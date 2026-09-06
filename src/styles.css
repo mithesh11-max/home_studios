@@ -1,0 +1,853 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+/* ════════════════════════════════════════════════════════════════════
+   HOME STUDIOS — DESIGN SYSTEM (DARK INDIGO THEME)
+   Editorial architecture practice × Nocturnal architectural monograph
+   
+   Palette (oklch):
+     Primary / Cursor  #8A86FC  oklch(0.678 0.170 282.39)  Soft Electric Indigo
+     Primary Strong    #6366F1  oklch(0.585 0.204 277.12)  Vivid Indigo
+     Deep Blue         #171A3D  oklch(0.237 0.066 276.42)  Midnight Indigo
+     Dark Background   #080B1A  oklch(0.156 0.032 273.18)  Near Black Blue
+     Surface           #10152B  oklch(0.204 0.044 272.25)  Deep Navy
+     Surface Light     #171D3A  oklch(0.242 0.056 272.76)  Blue Slate
+     Text Primary      #F5F7FF  oklch(0.977 0.011 274.90)  Ice White
+     Text Secondary    #A9AED0  oklch(0.758 0.049 278.58)  Cool Lavender
+     Text Muted        #7C82A8  oklch(0.603 0.046 278.60)  Muted Slate Lavender
+     Border            #282E55  oklch(0.316 0.070 275.09)  Muted Indigo
+     Interactive Border#3F4778  oklch(0.395 0.076 275.10)  Controls / Inputs (3:1)
+     Highlight         #38BDF8  oklch(0.754 0.139 232.66)  Cyan Blue
+   ════════════════════════════════════════════════════════════════════ */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* ── Radius: zero everywhere ── */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-full: 0;
+
+  /* ── Semantic color tokens ── */
+  --color-background: var(--bg-deep);
+  --color-foreground: var(--text-primary);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text-primary);
+  --color-popover: var(--surface-lt);
+  --color-popover-foreground: var(--text-primary);
+  --color-primary: var(--indigo);
+  --color-primary-foreground: var(--bg-deep);
+  --color-secondary: var(--surface-lt);
+  --color-secondary-foreground: var(--text-primary);
+  --color-muted: var(--surface);
+  --color-muted-foreground: var(--text-secondary);
+  --color-accent: var(--indigo);
+  --color-accent-foreground: var(--bg-deep);
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-destructive-foreground: oklch(0.984 0.003 247.858);
+  --color-border: var(--border);
+  --color-input: var(--border-interactive);
+  --color-ring: var(--indigo);
+  --color-ring-offset-background: var(--bg-deep);
+
+  /* ── Brand tokens ── */
+  --color-bg-deep: var(--bg-deep);
+  --color-surface: var(--surface);
+  --color-surface-lt: var(--surface-lt);
+  --color-deep-blue: var(--deep-blue);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-border-interactive: var(--border-interactive);
+  --color-indigo: var(--indigo);
+  --color-indigo-strong: var(--indigo-strong);
+  --color-highlight: var(--highlight);
+  --color-rule: var(--border);
+  --color-rule-dark: var(--border-interactive);
+
+  /* ── Legacy class compatibility mapped cleanly to new indigo tokens ── */
+  --color-navy-950: var(--bg-deep);
+  --color-ink-soft: var(--text-secondary);
+  --color-navy-line: var(--border);
+  --color-hs-line: var(--border);
+  --color-accent-hs: var(--indigo);
+  --color-accent-dark: var(--indigo-strong);
+  --color-muted-hs: var(--text-secondary);
+  --color-dark: var(--text-primary);
+  --color-line: var(--border);
+  --color-line-dark: var(--border-interactive);
+
+  /* ── Typography ── */
+  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
+  --font-mono: "Manrope", monospace;
+
+  /* ── Type scale ── */
+  --text-display-xl: clamp(4rem, 9vw, 9rem);
+  --text-display-lg: clamp(3rem, 6vw, 6rem);
+  --text-display-md: clamp(2rem, 4vw, 4rem);
+  --text-display-sm: clamp(1.6rem, 3vw, 3rem);
+  --text-body: 1rem;
+  --text-small: 0.9rem;
+  --text-label: 0.68rem;
+
+  /* ── Sidebar ── */
+  --color-sidebar: var(--surface);
+  --color-sidebar-foreground: var(--text-primary);
+  --color-sidebar-primary: var(--indigo);
+  --color-sidebar-primary-foreground: var(--bg-deep);
+  --color-sidebar-accent: var(--surface-lt);
+  --color-sidebar-accent-foreground: var(--text-primary);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-ring: var(--indigo);
+}
+
+:root {
+  /* ── Home Studios Dark Indigo Palette (oklch) ── */
+  --bg-deep: oklch(0.156 0.032 273.18);          /* #080B1A */
+  --surface: oklch(0.204 0.044 272.25);          /* #10152B */
+  --surface-lt: oklch(0.242 0.056 272.76);       /* #171D3A */
+  --deep-blue: oklch(0.237 0.066 276.42);        /* #171A3D */
+  --text-primary: oklch(0.977 0.011 274.90);     /* #F5F7FF */
+  --text-secondary: oklch(0.758 0.049 278.58);   /* #A9AED0 */
+  --text-muted: oklch(0.603 0.046 278.60);       /* #7C82A8 */
+  --border: oklch(0.316 0.070 275.09);           /* #282E55 */
+  --border-interactive: oklch(0.395 0.076 275.10); /* #3F4778 (3:1 interactive contrast) */
+  --indigo: oklch(0.678 0.170 282.39);           /* #8A86FC */
+  --indigo-strong: oklch(0.585 0.204 277.12);    /* #6366F1 */
+  --highlight: oklch(0.754 0.139 232.66);        /* #38BDF8 */
+
+  /* ── Shared architectural variables ── */
+  --rule: var(--border);
+  --rule-dark: var(--border-interactive);
+  --cursor-color: var(--indigo);
+  --radius: 0;
+  --stone: var(--text-secondary);
+  --paper: var(--bg-deep);
+  --paper-hi: var(--surface);
+  --ink: var(--text-primary);
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   BASE
+   ════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  *, *::before, *::after {
+    border-color: var(--rule);
+    border-radius: 0 !important;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── Display typography ── */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Focus ── */
+  :focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 2px;
+  }
+
+  /* ── Selection ── */
+  ::selection {
+    background: rgba(138, 134, 252, 0.2);
+    color: var(--text-primary);
+  }
+
+  /* ── Reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   COMPONENTS — Shared architectural motifs
+   ════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+
+  /* ── Editorial grid ── */
+  .grid-arch {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 0 clamp(1rem, 2vw, 2rem);
+  }
+  @media (max-width: 1024px) {
+    .grid-arch { grid-template-columns: repeat(8, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .grid-arch { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  /* ── Architectural rule ── */
+  .arch-rule {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* ── Section container ── */
+  .arch-container {
+    width: 100%;
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: clamp(1.25rem, 4vw, 5rem);
+    padding-right: clamp(1.25rem, 4vw, 5rem);
+  }
+
+  /* ── Technical label ── */
+  .arch-label {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    line-height: 1;
+  }
+  .arch-label--accent {
+    color: var(--indigo);
+  }
+  .arch-label--light {
+    color: var(--text-muted);
+  }
+
+  /* ── Editorial heading ── */
+  .arch-h-xl {
+    font-family: var(--font-display);
+    font-size: var(--text-display-xl);
+    font-weight: 300;
+    line-height: 0.93;
+    letter-spacing: -0.02em;
+  }
+  .arch-h-lg {
+    font-family: var(--font-display);
+    font-size: var(--text-display-lg);
+    font-weight: 300;
+    line-height: 0.97;
+    letter-spacing: -0.015em;
+  }
+  .arch-h-md {
+    font-family: var(--font-display);
+    font-size: var(--text-display-md);
+    font-weight: 300;
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+  }
+  .arch-h-sm {
+    font-family: var(--font-display);
+    font-size: var(--text-display-sm);
+    font-weight: 300;
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Editorial button with left-wipe hover and 1px lift ── */
+  .arch-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.28s ease, border-color 0.28s ease, transform 0.22s ease;
+    white-space: nowrap;
+    border-radius: 0 !important;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .arch-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--indigo-strong);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: -1;
+  }
+  .arch-btn:hover {
+    transform: translateY(-1px);
+  }
+  .arch-btn:hover::before {
+    transform: scaleX(1);
+  }
+  .arch-btn--primary {
+    background: var(--indigo);
+    color: var(--bg-deep);
+    padding: 0.875rem 1.75rem;
+    border: 1px solid var(--indigo);
+  }
+  .arch-btn--primary:hover {
+    color: var(--bg-deep);
+    border-color: var(--indigo-strong);
+  }
+  .arch-btn--outline {
+    background: transparent;
+    color: var(--text-primary);
+    padding: 0.875rem 1.75rem;
+    border: 1px solid var(--border-interactive);
+  }
+  .arch-btn--outline:hover {
+    color: var(--bg-deep);
+    border-color: var(--indigo);
+  }
+  .arch-btn--ghost-light {
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 0.875rem 1.75rem;
+    border: 1px solid var(--border);
+  }
+  .arch-btn--ghost-light:hover {
+    color: var(--bg-deep);
+    border-color: var(--indigo);
+  }
+  .arch-btn--indigo {
+    background: var(--indigo);
+    color: var(--bg-deep);
+    padding: 0.875rem 1.75rem;
+    border: 1px solid var(--indigo);
+  }
+  .arch-btn--indigo::before {
+    background: var(--indigo-strong);
+  }
+  .arch-btn--indigo:hover {
+    color: var(--bg-deep);
+    border-color: var(--indigo-strong);
+  }
+  .arch-btn-arrow {
+    display: inline-block;
+    transition: transform 0.22s ease;
+  }
+  .arch-btn:hover .arch-btn-arrow {
+    transform: translateX(4px);
+  }
+
+  /* ── Links: underline draw ── */
+  .arch-link--draw {
+    position: relative;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .arch-link--draw::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .arch-link--draw:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* ── Package card with animated indigo border ── */
+  .arch-pkg-card {
+    position: relative;
+    border: 1px solid var(--border);
+    background: var(--surface-lt);
+    padding: 1.5rem;
+    transition: border-color 0.3s ease;
+  }
+  .arch-pkg-card::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--indigo);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .arch-pkg-card:hover {
+    border-color: var(--indigo);
+  }
+  .arch-pkg-card:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* ── Images: subtle 1.04 scale on hover ── */
+  .arch-img-frame {
+    overflow: hidden;
+    position: relative;
+  }
+  .arch-img-frame img {
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .arch-img-frame:hover img {
+    transform: scale(1.04);
+  }
+
+  /* ── Drafting corner marks ── */
+  .arch-corners {
+    position: relative;
+  }
+  .arch-corners::before,
+  .arch-corners::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .arch-corners::before {
+    top: -1px;
+    left: -1px;
+    border-top: 1.5px solid var(--border);
+    border-left: 1.5px solid var(--border);
+  }
+  .arch-corners::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 1.5px solid var(--border);
+    border-right: 1.5px solid var(--border);
+  }
+
+  /* ── Grid background overlays ── */
+  .arch-grid-light {
+    background-image:
+      linear-gradient(rgba(138,134,252,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(138,134,252,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .arch-grid-dark {
+    background-image:
+      linear-gradient(rgba(138,134,252,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(138,134,252,0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .arch-service-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.75rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.25s ease, padding-left 0.25s ease;
+    cursor: pointer;
+  }
+  .arch-service-row:first-child {
+    border-top: 1px solid var(--border);
+  }
+  .arch-service-row:hover {
+    background: rgba(138, 134, 252, 0.05);
+    padding-left: 14px;
+  }
+  .arch-service-row:hover .arch-service-row__num {
+    color: var(--indigo);
+  }
+  .arch-service-row:hover .arch-service-row__arrow {
+    transform: translateX(6px) rotate(45deg);
+    color: var(--indigo);
+  }
+  .arch-service-row__arrow {
+    transition: transform 0.25s ease, color 0.25s ease;
+    color: var(--text-muted);
+  }
+  .arch-service-row__num {
+    transition: color 0.25s ease;
+  }
+
+  /* ── Package tab ── */
+  .arch-pkg-tab {
+    flex: 1;
+    padding: 1.25rem 1rem;
+    text-align: left;
+    border: none;
+    border-right: 1px solid var(--border);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    background: transparent;
+    font-family: var(--font-sans);
+    color: var(--text-secondary);
+  }
+  .arch-pkg-tab:last-child { border-right: none; }
+  .arch-pkg-tab.active {
+    border-bottom-color: var(--indigo);
+    background: var(--surface);
+    color: var(--text-primary);
+  }
+
+  /* ── FAQ ── */
+  .arch-faq-trigger {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 300;
+    text-align: left;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    transition: color 0.18s ease;
+    gap: 2rem;
+  }
+  .arch-faq-trigger:hover { color: var(--indigo); }
+  .arch-faq-content {
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.22,1,0.36,1), opacity 0.35s ease;
+  }
+
+  .arch-wa-float {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--indigo);
+    color: var(--bg-deep);
+    padding: 0.875rem 1.25rem;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.22s ease, transform 0.22s ease;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+  .arch-wa-float:hover {
+    background: var(--indigo-strong);
+    transform: translateY(-2px);
+  }
+
+  /* ── Custom cursor fallback ── */
+  #hs-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--indigo);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s ease, height 0.25s ease, opacity 0.25s ease;
+    will-change: transform;
+    opacity: 0;
+  }
+  #hs-cursor.hs-cursor--visible {
+    opacity: 1;
+  }
+  #hs-cursor.hs-cursor--large {
+    width: 40px;
+    height: 40px;
+    border-color: var(--indigo);
+    opacity: 0.7;
+  }
+  @media (pointer: coarse), (prefers-reduced-motion: reduce) {
+    #hs-cursor { display: none !important; }
+  }
+
+  /* ── Form field ── */
+  .arch-field {
+    display: block;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-interactive);
+    color: var(--text-primary);
+    padding: 0.875rem 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.18s ease;
+    appearance: none;
+    border-radius: 0 !important;
+  }
+  .arch-field::placeholder { color: var(--text-muted); }
+  .arch-field:focus { border-color: var(--indigo); }
+  .arch-field-dark {
+    background: var(--surface);
+    border-color: var(--border-interactive);
+    color: var(--text-primary);
+  }
+  .arch-field-dark::placeholder { color: var(--text-muted); }
+  .arch-field-dark:focus { border-color: var(--indigo); }
+  .arch-field-dark option { background: var(--surface-lt); color: var(--text-primary); }
+
+  /* ── Dialog overlay ── */
+  .arch-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 11, 26, 0.82);
+    z-index: 200;
+    backdrop-filter: blur(8px);
+  }
+  .arch-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 201;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .arch-dialog-panel {
+    background: var(--surface-lt);
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2.5rem;
+    position: relative;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+
+  /* ── Highlighted stats ── */
+  .arch-stat-number {
+    font-family: var(--font-display);
+    font-size: var(--text-display-lg);
+    font-weight: 300;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Color utilities ── */
+  .bg-deep { background-color: var(--bg-deep) !important; }
+  .bg-surface { background-color: var(--surface) !important; }
+  .bg-surface-lt { background-color: var(--surface-lt) !important; }
+  .bg-paper { background-color: transparent !important; }
+  .bg-paper-hi { background-color: var(--surface) !important; }
+
+  /* Ensure photography and media elements sit cleanly above background canvas */
+  img, picture, video, .before-after-slider {
+    position: relative;
+    z-index: 2;
+  }
+  .bg-ink { background-color: var(--surface) !important; }
+  .bg-indigo { background-color: var(--indigo) !important; }
+  .text-paper { color: var(--bg-deep) !important; }
+  .text-ink { color: var(--text-primary) !important; }
+  .text-stone { color: var(--text-secondary) !important; }
+  .text-muted-hs, .text-muted { color: var(--text-muted) !important; }
+  .text-primary { color: var(--text-primary) !important; }
+  .text-secondary { color: var(--text-secondary) !important; }
+  .text-indigo { color: var(--indigo) !important; }
+  .text-highlight, .text-cyan { color: var(--highlight) !important; }
+  .border-rule { border-color: var(--border) !important; }
+  .border-rule-dark { border-color: var(--border-interactive) !important; }
+
+  /* ── Architectural image grading and treatments ── */
+  .arch-img-grade {
+    filter: saturate(0.88) brightness(0.92);
+  }
+  .arch-img-tint {
+    position: relative;
+  }
+  .arch-img-tint::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--deep-blue);
+    opacity: 0.20;
+    mix-blend-mode: color;
+    pointer-events: none;
+  }
+  .arch-img-vignette {
+    position: relative;
+  }
+  .arch-img-vignette::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 70px rgba(8, 11, 26, 0.7);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .arch-map-dark {
+    filter: invert(0.92) hue-rotate(190deg) saturate(0.7) brightness(0.9);
+  }
+
+  /* ── Legacy compatibility ── */
+  .font-display { font-family: var(--font-display) !important; }
+  .font-sans { font-family: var(--font-sans) !important; }
+  .font-mono { font-family: var(--font-sans) !important; }
+  .bg-dark { background-color: var(--bg-deep) !important; }
+  .text-dark { color: var(--text-primary) !important; }
+  .text-ink-soft { color: var(--text-secondary) !important; }
+  .text-accent-hs { color: var(--indigo) !important; }
+  .bg-accent-hs { background-color: var(--indigo) !important; }
+  .border-line, .border-hs-line { border-color: var(--border) !important; }
+  .border-line-dark { border-color: var(--border-interactive) !important; }
+  .border-accent-hs { border-color: var(--indigo) !important; }
+
+  /* ── Old button compat ── */
+  .hs-btn-primary {
+    display: inline-flex; align-items: center; gap: 0.625rem;
+    background: var(--indigo); color: var(--bg-deep);
+    padding: 0.875rem 1.75rem;
+    font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase; text-decoration: none;
+    border: 1px solid var(--indigo); cursor: pointer;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .hs-btn-primary:hover { background: var(--indigo-strong); border-color: var(--indigo-strong); }
+  .hs-btn-accent {
+    display: inline-flex; align-items: center; gap: 0.625rem;
+    background: var(--indigo); color: var(--bg-deep);
+    padding: 0.875rem 1.75rem;
+    font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase; text-decoration: none;
+    border: 1px solid var(--indigo); cursor: pointer;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .hs-btn-accent:hover { background: var(--indigo-strong); border-color: var(--indigo-strong); }
+  .hs-btn-outline {
+    display: inline-flex; align-items: center; gap: 0.625rem;
+    background: transparent; color: var(--text-primary);
+    padding: 0.875rem 1.75rem;
+    font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase; text-decoration: none;
+    border: 1px solid var(--border-interactive); cursor: pointer;
+    transition: border-color 0.22s ease, color 0.22s ease;
+  }
+  .hs-btn-outline:hover { border-color: var(--indigo); color: var(--indigo); }
+  .hs-btn-outline-light {
+    display: inline-flex; align-items: center; gap: 0.625rem;
+    background: transparent; color: var(--text-secondary);
+    padding: 0.875rem 1.75rem;
+    font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase; text-decoration: none;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: color 0.22s ease, border-color 0.22s ease;
+  }
+  .hs-btn-outline-light:hover { color: var(--text-primary); border-color: var(--indigo); }
+
+  /* ── Old form compat ── */
+  .hs-input {
+    display: block; width: 100%; background: var(--surface);
+    border: 1px solid var(--border-interactive); color: var(--text-primary);
+    padding: 0.875rem 1rem; font-family: var(--font-sans); font-size: 0.9rem;
+    outline: none; transition: border-color 0.18s ease; appearance: none;
+  }
+  .hs-input::placeholder { color: var(--text-muted); }
+  .hs-input:focus { border-color: var(--indigo); }
+  .hs-input option { background: var(--surface-lt); color: var(--text-primary); }
+  .hs-eyebrow {
+    display: inline-block; font-family: var(--font-sans); font-size: 10px;
+    font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-secondary);
+  }
+  .hs-section-num { display: inline-block; font-family: var(--font-sans); font-size: 10px;
+    font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--indigo); }
+  .hs-tick-panel { position: relative; border: 1px solid var(--border); background: var(--surface); }
+  .hs-whatsapp-float { display: none; } /* replaced by .arch-wa-float */
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   UTILITIES
+   ════════════════════════════════════════════════════════════════════ */
+
+@layer utilities {
+  /* Clip-reveal animations */
+  @keyframes clip-up {
+    from { clip-path: inset(100% 0 0 0); }
+    to   { clip-path: inset(0% 0 0 0); }
+  }
+  .animate-clip-up {
+    animation: clip-up 1s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.6s ease forwards;
+  }
+
+  @keyframes line-draw {
+    from { transform: scaleX(0); transform-origin: left; }
+    to   { transform: scaleX(1); transform-origin: left; }
+  }
+
+  /* Number counting — handled via JS */
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+
+  /* Overflow utilities */
+  .overflow-x-clip { overflow-x: clip; }
+
+  /* ── Ken Burns — studio walkthrough photo ── */
+  @keyframes kenBurnsStudio {
+    from { transform: scale(1.0) translate(0%, 0%); }
+    to   { transform: scale(1.08) translate(-1.5%, -1%); }
+  }
+
+  /* ── Page-level route transition ── */
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes page-out {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-8px); }
+  }
+
+  /* ── Sequence loader ── */
+  @keyframes loader-rule {
+    from { transform: scaleX(0); transform-origin: left; }
+    to   { transform: scaleX(1); transform-origin: left; }
+  }
+}
