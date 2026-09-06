@@ -394,9 +394,9 @@ function Index() {
                 </Link>
               </FadeUp>
               <FadeUp delay={0.15}>
-                <BeforeAfterSlider beforeLabel="PLAN" afterLabel="INTERIOR" />
+                <BeforeAfterSlider beforeLabel="BEFORE" afterLabel="AFTER" aspect="7/5" />
                 <p className="mt-3 arch-label text-center">
-                  DRAG TO COMPARE — FLOOR PLAN / INTERIOR VISUALIZATION
+                  DRAG TO COMPARE — RAW SPACE / FINISHED INTERIOR
                 </p>
               </FadeUp>
             </div>
