@@ -44,7 +44,7 @@ const LOADER_TIMEOUT_MS = 5000;
 function getFrameSrc(n: number, isMobile: boolean): string {
   const num = String(n).padStart(3, "0");
   if (isMobile) {
-    return `/sequence/half/ezgif-frame-${num}.jpg`;
+    return `/sequence/mobile/ezgif-frame-${num}.jpg`;
   }
   return `/sequence/ezgif-frame-${num}.jpg`;
 }
@@ -105,9 +105,11 @@ interface LoaderProps {
 interface VideoLoaderProps {
   done: boolean;
   onDone: () => void;
+  isMobile?: boolean;
 }
 
-function VideoLoader({ done, onDone }: VideoLoaderProps) {
+function VideoLoader({ done, onDone, isMobile }: VideoLoaderProps) {
+  if (isMobile) return null; // Mobile immediately shows the mobile portrait scroll canvas
   const isStartAtEnd = typeof window !== "undefined" && window.location.hash.includes("hs-content");
   const [fading, setFading] = useState(false);
   const [hidden, setHidden] = useState(introShown || isStartAtEnd); // skip if already played this session or navigating to lockup
@@ -190,7 +192,7 @@ function VideoLoader({ done, onDone }: VideoLoaderProps) {
 // Static Fallback (Reduced motion or canvas failure)
 // ---------------------------------------------------------------------------
 
-function StaticHero() {
+function StaticHero({ isMobile = false }: { isMobile?: boolean }) {
   const { open } = useAppointment();
   return (
     <section
@@ -199,7 +201,7 @@ function StaticHero() {
       aria-label="Hero"
     >
       <img
-        src="/sequence/ezgif-frame-090.jpg"
+        src={isMobile ? "/sequence/mobile/ezgif-frame-090.jpg" : "/sequence/ezgif-frame-090.jpg"}
         alt="Double-height living room with floor-to-ceiling glass walls — Home Studios 1:1 walkthrough"
         className="absolute inset-0 w-full h-full object-cover object-center"
         style={{ filter: "saturate(0.88) brightness(0.6)" }}
@@ -264,6 +266,17 @@ interface CanvasHeroProps {
 function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<(HTMLImageElement | null)[]>(new Array(TOTAL_FRAMES).fill(null));
+
+  // Reset frame cache and force redraw if user resizes or rotates between mobile & desktop
+  const prevIsMobileRef = useRef(isMobile);
+  useEffect(() => {
+    if (prevIsMobileRef.current !== isMobile) {
+      prevIsMobileRef.current = isMobile;
+      imagesRef.current = new Array(TOTAL_FRAMES).fill(null);
+      lastDrawnFrameRef.current = -1;
+      setLoadedCount(0);
+    }
+  }, [isMobile]);
   
   // Animation loop variables stored in refs to avoid React re-renders during 60fps scrub
   const isStartAtEnd = typeof window !== "undefined" && window.location.hash.includes("hs-content");
@@ -361,8 +374,13 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
         imagesRef.current[idx] = img;
       }
       setLoadedCount((c) => c + 1);
+
+      // Repaint immediately if the decoded frame matches the current active view
+      if (Math.round(currentFrameRef.current) === idx) {
+        drawFrame(idx);
+      }
     },
-    [isMobile]
+    [isMobile, drawFrame]
   );
 
   // Fast Parallel Batch Preloading
@@ -391,7 +409,15 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
       // 3. Dismiss loader once initial view is completely smooth
       setLoaderDone(true);
 
-      // 4. Stream remainder in parallel worker pools of 12
+      // 4. Staggered keyframe preloading (every 10th frame) for instant scrub response
+      const keyframeTasks: Promise<void>[] = [];
+      for (let i = INITIAL_BURST_FRAMES; i < TOTAL_FRAMES - 1; i += 10) {
+        keyframeTasks.push(loadSingleFrame(i));
+      }
+      await Promise.all(keyframeTasks);
+      if (cancelled) return;
+
+      // 5. Stream remainder in parallel worker pools of 12
       let nextIndex = INITIAL_BURST_FRAMES;
       const worker = async () => {
         while (nextIndex < TOTAL_FRAMES - 1 && !cancelled) {
@@ -505,6 +531,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
       <VideoLoader
         done={loaderDone}
         onDone={() => {}}
+        isMobile={isMobile}
       />
 
       <canvas
@@ -515,7 +542,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
           position: "sticky",
           top: 0,
           width: "100vw",
-          height: "100vh",
+          height: "100dvh",
           display: "block",
           background: "var(--bg-deep)",
           filter: "saturate(0.88) brightness(0.92)",
@@ -524,7 +551,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
 
       {/* Dark Indigo atmospheric tint + vignette */}
       <div
-        className="pointer-events-none sticky top-0 -mt-[100vh] w-screen h-screen z-10"
+        className="pointer-events-none sticky top-0 -mt-[100dvh] w-screen h-[100dvh] z-10"
         style={{
           background: "radial-gradient(ellipse at center, rgba(23, 26, 61, 0.20) 0%, rgba(8, 11, 26, 0.60) 100%)",
         }}
@@ -618,18 +645,27 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
 // Main SequenceHero Export
 // ---------------------------------------------------------------------------
 
+function checkIsMobile(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+}
+
 export function SequenceHero() {
   const prefersReducedMotion = useReducedMotion();
   const scrollContainerRef = useRef<HTMLElement>(null);
   const [activePhaseIndex, setActivePhaseIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(() => checkIsMobile());
   const [canvasSupported, setCanvasSupported] = useState<boolean>(true);
 
   useEffect(() => {
-    const checkScreen = () => setIsMobile(window.innerWidth < 768);
+    const checkScreen = () => setIsMobile(checkIsMobile());
     checkScreen();
     window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
+    window.addEventListener("orientationchange", checkScreen);
+    return () => {
+      window.removeEventListener("resize", checkScreen);
+      window.removeEventListener("orientationchange", checkScreen);
+    };
   }, []);
 
   useEffect(() => {
@@ -642,13 +678,12 @@ export function SequenceHero() {
   }, []);
 
   if (prefersReducedMotion || canvasSupported === false) {
-    return <StaticHero />;
+    return <StaticHero isMobile={isMobile} />;
   }
 
-  // 0.85x scroll speed: scale scroll container height so frame advance per pixel is 0.85x
-  // Desktop: 500vh / 0.85 ≈ 588vh (giving 488vh of active scroll travel)
-  // Mobile: 300vh / 0.85 ≈ 353vh (giving 253vh of active scroll travel)
-  const baseScrollVh = isMobile ? 300 : 500;
+  // 0.85x scroll speed: 500vh container gives 488vh of cinematic scroll travel
+  // Matching identical paced scroll motion on both mobile phone and PC
+  const baseScrollVh = 500;
   const scrollVh = Math.round(baseScrollVh / SCROLL_SPEED);
 
   return (
