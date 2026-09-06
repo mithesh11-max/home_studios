@@ -77,3 +77,4 @@ processFrames().catch((err) => {
   console.error("Error processing frames:", err);
   process.exit(1);
 });
+// Automated sequence processor for Home Studios
