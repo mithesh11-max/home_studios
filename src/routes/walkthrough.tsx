@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { FinalCTA } from "@/components/site/FinalCTA";
 import { FadeUp } from "@/components/site/TextReveal";
 import { InteractiveFloorPlan } from "@/components/site/InteractiveFloorPlan";
+import { ArchitecturalMeasurement } from "@/components/site/ArchitecturalMeasurement";
 import { CONTACT } from "@/lib/site-data";
 
 import walkthroughFurnitureImg from "@/assets/walkthrough-furniture.jpg";
