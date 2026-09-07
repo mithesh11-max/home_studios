@@ -62,17 +62,28 @@ async function run() {
     // Wait 2s for page to settle
     await new Promise(r => setTimeout(r, 2000));
 
-    console.log('Simulating scroll down...');
-    // Evaluate scroll in browser
+    console.log('Simulating deep scroll to bottom...');
     send('Runtime.evaluate', {
       expression: `
         (async () => {
-          console.log('Start scrolling from top');
-          for (let i = 0; i < 20; i++) {
-            window.scrollBy(0, 300);
-            await new Promise(r => setTimeout(r, 100));
+          console.log('Document scrollHeight:', document.documentElement.scrollHeight);
+          const total = document.documentElement.scrollHeight - window.innerHeight;
+          console.log('Total scrollable pixels:', total);
+          const steps = 30;
+          for (let i = 1; i <= steps; i++) {
+            const targetY = (total / steps) * i;
+            window.scrollTo(0, targetY);
+            // Also trigger standard scroll event in case
+            window.dispatchEvent(new Event('scroll'));
+            await new Promise(r => setTimeout(r, 150));
+            if (i % 5 === 0) {
+              console.log('Scrolled to step', i, 'scrollY:', window.scrollY, 'target:', targetY);
+            }
           }
-          console.log('Finished scrolling, current scrollY:', window.scrollY);
+          console.log('Finished deep scroll, final scrollY:', window.scrollY);
+          // Check if error overlay or error text is in DOM
+          const hasError = document.body.innerText.includes("Something went wrong");
+          console.log('Has Error Text in DOM?:', hasError);
         })()
       `
     });
