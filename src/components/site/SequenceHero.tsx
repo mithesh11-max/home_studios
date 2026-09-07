@@ -282,6 +282,37 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
   // Overlay DOM element refs for instant style updates without React reconciliation
   const overlayRefs = useRef<(HTMLDivElement | null)[]>([]);
   const finalLockupRef = useRef<HTMLDivElement>(null);
+  const initialLockupRef = useRef<HTMLDivElement>(null);
+  const vignetteRef = useRef<HTMLDivElement>(null);
+
+  // Subtle mouse tracking for optical depth parallax (desktop only)
+  const mouseRef = useRef({ targetX: 0, targetY: 0, currentX: 0, currentY: 0 });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || isMobile) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+
+    const onPointerMove = (e: PointerEvent) => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const nx = (e.clientX / w) * 2 - 1;
+      const ny = (e.clientY / h) * 2 - 1;
+      mouseRef.current.targetX = Math.max(-1, Math.min(1, nx));
+      mouseRef.current.targetY = Math.max(-1, Math.min(1, ny));
+    };
+
+    const onPointerLeave = () => {
+      mouseRef.current.targetX = 0;
+      mouseRef.current.targetY = 0;
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerleave", onPointerLeave);
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerleave", onPointerLeave);
+    };
+  }, [isMobile]);
 
   const [loadedCount, setLoadedCount] = useState(0);
   const [loaderDone, setLoaderDone] = useState(false);
