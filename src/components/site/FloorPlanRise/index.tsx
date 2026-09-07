@@ -117,7 +117,7 @@ export function FloorPlanRise() {
     <section
       ref={containerRef}
       className="relative w-full"
-      style={{ height: "500vh", background: "var(--bg-deep)" }}
+      style={{ height: isMobile ? "320vh" : "500vh", background: "var(--bg-deep)" }}
       aria-label="Cinematic storytelling sequence — PLAN TO EXPERIENCE"
     >
       {/* Pinned 100vh viewport */}
@@ -126,21 +126,32 @@ export function FloorPlanRise() {
         <div className="arch-grid-dark absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true" />
 
         {/* Section Header & Signature HUD Pill (Top) */}
-        <div className="relative z-20 arch-container pt-16 sm:pt-20 pb-4 flex justify-between items-start pointer-events-none">
-          <div className="relative h-12 w-full max-w-[600px]">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="arch-label arch-label--accent">02 / TRANSFORMATION</span>
-              <span className="inline-block w-2 h-px bg-indigo/40" />
-              <span className="arch-label text-stone hidden sm:inline">1:1 PROJECTION</span>
+        <div className="relative z-20 arch-container pt-16 sm:pt-20 pb-4 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 pointer-events-none">
+          <div className="w-full">
+            <div className="flex items-center justify-between sm:justify-start gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <span className="arch-label arch-label--accent">02 / TRANSFORMATION</span>
+                <span className="inline-block w-2 h-px bg-indigo/40" />
+                <span className="arch-label text-stone hidden sm:inline">1:1 PROJECTION</span>
+              </div>
+
+              {/* Mobile-only compact HUD pill */}
+              <div className="sm:hidden flex items-center gap-1.5 px-2 py-1 border border-white/15 bg-deep/90 backdrop-blur-sm font-mono text-[9px] tracking-widest uppercase pointer-events-auto">
+                <span className="text-indigo font-bold">{activePhase.toUpperCase()}</span>
+                <span className="text-stone/40">·</span>
+                <span className="text-white/60">
+                  {activePhase === "plan" ? "01/05" : activePhase === "build" ? "02/05" : activePhase === "light" ? "03/05" : activePhase === "walk" ? "04/05" : "05/05"}
+                </span>
+              </div>
             </div>
             
-            <div className="relative">
+            <div className="relative h-10 sm:h-12 w-full max-w-[600px]">
               {/* Dynamic Typography Transition for Narrative */}
               <motion.h2 
                 initial={false}
                 animate={{ opacity: activePhase === "plan" ? 1 : 0, y: activePhase === "plan" ? 0 : -8 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.35rem,4.5vw,2.4rem)] font-light leading-none whitespace-nowrap"
               >
                 The foundation of truth.
               </motion.h2>
@@ -148,7 +159,7 @@ export function FloorPlanRise() {
                 initial={false}
                 animate={{ opacity: activePhase === "build" ? 1 : 0, y: activePhase === "build" ? 0 : (activePhase === "plan" ? 8 : -8) }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.35rem,4.5vw,2.4rem)] font-light leading-none whitespace-nowrap"
               >
                 Walls take shape.
               </motion.h2>
@@ -156,7 +167,7 @@ export function FloorPlanRise() {
                 initial={false}
                 animate={{ opacity: activePhase === "light" ? 1 : 0, y: activePhase === "light" ? 0 : (["plan", "build"].includes(activePhase) ? 8 : -8) }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.35rem,4.5vw,2.4rem)] font-light leading-none whitespace-nowrap"
               >
                 Atmosphere emerges.
               </motion.h2>
@@ -164,7 +175,7 @@ export function FloorPlanRise() {
                 initial={false}
                 animate={{ opacity: activePhase === "walk" ? 1 : 0, y: activePhase === "walk" ? 0 : (["experience"].includes(activePhase) ? -8 : 8) }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.35rem,4.5vw,2.4rem)] font-light leading-none whitespace-nowrap"
               >
                 Feel the scale.
               </motion.h2>
@@ -172,15 +183,15 @@ export function FloorPlanRise() {
                 initial={false}
                 animate={{ opacity: activePhase === "experience" ? 1 : 0, y: activePhase === "experience" ? 0 : 8 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.35rem,4.5vw,2.4rem)] font-light leading-none whitespace-nowrap"
               >
                 The space before you build it.
               </motion.h2>
             </div>
           </div>
 
-          {/* Signature Phase HUD Pill - Expanded to 5 stages */}
-          <div className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-1.5 border border-white/15 bg-deep/85 backdrop-blur-sm font-mono text-[9px] tracking-widest uppercase pointer-events-auto">
+          {/* Desktop Signature Phase HUD Pill (Hidden on small screens in favor of top-bar indicator) */}
+          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 border border-white/15 bg-deep/85 backdrop-blur-sm font-mono text-[9px] tracking-widest uppercase pointer-events-auto flex-shrink-0">
             <span className={`transition-colors duration-300 ${activePhase === "plan" ? "text-indigo font-bold" : "text-stone/60"}`}>PLAN</span>
             <span className="text-stone/40">→</span>
             <span className={`transition-colors duration-300 ${activePhase === "build" ? "text-indigo font-bold" : "text-stone/60"}`}>BUILD</span>
@@ -226,10 +237,10 @@ export function FloorPlanRise() {
                   top: `${50 + ann.z * 6}%`,
                 }}
               >
-                <span className="arch-label text-white/90" style={{ fontSize: "9px" }}>
+                <span className="arch-label text-white/90" style={{ fontSize: isMobile ? "8px" : "9px" }}>
                   {ann.label}
                 </span>
-                {ann.dimension && (
+                {ann.dimension && !isMobile && (
                   <span className="arch-label arch-label--accent" style={{ fontSize: "8px" }}>
                     {ann.dimension}
                   </span>
@@ -242,31 +253,31 @@ export function FloorPlanRise() {
         {/* Stage 7 Reality Spatial Callouts (Fades in at Eye Level) */}
         {scrollProgress >= 0.70 && (
           <div
-            className="absolute inset-0 z-15 pointer-events-none arch-container flex flex-col justify-between py-24 sm:py-28 transition-opacity duration-500"
+            className="absolute inset-0 z-15 pointer-events-none arch-container flex flex-col justify-between py-20 sm:py-28 transition-opacity duration-500"
             style={{ opacity: realityCalloutsOpacity }}
             aria-hidden={realityCalloutsOpacity < 0.05 ? "true" : undefined}
           >
-            <div className="flex justify-between items-start">
-              <div className="px-3 py-1.5 bg-deep/85 border border-white/15 backdrop-blur-sm">
-                <p className="arch-label arch-label--accent">3.60M CLEARANCE</p>
-                <p className="text-white/70 text-[10px] font-mono">Double-height pavilion volume</p>
+            <div className="flex justify-between items-start gap-2">
+              <div className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-deep/90 border border-white/15 backdrop-blur-sm max-w-[46%] sm:max-w-none">
+                <p className="arch-label arch-label--accent text-[8px] sm:text-[10px]">3.60M CLEARANCE</p>
+                <p className="text-white/70 text-[9px] sm:text-[10px] font-mono truncate">Double-height pavilion</p>
               </div>
 
-              <div className="px-3 py-1.5 bg-deep/85 border border-white/15 backdrop-blur-sm text-right">
-                <p className="arch-label text-white">DIRECT DAYLIGHT</p>
-                <p className="text-white/70 text-[10px] font-mono">North-facing floor glazing</p>
+              <div className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-deep/90 border border-white/15 backdrop-blur-sm text-right max-w-[46%] sm:max-w-none">
+                <p className="arch-label text-white text-[8px] sm:text-[10px]">DIRECT DAYLIGHT</p>
+                <p className="text-white/70 text-[9px] sm:text-[10px] font-mono truncate">North floor glazing</p>
               </div>
             </div>
 
-            <div className="flex justify-between items-end pb-12">
-              <div className="px-3 py-1.5 bg-deep/85 border border-white/15 backdrop-blur-sm">
-                <p className="arch-label text-indigo">1200MM WALKWAY</p>
-                <p className="text-white/70 text-[10px] font-mono">Unobstructed circulation flow</p>
+            <div className="flex justify-between items-end pb-8 sm:pb-12 gap-2">
+              <div className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-deep/90 border border-white/15 backdrop-blur-sm max-w-[46%] sm:max-w-none">
+                <p className="arch-label text-indigo text-[8px] sm:text-[10px]">1200MM WALKWAY</p>
+                <p className="text-white/70 text-[9px] sm:text-[10px] font-mono truncate">Circulation flow</p>
               </div>
 
-              <div className="px-3 py-1.5 bg-deep/85 border border-white/15 backdrop-blur-sm text-right">
-                <p className="arch-label arch-label--accent">1:1 SCALE VERIFIED</p>
-                <p className="text-white/70 text-[10px] font-mono">RR Nagar studio field</p>
+              <div className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-deep/90 border border-white/15 backdrop-blur-sm text-right max-w-[46%] sm:max-w-none">
+                <p className="arch-label arch-label--accent text-[8px] sm:text-[10px]">1:1 SCALE</p>
+                <p className="text-white/70 text-[9px] sm:text-[10px] font-mono truncate">Studio verified</p>
               </div>
             </div>
           </div>
