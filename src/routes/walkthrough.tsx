@@ -258,6 +258,8 @@ function WalkthroughPage() {
                     <img
                       src={mode.image}
                       alt={mode.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-ink/45 via-transparent to-transparent pointer-events-none" />

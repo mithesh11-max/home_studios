@@ -494,6 +494,8 @@ function ArchImageReveal() {
         <motion.img
           src={architectureImg}
           alt="Architecture and site — Spatial Canvas Home Studios"
+          loading="lazy"
+          decoding="async"
           className="w-full block"
           style={{ aspectRatio: "4/3", objectFit: "cover", objectPosition: "center", display: "block" }}
           initial={{ scale: 1.08 }}
