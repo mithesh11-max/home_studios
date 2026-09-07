@@ -379,15 +379,6 @@ function Index() {
             </div>
           </div>
         </section>
-                <h2 className="font-display text-ink leading-none"
-                  style={{ fontSize: "var(--text-display-sm)" }}>
-                  Questions before<br />your first visit.
-                </h2>
-              </FadeUp>
-              <FAQ items={HOME_FAQS} defaultOpen={HOME_FAQS[0]?.question} />
-            </div>
-          </div>
-        </section>
 
         {/* ══════════════════════════════════════════════════════
             CONTACT PREVIEW
