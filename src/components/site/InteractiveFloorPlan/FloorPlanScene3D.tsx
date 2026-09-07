@@ -168,22 +168,6 @@ function SceneInner({
     }
   });
 
-  // Cleanup geometries & materials
-  useEffect(() => {
-    return () => {
-      boxGeom.dispose();
-      masterFloorGeom.dispose();
-      matPlaster.dispose();
-      matConcrete.dispose();
-      matWood.dispose();
-      matGlass.dispose();
-      matFabric.dispose();
-      matCushion.dispose();
-      matStone.dispose();
-      matRug.dispose();
-    };
-  }, [boxGeom, masterFloorGeom, matPlaster, matConcrete, matWood, matGlass, matFabric, matCushion, matStone, matRug]);
-
   return (
     <>
       {/* Lighting Setup */}

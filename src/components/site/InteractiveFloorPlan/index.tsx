@@ -4,6 +4,7 @@ import { FloorPlanNavSVG } from "./FloorPlanNavSVG";
 import { RoomSpecPanel } from "./RoomSpecPanel";
 import { RoomVisualDisplay } from "./RoomVisualDisplay";
 import { type RoomId } from "./roomData";
+import { ErrorBoundary } from "@/components/site/ErrorBoundary";
 
 // Lazy-load the 3D Three.js scene
 const LazyFloorPlanScene3D = lazy(() => import("./FloorPlanScene3D"));
