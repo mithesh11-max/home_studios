@@ -63,6 +63,8 @@ function ParallaxStudioBanner() {
         <img
           src={aboutStudioBannerImg}
           alt="Home Studios senior architects and engineers collaborating over physical scale models"
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover object-center"
           style={{ filter: "contrast(1.02)" }}
         />
