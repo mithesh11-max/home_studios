@@ -20,9 +20,10 @@ import {
   type RefObject,
 } from "react";
 import { Link } from "@tanstack/react-router";
-import { useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { getActivePhase } from "./PhaseIndicator";
 import { useAppointment } from "@/lib/appointment-context";
+import { EASE_ARCH_HEAVY, EASE_ARCH_SLOW, DURATION } from "@/lib/motion";
 
 // Module-level flag: false on every fresh load/reload (JS re-executes),
 // true after the intro video plays once — survives SPA navigation.
@@ -50,18 +51,10 @@ function getFrameSrc(n: number, isMobile: boolean): string {
 }
 
 // ---------------------------------------------------------------------------
-// Overlay Phase Definitions
+// Overlay Phase Definitions (Intermediate sequence chapters)
 // ---------------------------------------------------------------------------
 
 const OVERLAYS = [
-  {
-    id: "arrival",
-    phaseIndex: 0,
-    frames: [1, 30] as const,
-    label: "01 / ARRIVAL",
-    copy: "Every space starts with a line.",
-    large: false,
-  },
   {
     id: "space",
     phaseIndex: 2,
