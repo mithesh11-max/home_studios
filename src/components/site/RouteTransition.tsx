@@ -1,31 +1,65 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation } from "@tanstack/react-router";
+import { useLocation, useRouter } from "@tanstack/react-router";
 import { useSmoothScroll } from "@/lib/lenis-context";
-import { DURATION, EASE_ARCH_SMOOTH, DISTANCE } from "@/lib/motion";
 
 /**
- * Wraps <Outlet> to provide swift, non-blocking fade+rise transitions between routes.
- * Uses centralized motion tokens and coordinates scroll reset with Lenis.
+ * Wraps <Outlet> to provide premium spatial transitions between routes.
+ * Uses clip-path masking to create an architectural vertical wipe.
  */
 export function RouteTransition({ children }: { children: ReactNode }) {
   const location = useLocation();
   const { scrollTo } = useSmoothScroll();
+  const router = useRouter();
+
+  // Track if navigation is via browser back/forward (POP) to preserve scroll position
+  const isPopRef = useRef(false);
+
+  useEffect(() => {
+    const unsubscribe = router.history.subscribe(() => {
+      isPopRef.current = router.history.action === 'POP';
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
-        initial={{ opacity: 0, y: DISTANCE.SUBTLE }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -DISTANCE.SUBTLE }}
-        transition={{ duration: DURATION.TABS, ease: EASE_ARCH_SMOOTH }}
+        initial={{ 
+          clipPath: "inset(100% 0% 0% 0%)",
+          y: 40,
+          scale: 0.97,
+          opacity: 0,
+          filter: "brightness(0.6) blur(4px)"
+        }}
+        animate={{ 
+          clipPath: "inset(0% 0% 0% 0%)",
+          y: 0,
+          scale: 1,
+          opacity: 1,
+          filter: "brightness(1) blur(0px)"
+        }}
+        exit={{ 
+          clipPath: "inset(0% 0% 100% 0%)",
+          y: -40,
+          scale: 0.97,
+          opacity: 0,
+          filter: "brightness(0.6) blur(4px)"
+        }}
+        transition={{ 
+          duration: 0.75, 
+          ease: [0.22, 1, 0.36, 1] 
+        }}
         onAnimationStart={() => {
-          // If no hash is present, reset scroll to top immediately on route change
+          // Prevent scroll jump flashes during exit, only scroll to top on ENTER of new push route
           if (typeof window !== "undefined" && !window.location.hash) {
-            scrollTo(0, { immediate: true });
+            if (!isPopRef.current) {
+              scrollTo(0, { immediate: true });
+            }
           }
         }}
+        className="w-full origin-center relative will-change-transform"
       >
         {children}
       </motion.div>
