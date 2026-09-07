@@ -98,7 +98,8 @@ export function TileGridBackground() {
 
     /* ---- ripple trail listeners ---- */
     function onPointerMove(e: PointerEvent) {
-      if (reducedMotion) return;
+      // On touch devices, prevent touch scrolling from triggering continuous canvas recalculations
+      if (reducedMotion || e.pointerType === "touch") return;
       const x = e.clientX;
       const y = e.clientY;
       tvx = x / Math.max(w, 1);
