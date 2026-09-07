@@ -1,5 +1,13 @@
 import { useRef, type ReactNode } from "react";
 import { motion, useInView, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import {
+  DURATION,
+  EASE_ARCH_HEAVY,
+  EASE_ARCH_SMOOTH,
+  EASE_ARCH_SLOW,
+  DISTANCE,
+  CSS_EASE,
+} from "@/lib/motion";
 
 // ---------------------------------------------------------------------------
 // Reveal — clip-path wipe from bottom for headlines
@@ -21,7 +29,7 @@ export function Reveal({ children, className = "", delay = 0, once = true }: Rev
       <motion.div
         initial={{ clipPath: "inset(100% 0 0 0)" }}
         animate={inView ? { clipPath: "inset(0% 0 0 0)" } : {}}
-        transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: DURATION.SECTION, delay, ease: EASE_ARCH_HEAVY }}
       >
         {children}
       </motion.div>
