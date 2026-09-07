@@ -318,6 +318,8 @@
     border-radius: 0 !important;
     overflow: hidden;
     z-index: 1;
+    min-height: 44px;
+    touch-action: manipulation;
   }
   .arch-btn::before {
     content: "";
@@ -331,6 +333,9 @@
   }
   .arch-btn:hover {
     transform: translateY(-1px);
+  }
+  .arch-btn:active {
+    transform: scale(0.98);
   }
   .arch-btn:hover::before {
     transform: scaleX(1);
