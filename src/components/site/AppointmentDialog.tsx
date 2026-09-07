@@ -2,6 +2,8 @@ import { useEffect, useRef, type FormEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useAppointment } from "@/lib/appointment-context";
+import { useSmoothScroll } from "@/lib/lenis-context";
+import { DURATION, EASE_ARCH_HEAVY, DISTANCE } from "@/lib/motion";
 import { CONTACT } from "@/lib/site-data";
 
 const SERVICES = [
@@ -37,6 +39,7 @@ function buildWhatsAppMessage(data: Record<string, string>) {
 
 export function AppointmentDialog() {
   const { isOpen, close, prefillService } = useAppointment();
+  const { stop, start } = useSmoothScroll();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [sent, setSent] = useState(false);
@@ -87,15 +90,20 @@ export function AppointmentDialog() {
     return () => document.removeEventListener("keydown", trap);
   }, [isOpen]);
 
-  // Prevent body scroll
+  // Prevent background scroll and pause Lenis
   useEffect(() => {
     if (isOpen) {
+      stop();
       document.body.style.overflow = "hidden";
     } else {
+      start();
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
-  }, [isOpen]);
+    return () => {
+      start();
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, stop, start]);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -111,14 +119,14 @@ export function AppointmentDialog() {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" data-lenis-prevent>
           {/* Overlay */}
           <motion.div
             className="arch-dialog-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: DURATION.MODAL }}
             onClick={close}
             aria-hidden="true"
           />
@@ -128,10 +136,10 @@ export function AppointmentDialog() {
             <motion.div
               ref={dialogRef}
               className="arch-dialog-panel"
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: DISTANCE.LARGE }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 24 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              exit={{ opacity: 0, y: DISTANCE.LARGE }}
+              transition={{ duration: DURATION.MODAL, ease: EASE_ARCH_HEAVY }}
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-8">

@@ -74,6 +74,7 @@ const ARCH_ITEMS = [
 
 function Index() {
   const { open } = useAppointment();
+  const { scrollTo } = useSmoothScroll();
   const hash = useRouterState({ select: (s) => s.location.hash });
 
   // When arriving via HOME nav from another page, the hash is "hs-content".
@@ -88,9 +89,9 @@ function Index() {
         );
         if (section) {
           const maxScroll = section.offsetHeight - window.innerHeight;
-          window.scrollTo({ top: section.offsetTop + maxScroll, behavior: "instant" });
+          scrollTo(section.offsetTop + maxScroll, { immediate: true });
         } else {
-          window.scrollTo({ top: 0, behavior: "instant" });
+          scrollTo(0, { immediate: true });
         }
       };
 
@@ -102,7 +103,7 @@ function Index() {
         clearTimeout(timer);
       };
     }
-  }, [hash]);
+  }, [hash, scrollTo]);
 
   return (
     <>
