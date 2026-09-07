@@ -246,68 +246,9 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            06 / SERVICE INDEX
+            06 / SPATIAL PROJECTS & SERVICES PORTFOLIO
             ══════════════════════════════════════════════════════ */}
-        <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Services">
-          <div className="arch-container">
-            <div className="flex flex-col lg:flex-row justify-between items-start gap-4 mb-6">
-              <div>
-                <p className="arch-label arch-label--accent mb-3">06 / SERVICES</p>
-                <h2 className="font-display text-ink leading-none" style={{ fontSize: "var(--text-display-sm)" }}>
-                  Everything from<br />visualization to build.
-                </h2>
-              </div>
-              <Link to="/services" className="arch-btn arch-btn--outline flex-shrink-0 self-end lg:self-auto">
-                ALL SERVICES <span className="arch-btn-arrow">→</span>
-              </Link>
-            </div>
-
-            {/* Editorial service rows */}
-            <div>
-              {SERVICES_LIST.map((svc) => {
-                const inner = (
-                  <>
-                    <div className="flex items-baseline gap-5 min-w-0">
-                      <span className="arch-label flex-shrink-0" style={{ color: "var(--text-secondary)", minWidth: "1.8rem" }}>{svc.num}</span>
-                      <div className="min-w-0">
-                        <span className="font-display text-[clamp(1.4rem,2.5vw,2rem)] font-light text-ink group-hover:text-indigo transition-colors duration-200">
-                          {svc.label}
-                        </span>
-                        <span className="ml-4 arch-label" style={{ color: "var(--text-secondary)" }}>{svc.tag}</span>
-                      </div>
-                    </div>
-                    <svg className="arch-service-row__arrow h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                    </svg>
-                  </>
-                );
-
-                return "slug" in svc ? (
-                  <Link
-                    key={svc.num}
-                    to="/services/$slug"
-                    params={{ slug: svc.slug }}
-                    className="arch-service-row group"
-                    style={{ textDecoration: "none" }}
-                    data-interactive
-                  >
-                    {inner}
-                  </Link>
-                ) : (
-                  <Link
-                    key={svc.num}
-                    to={svc.to as "/walkthrough" | "/construction"}
-                    className="arch-service-row group"
-                    style={{ textDecoration: "none" }}
-                    data-interactive
-                  >
-                    {inner}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+        <SpatialProjectShowcase />
 
         {/* ══════════════════════════════════════════════════════
             07 / STRUCTURAL DESIGN
