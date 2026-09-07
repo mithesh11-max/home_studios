@@ -110,10 +110,10 @@ export function SpatialProjectCard({
         delay: index * 0.08,
         ease: EASE_ARCH_HEAVY,
       }}
-      className="group relative block w-full text-left cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-indigo/80"
+      className="group relative block w-full text-left cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-indigo/80 touch-manipulation active:scale-[0.985] transition-transform duration-150"
       style={{
-        perspective: prefersReducedMotion ? "none" : "1200px",
-        transformStyle: "preserve-3d",
+        perspective: prefersReducedMotion || isTouchDevice ? "none" : "1200px",
+        transformStyle: isTouchDevice ? "flat" : "preserve-3d",
       }}
       data-interactive
       data-cursor="view"
@@ -122,23 +122,23 @@ export function SpatialProjectCard({
       <div
         className="relative w-full aspect-[4/3] sm:aspect-[16/11] bg-[#0c1024] border border-white/12 overflow-hidden transition-all duration-500 ease-out"
         style={{
-          transform: prefersReducedMotion
+          transform: prefersReducedMotion || isTouchDevice
             ? "none"
             : `rotateX(${tilt.rotateX.toFixed(2)}deg) rotateY(${tilt.rotateY.toFixed(2)}deg) scale3d(${
                 isSelected ? 1.03 : isHovered ? 1.01 : 1
               }, ${isSelected ? 1.03 : isHovered ? 1.01 : 1}, 1)`,
-          transformStyle: "preserve-3d",
+          transformStyle: isTouchDevice ? "flat" : "preserve-3d",
           borderColor: isHovered ? "rgba(138, 134, 252, 0.45)" : "rgba(255, 255, 255, 0.12)",
           boxShadow: isHovered
             ? "0 20px 40px -15px rgba(8, 11, 26, 0.7), 0 0 25px -5px rgba(138, 134, 252, 0.12)"
             : "0 8px 24px -10px rgba(8, 11, 26, 0.5)",
         }}
       >
-        {/* ── Layer 1: Recessed Image Window with Clip-Path Reveal (Z = -14px) ── */}
+        {/* ── Layer 1: Recessed Image Window with Clip-Path Reveal (Z = -14px on desktop) ── */}
         <div
           className="absolute -inset-2 overflow-hidden pointer-events-none"
           style={{
-            transform: prefersReducedMotion
+            transform: prefersReducedMotion || isTouchDevice
               ? "none"
               : `translate3d(${tilt.imgX.toFixed(1)}px, ${tilt.imgY.toFixed(1)}px, -14px) scale(1.05)`,
             transition: isHovered ? "transform 0.12s ease-out" : "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
