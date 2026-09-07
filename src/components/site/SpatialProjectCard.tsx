@@ -142,6 +142,8 @@ export function SpatialProjectCard({
           <motion.img
             src={project.image}
             alt={project.title}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover object-center"
             initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
             animate={inView ? { clipPath: "inset(0% 0% 0% 0%)" } : {}}
