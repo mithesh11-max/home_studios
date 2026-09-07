@@ -157,11 +157,11 @@ function ArchitecturalScene({ progress }: SceneContentProps) {
 
   return (
     <>
-      <ambientLight intensity={lerp(0.9, 1.1, smoothstep(0.5, 0.9, progress))} color="#F4F1EB" />
+      <ambientLight intensity={lerp(0.6, 0.9, smoothstep(0.5, 0.9, progress))} color="#B8BEEC" />
       <directionalLight
         ref={dirLightRef}
         position={[8, 14, 10]}
-        intensity={1.2}
+        intensity={1.4}
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-camera-near={0.5}
@@ -171,7 +171,7 @@ function ArchitecturalScene({ progress }: SceneContentProps) {
         shadow-camera-top={10}
         shadow-camera-bottom={-10}
       />
-      <hemisphereLight args={["#FFFFFF", "#DCD6C8", 0.7]} />
+      <hemisphereLight args={["#D0D5F5", "#10152B", 0.5]} />
 
       {/* Ground Floor Plane */}
       <mesh geometry={floorGeom} material={matFloor} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.005, 0]} receiveShadow />
@@ -183,7 +183,7 @@ function ArchitecturalScene({ progress }: SceneContentProps) {
           rotation={[Math.PI / 2, 0, 0]}
           material={
             new THREE.MeshStandardMaterial({
-              color: "#F6F4EE",
+              color: "#141A38",
               roughness: 0.8,
               transparent: true,
               opacity: smoothstep(0.65, 0.9, progress) * 0.85,
@@ -253,7 +253,7 @@ export function FloorPlanScene({ progress }: { progress: number }) {
       style={{
         width: "100%",
         height: "100%",
-        background: "#F4F1EB", // Paper tone background
+        background: "#080B1A", // Dark Indigo deep background
       }}
     >
       <ArchitecturalScene progress={progress} />
