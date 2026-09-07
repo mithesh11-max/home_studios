@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppointment } from "@/lib/appointment-context";
+import { useSmoothScroll } from "@/lib/lenis-context";
+import { DURATION, EASE_ARCH_SMOOTH, EASE_ARCH_HEAVY } from "@/lib/motion";
 import { CONTACT } from "@/lib/site-data";
 
 interface NavItem {
@@ -19,17 +21,23 @@ const MENU_LABELS = ["01", "02", "03", "04", "05", "06"];
 
 export function MobileMenu({ open, onClose, nav }: MobileMenuProps) {
   const { open: openAppt } = useAppointment();
+  const { stop, start } = useSmoothScroll();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // Lock scroll
+  // Lock scroll and pause Lenis
   useEffect(() => {
     if (open) {
+      stop();
       document.body.style.overflow = "hidden";
     } else {
+      start();
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
+    return () => {
+      start();
+      document.body.style.overflow = "";
+    };
+  }, [open, stop, start]);
 
   return (
     <AnimatePresence>
@@ -40,10 +48,11 @@ export function MobileMenu({ open, onClose, nav }: MobileMenuProps) {
           initial={{ clipPath: "inset(0 0 100% 0)" }}
           animate={{ clipPath: "inset(0 0 0% 0)" }}
           exit={{ clipPath: "inset(0 0 100% 0)" }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: DURATION.SECTION, ease: EASE_ARCH_HEAVY }}
           aria-modal="true"
           role="dialog"
           aria-label="Navigation menu"
+          data-lenis-prevent
         >
           {/* Nav items */}
           <nav className="flex-1 overflow-y-auto px-6 pt-8 pb-4" aria-label="Mobile navigation">
