@@ -12,7 +12,6 @@ import { FinalCTA } from "@/components/site/FinalCTA";
 import { StatCounter } from "@/components/site/StatCounter";
 import { FadeUp } from "@/components/site/TextReveal";
 import { SequenceHero } from "@/components/site/SequenceHero";
-import { FloorPlanRise } from "@/components/site/FloorPlanRise";
 import { SpatialProjectShowcase } from "@/components/site/SpatialProjectShowcase";
 import { ArchitecturalMeasurement } from "@/components/site/ArchitecturalMeasurement";
 import { useAppointment } from "@/lib/appointment-context";
