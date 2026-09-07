@@ -143,7 +143,7 @@ function VideoLoader({ done, onDone, isMobile }: VideoLoaderProps) {
   return (
     <div
       onClick={triggerFadeOut}
-      className="fixed inset-0 z-[100] w-screen h-screen overflow-hidden bg-black pointer-events-auto cursor-pointer"
+      className="fixed inset-0 z-[100] w-full h-screen overflow-hidden bg-black pointer-events-auto cursor-pointer"
       style={{
         opacity: fading ? 0 : 1,
         transition: "opacity 1500ms cubic-bezier(0.4, 0, 0.2, 1)",
