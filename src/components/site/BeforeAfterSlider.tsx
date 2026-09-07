@@ -218,9 +218,9 @@ export function BeforeAfterSlider({
           ))}
         </div>
 
-        {/* Center architectural handle with zero-radius badge */}
+        {/* Center architectural handle with zero-radius badge (44px on mobile for effortless touch drag) */}
         <div
-          className="relative z-10 flex h-9 w-9 items-center justify-center shadow-2xl transition-transform group-hover:scale-105 active:scale-95"
+          className="relative z-10 flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center shadow-2xl transition-transform group-hover:scale-105 active:scale-95 touch-manipulation"
           style={{
             background: "var(--indigo, #8A86FC)",
             border: "1.5px solid #ffffff",
@@ -228,7 +228,7 @@ export function BeforeAfterSlider({
             boxShadow: "0 4px 16px rgba(0,0,0,0.7), 0 0 14px rgba(138,134,252,0.6)",
           }}
         >
-          <svg width="16" height="10" viewBox="0 0 16 10" fill="none" aria-hidden="true">
+          <svg width="18" height="12" viewBox="0 0 16 10" fill="none" aria-hidden="true">
             <path d="M4 1L1 5L4 9" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M12 1L15 5L12 9" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
