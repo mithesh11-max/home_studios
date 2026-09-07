@@ -189,6 +189,30 @@ function WalkthroughPage() {
                     <line x1="50" y1="150" x2="200" y2="150" stroke="white" strokeWidth="0.4" />
                     <line x1="200" y1="50" x2="200" y2="250" stroke="white" strokeWidth="0.4" />
                   </svg>
+
+                  {/* Architectural Measurements */}
+                  <ArchitecturalMeasurement 
+                    label="ROOM WIDTH" 
+                    value="12' 4&quot;" 
+                    length={160} 
+                    className="top-[30%] left-[20%]" 
+                    delay={0.2}
+                  />
+                  <ArchitecturalMeasurement 
+                    label="WALKING CLEARANCE" 
+                    value="3' 2&quot;" 
+                    length={90} 
+                    className="bottom-[35%] left-[45%]" 
+                    delay={0.4}
+                  />
+                  <ArchitecturalMeasurement 
+                    label="CEILING HEIGHT" 
+                    value="9' 6&quot;" 
+                    orientation="vertical"
+                    length={130} 
+                    className="top-[25%] right-[15%]" 
+                    delay={0.6}
+                  />
                   {/* Architectural callouts */}
                   <span
                     className="absolute top-4 left-4 arch-label"
