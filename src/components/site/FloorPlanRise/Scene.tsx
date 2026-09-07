@@ -181,10 +181,11 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
       const next = current + diff * 0.12;
       smoothProgressRef.current = next;
 
-      // Update camera trajectory (Stage 6)
-      // 0.00 -> 0.22: Top-down drafting view
-      // 0.22 -> 0.60: Axonometric depth overview
-      // 0.60 -> 0.95: Eye-level push into living room (y: 1.55m)
+      // Update camera trajectory (Stages 1-5 mapped to 0-1 progress)
+      // 0.00 -> 0.20: PLAN (Top-down drafting view)
+      // 0.20 -> 0.60: BUILD & LIGHT (Axonometric depth overview)
+      // 0.60 -> 0.85: WALK (Eye-level push into living room, y: 1.55m)
+      // 0.85 -> 1.00: EXPERIENCE (Final hold & subtle pan)
       const p = next;
       let camX = 0;
       let camY = isMobile ? 22 : 16.5;
@@ -193,7 +194,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
       let targetY = 0;
       let targetZ = 0;
 
-      if (p < 0.22) {
+      if (p < 0.20) {
         camX = 0;
         camY = isMobile ? 22 : 16.5;
         camZ = 0.01;
@@ -201,30 +202,42 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
         targetY = 0;
         targetZ = 0;
       } else if (p < 0.60) {
-        const t = smoothstep(0.22, 0.60, p);
+        // Starts moving to axonometric during BUILD
+        const t = smoothstep(0.20, 0.50, p);
         camX = lerp(0, isMobile ? 2.5 : 4.5, t);
         camY = lerp(isMobile ? 22 : 16.5, isMobile ? 9.5 : 7.5, t);
         camZ = lerp(0.01, isMobile ? 9.8 : 8.2, t);
         targetX = lerp(0, 0, t);
         targetY = lerp(0, 1.2, t);
         targetZ = lerp(0, 0.6, t);
-      } else {
-        const t = smoothstep(0.60, 0.95, p);
+      } else if (p < 0.85) {
+        // WALK phase: drop to eye level
+        const t = smoothstep(0.60, 0.85, p);
         camX = lerp(isMobile ? 2.5 : 4.5, -0.1, t);
         camY = lerp(isMobile ? 9.5 : 7.5, 1.55, t); // Standard human eye height
         camZ = lerp(isMobile ? 9.8 : 8.2, 2.6, t);
         targetX = 0;
         targetY = lerp(1.2, 1.45, t);
         targetZ = lerp(0.6, -2.5, t); // Gaze through glass wall towards horizon
+      } else {
+        // EXPERIENCE phase: slow pan
+        const t = smoothstep(0.85, 1.0, p);
+        camX = lerp(-0.1, -0.15, t);
+        camY = 1.55;
+        camZ = lerp(2.6, 2.3, t);
+        targetX = lerp(0, 0.1, t);
+        targetY = 1.45;
+        targetZ = -2.5;
       }
 
       camera.position.set(camX, camY, camZ);
       camera.lookAt(targetX, targetY, targetZ);
 
-      // Lighting activation (Stage 5)
-      const lightActivation = smoothstep(0.42, 0.88, p);
+      // LIGHT phase: Lighting activation
+      // 0.45 -> 0.65
+      const lightActivation = smoothstep(0.40, 0.65, p);
       if (dirLightRef.current) {
-        dirLightRef.current.intensity = lerp(0.4, 1.85, lightActivation);
+        dirLightRef.current.intensity = lerp(0.4, 2.2, lightActivation);
         dirLightRef.current.color.setRGB(
           lerp(0.82, 1.0, lightActivation),
           lerp(0.86, 0.96, lightActivation),
@@ -233,13 +246,13 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
       }
 
       if (interiorLightRef.current) {
-        interiorLightRef.current.intensity = lerp(0.0, 1.2, smoothstep(0.65, 0.92, p));
+        interiorLightRef.current.intensity = lerp(0.0, 1.4, smoothstep(0.60, 0.85, p));
       }
 
       // Material opacities & transitions
-      matPlanLine.opacity = lerp(0.92, 0.0, smoothstep(0.22, 0.45, p));
-      matPlanDim.opacity = lerp(0.75, 0.0, smoothstep(0.20, 0.38, p));
-      matFloor.opacity = smoothstep(0.32, 0.70, p);
+      matPlanLine.opacity = lerp(0.92, 0.0, smoothstep(0.20, 0.35, p));
+      matPlanDim.opacity = lerp(0.75, 0.0, smoothstep(0.18, 0.30, p));
+      matFloor.opacity = smoothstep(0.25, 0.50, p);
 
       invalidate();
     }
