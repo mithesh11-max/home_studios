@@ -12,6 +12,7 @@ import { FinalCTA } from "@/components/site/FinalCTA";
 import { StatCounter } from "@/components/site/StatCounter";
 import { FadeUp } from "@/components/site/TextReveal";
 import { SequenceHero } from "@/components/site/SequenceHero";
+import { FloorPlanRise } from "@/components/site/FloorPlanRise";
 import { useAppointment } from "@/lib/appointment-context";
 import { HOME_FAQS, CONTACT } from "@/lib/site-data";
 import architectureImg from "@/assets/architecture-site.jpg";
@@ -168,13 +169,18 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            WALKTHROUGH MODES
+            02 / FROM DRAWING TO SPACE — Interactive 3D Floor Plan Rise
+            ══════════════════════════════════════════════════════ */}
+        <FloorPlanRise />
+
+        {/* ══════════════════════════════════════════════════════
+            03 / WALKTHROUGH MODES
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16 bg-paper" aria-label="Walkthrough modes">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.2fr] lg:gap-12 items-start">
               <div>
-                <p className="arch-label arch-label--accent mb-3">02 / WALKTHROUGH</p>
+                <p className="arch-label arch-label--accent mb-3">03 / WALKTHROUGH</p>
                 <h2 className="font-display text-ink leading-none mb-4"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   Four ways to understand your space before it's built.
@@ -195,13 +201,13 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            WHY HOME STUDIOS — Expandable list
+            04 / WHY HOME STUDIOS — Expandable list
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Why Home Studios">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.4fr] lg:gap-12 items-start">
               <FadeUp>
-                <p className="arch-label arch-label--accent mb-4">03 / WHY</p>
+                <p className="arch-label arch-label--accent mb-4">04 / WHY</p>
                 <h2 className="font-display text-ink leading-none"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   What makes the<br />walkthrough studio<br />different.
@@ -217,11 +223,11 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            PROCESS TIMELINE
+            05 / PROCESS TIMELINE
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16 bg-paper" aria-label="How it works">
           <div className="arch-container">
-            <p className="arch-label arch-label--accent mb-3">04 / PROCESS</p>
+            <p className="arch-label arch-label--accent mb-3">05 / PROCESS</p>
             <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-8">
               <h2 className="font-display text-ink leading-none" style={{ fontSize: "var(--text-display-sm)" }}>
                 How a walkthrough<br />session works.
@@ -237,13 +243,13 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            SERVICE INDEX
+            06 / SERVICE INDEX
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Services">
           <div className="arch-container">
             <div className="flex flex-col lg:flex-row justify-between items-start gap-4 mb-6">
               <div>
-                <p className="arch-label arch-label--accent mb-3">05 / SERVICES</p>
+                <p className="arch-label arch-label--accent mb-3">06 / SERVICES</p>
                 <h2 className="font-display text-ink leading-none" style={{ fontSize: "var(--text-display-sm)" }}>
                   Everything from<br />visualization to build.
                 </h2>
