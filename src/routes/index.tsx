@@ -507,6 +507,23 @@ function ArchImageReveal() {
           style={{ background: "linear-gradient(180deg, transparent 50%, rgba(8,11,26,0.6) 100%)" }}
           aria-hidden="true"
         />
+
+        {/* Architectural Measurements */}
+        <ArchitecturalMeasurement 
+          label="PLOT DEPTH" 
+          value="60' 0&quot;" 
+          orientation="vertical"
+          length={120} 
+          className="top-[20%] left-[20%]" 
+          delay={0.6}
+        />
+        <ArchitecturalMeasurement 
+          label="FRONT SETBACK" 
+          value="15' 0&quot;" 
+          length={100} 
+          className="bottom-[30%] right-[30%]" 
+          delay={0.8}
+        />
       </motion.div>
       {/* Architectural corner annotations */}
       <motion.p
