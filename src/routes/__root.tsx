@@ -66,6 +66,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+import { CustomCursor } from "@/components/site/CustomCursor";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -76,6 +78,9 @@ function RootComponent() {
           <AppointmentProvider>
             {/* 3D Tile grid ripple background & cursor shockwave */}
             <TileGridBackground />
+
+            {/* Custom Interactive Cursor */}
+            <CustomCursor />
 
             {/* Route content stacked above background */}
             <div className="relative z-[1]">
