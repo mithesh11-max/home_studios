@@ -142,16 +142,16 @@ export function FloorPlan2D({ reason = "mobile" }: FloorPlan2DProps) {
             <div
               className="absolute inset-0"
               style={{
-                background: "linear-gradient(180deg, rgba(20,19,16,0.2) 0%, rgba(20,19,16,0.65) 100%)",
+                background: "linear-gradient(180deg, rgba(8,11,26,0.2) 0%, rgba(8,11,26,0.75) 100%)",
               }}
             />
           </motion.div>
 
           {/* Technical Corner Markers */}
-          <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-stone pointer-events-none" />
-          <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-stone pointer-events-none" />
-          <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-stone pointer-events-none" />
-          <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-stone pointer-events-none" />
+          <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-rule pointer-events-none" />
+          <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-rule pointer-events-none" />
+          <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-rule pointer-events-none" />
+          <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-rule pointer-events-none" />
         </div>
 
         {/* 3. Overlay CTA Lockup */}
