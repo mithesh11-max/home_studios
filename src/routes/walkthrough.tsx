@@ -164,6 +164,8 @@ function WalkthroughPage() {
                   <motion.img
                     src={walkthroughFurnitureImg}
                     alt="Clients and architect walking inside a 1:1 scale floor plan with real furniture on wheels"
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover object-center"
                     initial={{ scale: 1.06 }}
                     whileInView={{ scale: 1.0 }}
