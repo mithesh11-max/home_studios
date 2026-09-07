@@ -39,8 +39,12 @@ export function FloorPlanRise() {
 
   // WebGL support check
   useEffect(() => {
-    setWebglSupported(isWebGLAvailable());
-  }, []);
+    const supported = isWebGLAvailable();
+    setWebglSupported(supported);
+    if (supported && !prefersReducedMotion) {
+      import("./Scene").catch(() => {});
+    }
+  }, [prefersReducedMotion]);
 
   // IntersectionObserver: Mount when approaching, unmount when out of view
   useEffect(() => {
@@ -208,17 +212,19 @@ export function FloorPlanRise() {
         {/* 3D Canvas Viewport */}
         <div className="absolute inset-0 z-0 w-full h-full">
           {isNearViewport && webglSupported && (
-            <Suspense
-              fallback={
-                <div className="w-full h-full flex items-center justify-center bg-deep">
-                  <span className="arch-label text-stone font-mono text-[10px] tracking-widest">
-                    INITIALIZING ARCHITECTURAL SCENE...
-                  </span>
-                </div>
-              }
-            >
-              <LazyFloorPlanScene progress={scrollProgress} isMobile={isMobile} />
-            </Suspense>
+            <ErrorBoundary fallback={<FloorPlan2D reason="webgl-fallback" />}>
+              <Suspense
+                fallback={
+                  <div className="w-full h-full flex items-center justify-center bg-deep">
+                    <span className="arch-label text-stone font-mono text-[10px] tracking-widest">
+                      INITIALIZING ARCHITECTURAL SCENE...
+                    </span>
+                  </div>
+                }
+              >
+                <LazyFloorPlanScene progress={scrollProgress} isMobile={isMobile} />
+              </Suspense>
+            </ErrorBoundary>
           )}
         </div>
 
