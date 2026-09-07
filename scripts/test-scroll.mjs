@@ -88,8 +88,8 @@ async function run() {
       `
     });
 
-    // Wait 5s for any errors to occur
-    await new Promise(r => setTimeout(r, 5000));
+    // Wait 7s for scroll to complete and any errors to occur
+    await new Promise(r => setTimeout(r, 7000));
 
   } catch (err) {
     console.error('CDP Error:', err);
