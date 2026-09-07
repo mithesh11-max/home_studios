@@ -74,7 +74,7 @@ export function WalkthroughTabs() {
             initial={{ opacity: 0, scale: 1.02 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.99 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: DURATION.STANDARD, ease: EASE_ARCH_SMOOTH }}
             className="absolute inset-0 w-full h-full"
           >
             <img
@@ -196,10 +196,10 @@ export function WalkthroughTabs() {
           id={`walkthrough-panel-${active}`}
           role="tabpanel"
           aria-label={mode.title}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: DISTANCE.MEDIUM }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          exit={{ opacity: 0, y: -DISTANCE.SUBTLE }}
+          transition={{ duration: DURATION.TABS, ease: EASE_ARCH_SMOOTH }}
           className="pt-8"
         >
           <span className="arch-label arch-label--accent">{mode.num} / {mode.label}</span>
