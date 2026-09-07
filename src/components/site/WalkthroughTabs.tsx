@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { DURATION, EASE_ARCH_SMOOTH, DISTANCE } from "@/lib/motion";
 
 import laserImg from "@/assets/walkthrough-studio.jpg";
 import arImg from "@/assets/walkthrough-ar.jpg";
