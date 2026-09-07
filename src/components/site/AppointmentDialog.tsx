@@ -234,7 +234,7 @@ export function AppointmentDialog() {
               )}
             </motion.div>
           </div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );
