@@ -14,6 +14,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ["three", "@react-three/fiber"],
+  },
   build: {
     target: "es2022",
     rollupOptions: {
