@@ -72,18 +72,20 @@ function RootComponent() {
   return (
     <MotionConfig reducedMotion="user">
       <QueryClientProvider client={queryClient}>
-        <AppointmentProvider>
-          {/* 3D Tile grid ripple background & cursor shockwave */}
-          <TileGridBackground />
+        <SmoothScrollProvider>
+          <AppointmentProvider>
+            {/* 3D Tile grid ripple background & cursor shockwave */}
+            <TileGridBackground />
 
-          {/* Route content stacked above background */}
-          <div className="relative z-[1]">
-            <RouteTransition>
-              <Outlet />
-            </RouteTransition>
-          </div>
-          <AppointmentDialog />
-        </AppointmentProvider>
+            {/* Route content stacked above background */}
+            <div className="relative z-[1]">
+              <RouteTransition>
+                <Outlet />
+              </RouteTransition>
+            </div>
+            <AppointmentDialog />
+          </AppointmentProvider>
+        </SmoothScrollProvider>
       </QueryClientProvider>
     </MotionConfig>
   );
