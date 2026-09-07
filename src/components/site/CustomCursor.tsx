@@ -24,7 +24,7 @@ export function CustomCursor() {
     // This respects accessibility if the user explicitly disables the custom cursor via other means.
     const style = document.createElement("style");
     style.innerHTML = `
-      body, a, button, input, textarea, select, [role="button"], [data-interactive] {
+      body, a, button, input, textarea, select, [role="button"], [data-interactive], [data-cursor] {
         cursor: none !important;
       }
     `;
