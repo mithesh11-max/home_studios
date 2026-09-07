@@ -633,7 +633,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
       {/* Layer 2: Midground Dark Indigo atmospheric tint + vignette */}
       <div
         ref={vignetteRef}
-        className="pointer-events-none sticky top-0 -mt-[100dvh] w-screen h-[100dvh] z-10 will-change-transform"
+        className="pointer-events-none sticky top-0 -mt-[100dvh] w-full h-[100dvh] z-10 will-change-transform"
         style={{
           background: "radial-gradient(ellipse at center, rgba(23, 26, 61, 0.20) 0%, rgba(8, 11, 26, 0.60) 100%)",
         }}
@@ -643,7 +643,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
       {/* Layer 3: Initial Arrival Architectural Lockup (Enters with spatial stagger, recedes on scroll) */}
       <div
         ref={initialLockupRef}
-        className="pointer-events-none sticky top-0 -mt-[100dvh] w-screen h-[100dvh] z-20 flex flex-col justify-end pb-8 sm:pb-12 will-change-transform"
+        className="pointer-events-none sticky top-0 -mt-[100dvh] w-full h-[100dvh] z-20 flex flex-col justify-end pb-8 sm:pb-12 will-change-transform"
         style={{
           opacity: isStartAtEnd ? 0 : 1,
           transform: "translate3d(0, 0, 0)",
@@ -697,7 +697,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
 
       {/* Layer 4: Direct DOM Animated Overlays for Intermediate Phases */}
       <div
-        className="pointer-events-none sticky top-0 -mt-[100dvh] w-screen h-[100dvh] z-20"
+        className="pointer-events-none sticky top-0 -mt-[100dvh] w-full h-[100dvh] z-20"
         aria-hidden="true"
       >
         {OVERLAYS.map((ov, i) => (
