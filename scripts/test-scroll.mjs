@@ -26,8 +26,7 @@ async function run() {
     }
 
     const wsUrl = pageTab.webSocketDebuggerUrl;
-    const WebSocket = (await import('ws')).default || globalThis.WebSocket;
-    const ws = new WebSocket(wsUrl);
+    const ws = new globalThis.WebSocket(wsUrl);
 
     await new Promise(resolve => ws.on('open', resolve));
     console.log('Connected to CDP WebSocket');
