@@ -66,7 +66,7 @@ export function TextReveal({
           style={{ display: "block", overflow: "hidden" }}
           initial={{ clipPath: "inset(0 0 100% 0)" }}
           animate={inView ? { clipPath: "inset(0 0 0% 0)" } : {}}
-          transition={{ duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: DURATION.HERO, delay, ease: EASE_ARCH_SLOW }}
         >
           {children}
         </motion.span>
@@ -85,9 +85,9 @@ export function TextReveal({
             initial={{ y: "110%", opacity: 0 }}
             animate={inView ? { y: "0%", opacity: 1 } : {}}
             transition={{
-              duration: 1.0,
+              duration: DURATION.HERO,
               delay: delay + i * 0.1,
-              ease: [0.22, 1, 0.36, 1],
+              ease: EASE_ARCH_SLOW,
             }}
           >
             {line}
@@ -99,7 +99,7 @@ export function TextReveal({
 }
 
 // ---------------------------------------------------------------------------
-// FadeUp — opacity + 20px rise for body copy and small elements
+// FadeUp — opacity + standardized rise for body copy and small elements
 // ---------------------------------------------------------------------------
 
 export function FadeUp({
@@ -118,9 +118,9 @@ export function FadeUp({
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: DISTANCE.MEDIUM }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: DURATION.SECTION, delay, ease: EASE_ARCH_HEAVY }}
     >
       {children}
     </motion.div>
@@ -178,11 +178,11 @@ export function StaggerItem({
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, y: 18 },
+        hidden: { opacity: 0, y: DISTANCE.MEDIUM },
         visible: {
           opacity: 1,
           y: 0,
-          transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+          transition: { duration: DURATION.STANDARD, ease: EASE_ARCH_SMOOTH },
         },
       }}
     >
