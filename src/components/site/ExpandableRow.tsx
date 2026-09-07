@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
+import { DURATION, EASE_ARCH_SMOOTH } from "@/lib/motion";
 
 interface ExpandableRowProps {
   num: string;
@@ -38,7 +39,7 @@ export function ExpandableRow({ num, title, description }: ExpandableRowProps) {
         </span>
         <motion.span
           animate={{ rotate: open ? 45 : 0 }}
-          transition={{ duration: 0.22, ease: "easeOut" }}
+          transition={{ duration: DURATION.TABS, ease: EASE_ARCH_SMOOTH }}
           className="flex-shrink-0"
           style={{ color: open ? "var(--indigo)" : "var(--text-secondary)" }}
           aria-hidden="true"
@@ -54,7 +55,7 @@ export function ExpandableRow({ num, title, description }: ExpandableRowProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: DURATION.STANDARD, ease: EASE_ARCH_SMOOTH }}
             style={{ overflow: "hidden" }}
             aria-hidden={!open}
           >
