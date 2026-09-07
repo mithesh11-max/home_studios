@@ -28,7 +28,10 @@ async function run() {
     const wsUrl = pageTab.webSocketDebuggerUrl;
     const ws = new globalThis.WebSocket(wsUrl);
 
-    await new Promise(resolve => ws.on('open', resolve));
+    await new Promise((resolve, reject) => {
+      ws.onopen = resolve;
+      ws.onerror = reject;
+    });
     console.log('Connected to CDP WebSocket');
 
     let id = 1;
@@ -37,14 +40,14 @@ async function run() {
       ws.send(JSON.stringify({ id: msgId, method, params }));
     }
 
-    ws.on('message', data => {
-      const msg = JSON.parse(data);
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
       if (msg.method === 'Runtime.consoleAPICalled') {
-        console.log('[BROWSER CONSOLE]', msg.params.type, msg.params.args.map(a => a.value || a.description).join(' '));
+        console.log('[BROWSER CONSOLE]', msg.params.type, msg.params.args.map(a => a.value || a.description || JSON.stringify(a)).join(' '));
       } else if (msg.method === 'Runtime.exceptionThrown') {
-        console.error('[BROWSER EXCEPTION]', msg.params.exceptionDetails);
+        console.error('[BROWSER EXCEPTION]', JSON.stringify(msg.params.exceptionDetails, null, 2));
       }
-    });
+    };
 
     send('Runtime.enable');
     send('Page.enable');
