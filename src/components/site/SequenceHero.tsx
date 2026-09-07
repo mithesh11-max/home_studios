@@ -738,7 +738,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
       <div
         ref={finalLockupRef}
         id="home-lockup"
-        className="absolute bottom-0 left-0 right-0 arch-container pb-6 sm:pb-10 transition-all duration-500 z-20"
+        className="absolute bottom-0 left-0 right-0 arch-container pb-6 sm:pb-10 transition-all duration-500 z-30"
         style={{
           opacity: isStartAtEnd ? 1 : 0,
           transform: isStartAtEnd ? "none" : "translateY(16px)",
@@ -780,9 +780,9 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
         </div>
       </div>
 
-      {/* Aperture threshold transition to next section */}
+      {/* Aperture threshold transition to next section (sits behind lockup at z-15) */}
       <div
-        className="pointer-events-none absolute bottom-0 left-0 right-0 h-36 z-30"
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-36 z-15"
         style={{
           background: "linear-gradient(to bottom, transparent 0%, rgba(8, 11, 26, 0.75) 60%, var(--bg-deep) 100%)",
         }}
