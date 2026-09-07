@@ -41,8 +41,12 @@ export function InteractiveFloorPlan({
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
-    setWebglSupported(isWebGLAvailable());
-  }, []);
+    const supported = isWebGLAvailable();
+    setWebglSupported(supported);
+    if (supported && !prefersReducedMotion) {
+      import("./FloorPlanScene3D").catch(() => {});
+    }
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -130,22 +134,33 @@ export function InteractiveFloorPlan({
                   onHoverRoom={handleHoverRoom}
                 />
               ) : (
-                <Suspense
+                <ErrorBoundary
                   fallback={
-                    <div className="w-full h-full flex items-center justify-center bg-deep">
-                      <span className="arch-label text-stone font-mono text-[10px] tracking-widest">
-                        CONNECTING 3D CAMERA CONTROLLER...
-                      </span>
-                    </div>
+                    <FloorPlanNavSVG
+                      activeRoomId={activeRoomId}
+                      hoveredRoomId={hoveredRoomId}
+                      onSelectRoom={handleSelectRoom}
+                      onHoverRoom={handleHoverRoom}
+                    />
                   }
                 >
-                  <LazyFloorPlanScene3D
-                    activeRoomId={activeRoomId}
-                    hoveredRoomId={hoveredRoomId}
-                    onSelectRoom={handleSelectRoom}
-                    isMobile={isMobile}
-                  />
-                </Suspense>
+                  <Suspense
+                    fallback={
+                      <div className="w-full h-full flex items-center justify-center bg-deep">
+                        <span className="arch-label text-stone font-mono text-[10px] tracking-widest">
+                          CONNECTING 3D CAMERA CONTROLLER...
+                        </span>
+                      </div>
+                    }
+                  >
+                    <LazyFloorPlanScene3D
+                      activeRoomId={activeRoomId}
+                      hoveredRoomId={hoveredRoomId}
+                      onSelectRoom={handleSelectRoom}
+                      isMobile={isMobile}
+                    />
+                  </Suspense>
+                </ErrorBoundary>
               )}
             </div>
 
