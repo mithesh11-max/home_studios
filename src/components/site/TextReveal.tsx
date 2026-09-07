@@ -277,3 +277,58 @@ export function TiltCard({
   );
 }
 
+// ---------------------------------------------------------------------------
+// DraftingFrame — architectural container with subtle corner crosshairs and datum mark
+// ---------------------------------------------------------------------------
+
+interface DraftingFrameProps {
+  children: ReactNode;
+  className?: string;
+  datum?: string;
+  cornerSize?: number;
+}
+
+export function DraftingFrame({
+  children,
+  className = "",
+  datum,
+  cornerSize = 8,
+}: DraftingFrameProps) {
+  return (
+    <div className={`relative ${className}`} style={{ borderRadius: 0 }}>
+      {/* Corner crosshairs */}
+      <span
+        className="absolute top-0 left-0 pointer-events-none border-t border-l border-indigo/40"
+        style={{ width: cornerSize, height: cornerSize }}
+        aria-hidden="true"
+      />
+      <span
+        className="absolute top-0 right-0 pointer-events-none border-t border-r border-indigo/40"
+        style={{ width: cornerSize, height: cornerSize }}
+        aria-hidden="true"
+      />
+      <span
+        className="absolute bottom-0 left-0 pointer-events-none border-b border-l border-indigo/40"
+        style={{ width: cornerSize, height: cornerSize }}
+        aria-hidden="true"
+      />
+      <span
+        className="absolute bottom-0 right-0 pointer-events-none border-b border-r border-indigo/40"
+        style={{ width: cornerSize, height: cornerSize }}
+        aria-hidden="true"
+      />
+
+      {datum && (
+        <span
+          className="absolute -top-2.5 right-3 font-mono text-[9px] tracking-widest text-indigo/80 pointer-events-none bg-deep px-1 uppercase"
+          aria-hidden="true"
+        >
+          {datum}
+        </span>
+      )}
+
+      {children}
+    </div>
+  );
+}
+
