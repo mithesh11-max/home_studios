@@ -14,29 +14,41 @@ export function CustomCursor() {
   const smoothY = useSpring(cursorY, springConfig);
 
   useEffect(() => {
-    // Only mount on devices with a real pointer (e.g., desktop mouse)
-    const mediaQuery = window.matchMedia("(pointer: fine)");
-    setHasPointer(mediaQuery.matches);
-    
-    if (!mediaQuery.matches) return;
+    let styleEl: HTMLStyleElement | null = null;
 
-    // Add global style to hide default cursor dynamically instead of a class
-    // This respects accessibility if the user explicitly disables the custom cursor via other means.
-    const style = document.createElement("style");
-    style.innerHTML = `
-      body, a, button, input, textarea, select, [role="button"], [data-interactive], [data-cursor] {
-        cursor: none !important;
+    const checkPointer = () => {
+      // Must be desktop width (>= 768px) and have a real mouse with fine hover pointer
+      const isDesktop = window.innerWidth >= 768;
+      const isFinePointer = window.matchMedia("(pointer: fine) and (hover: hover)").matches;
+      const enabled = isDesktop && isFinePointer;
+      setHasPointer(enabled);
+
+      if (enabled && !styleEl) {
+        styleEl = document.createElement("style");
+        styleEl.id = "custom-cursor-style";
+        styleEl.innerHTML = `
+          body, a, button, input, textarea, select, [role="button"], [data-interactive], [data-cursor] {
+            cursor: none !important;
+          }
+        `;
+        document.head.appendChild(styleEl);
+      } else if (!enabled && styleEl) {
+        if (styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
+        styleEl = null;
       }
-    `;
-    document.head.appendChild(style);
+    };
+
+    checkPointer();
 
     const moveCursor = (e: PointerEvent) => {
-      // Extremely low latency update of the motion values (bypasses React render)
+      // Ignore simulated pointer events on touch screens
+      if (e.pointerType === "touch") return;
+
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
 
-      // Inspect elements under cursor using event delegation
       const target = e.target as HTMLElement;
+      if (!target) return;
       
       const cursorElement = target.closest('[data-cursor]');
       const clickableElement = target.closest('a, button, input, textarea, select, [role="button"], [data-interactive]');
@@ -49,7 +61,6 @@ export function CustomCursor() {
           setCursorState("hover");
         }
       } else if (clickableElement) {
-        // Inputs hide the cursor mostly or keep it small
         if (clickableElement.tagName === "INPUT" || clickableElement.tagName === "TEXTAREA") {
           setCursorState("default"); 
         } else {
@@ -60,12 +71,19 @@ export function CustomCursor() {
       }
     };
 
-    // Use pointer events for best performance and device support
     window.addEventListener("pointermove", moveCursor, { passive: true });
+    window.addEventListener("resize", checkPointer, { passive: true });
+
+    const mql = window.matchMedia("(pointer: fine) and (hover: hover)");
+    mql.addEventListener("change", checkPointer);
 
     return () => {
       window.removeEventListener("pointermove", moveCursor);
-      document.head.removeChild(style);
+      window.removeEventListener("resize", checkPointer);
+      mql.removeEventListener("change", checkPointer);
+      if (styleEl && styleEl.parentNode) {
+        styleEl.parentNode.removeChild(styleEl);
+      }
     };
   }, [cursorX, cursorY]);
 
