@@ -111,6 +111,8 @@ export function BeforeAfterSlider({
         <img
           src={interiorFinishedImg}
           alt="Finished luxury interior"
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover object-center select-none pointer-events-none block"
           draggable={false}
         />
