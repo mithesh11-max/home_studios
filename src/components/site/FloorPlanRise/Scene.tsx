@@ -437,11 +437,11 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          STAGE 4: Progressive Procedural Furniture (0.40 -> 0.72)
+          BUILD: Progressive Procedural Furniture (0.25 -> 0.45)
           ───────────────────────────────────────────────────────────── */}
       {FURNITURE_ITEMS.map((item) => {
-        const startP = item.stagger;
-        const endP = startP + 0.11;
+        const startP = 0.25 + (item.stagger * 0.15);
+        const endP = startP + 0.08;
         const furnFactor = smoothstep(startP, endP, p);
 
         if (furnFactor <= 0.005) return null;
