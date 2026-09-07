@@ -25,12 +25,12 @@ function ArchitecturalScene({ progress }: SceneContentProps) {
   const boxGeom = useMemo(() => new THREE.BoxGeometry(1, 1, 1), []);
   const floorGeom = useMemo(() => new THREE.PlaneGeometry(24, 20), []);
 
-  // Base materials
+  // Base materials tuned for Dark Indigo architectural monograph
   const matPlaster = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#F3F0E8"),
-        roughness: 0.85,
+        color: new THREE.Color("#1E2548"),
+        roughness: 0.75,
         metalness: 0.05,
       }),
     []
@@ -39,9 +39,9 @@ function ArchitecturalScene({ progress }: SceneContentProps) {
   const matConcrete = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#C8C3B8"),
-        roughness: 0.9,
-        metalness: 0.05,
+        color: new THREE.Color("#282E55"),
+        roughness: 0.88,
+        metalness: 0.08,
       }),
     []
   );
@@ -49,8 +49,8 @@ function ArchitecturalScene({ progress }: SceneContentProps) {
   const matWood = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#8E6E53"),
-        roughness: 0.65,
+        color: new THREE.Color("#5A4535"),
+        roughness: 0.6,
         metalness: 0.1,
       }),
     []
@@ -59,8 +59,8 @@ function ArchitecturalScene({ progress }: SceneContentProps) {
   const matFloor = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#E8E2D5"),
-        roughness: 0.75,
+        color: new THREE.Color("#10152B"),
+        roughness: 0.8,
         metalness: 0.05,
         transparent: true,
         opacity: 0,
@@ -71,9 +71,9 @@ function ArchitecturalScene({ progress }: SceneContentProps) {
   const matPlanLine = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: new THREE.Color("#141310"),
+        color: new THREE.Color("#8A86FC"), // Soft Electric Indigo blueprint trace
         transparent: true,
-        opacity: 0.9,
+        opacity: 0.95,
       }),
     []
   );
