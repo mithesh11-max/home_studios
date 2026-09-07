@@ -40,17 +40,24 @@ async function run() {
       ws.send(JSON.stringify({ id: msgId, method, params }));
     }
 
+    send('Runtime.enable');
+    send('Page.enable');
+    send('Network.enable');
+
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.method === 'Runtime.consoleAPICalled') {
         console.log('[BROWSER CONSOLE]', msg.params.type, msg.params.args.map(a => a.value || a.description || JSON.stringify(a)).join(' '));
       } else if (msg.method === 'Runtime.exceptionThrown') {
         console.error('[BROWSER EXCEPTION]', JSON.stringify(msg.params.exceptionDetails, null, 2));
+      } else if (msg.method === 'Network.loadingFailed') {
+        console.error('[NET FAILED]', msg.params.requestId, msg.params.errorText, msg.params.canceled);
+      } else if (msg.method === 'Network.responseReceived') {
+        if (msg.params.response.status >= 400 || msg.params.response.url.includes('Scene')) {
+          console.log('[NET RESPONSE]', msg.params.response.status, msg.params.response.url);
+        }
       }
     };
-
-    send('Runtime.enable');
-    send('Page.enable');
 
     // Wait 2s for page to settle
     await new Promise(r => setTimeout(r, 2000));
