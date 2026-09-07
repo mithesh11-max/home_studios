@@ -45,7 +45,12 @@ export function SpatialProjectCard({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setIsTouchDevice(!window.matchMedia("(pointer: fine)").matches);
+    const checkTouch = () => {
+      setIsTouchDevice(!window.matchMedia("(pointer: fine)").matches || window.innerWidth < 768);
+    };
+    checkTouch();
+    window.addEventListener("resize", checkTouch);
+    return () => window.removeEventListener("resize", checkTouch);
   }, []);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
