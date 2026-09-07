@@ -101,21 +101,24 @@ export function FloorPlanRise() {
     );
   }
 
-  // Active Phase identification
-  const activePhase: "plan" | "space" | "reality" =
-    scrollProgress < 0.28 ? "plan" : scrollProgress < 0.68 ? "space" : "reality";
+  // Active 5-Stage Cinematic Phase identification
+  let activePhase: "plan" | "build" | "light" | "walk" | "experience" = "plan";
+  if (scrollProgress >= 0.85) activePhase = "experience";
+  else if (scrollProgress >= 0.65) activePhase = "walk";
+  else if (scrollProgress >= 0.45) activePhase = "light";
+  else if (scrollProgress >= 0.20) activePhase = "build";
 
-  const annotationsOpacity = Math.max(0, 1 - scrollProgress / 0.22);
+  const annotationsOpacity = Math.max(0, 1 - scrollProgress / 0.15);
   const realityCalloutsOpacity =
     scrollProgress >= 0.72 ? Math.min(1, (scrollProgress - 0.72) / 0.12) : 0;
-  const showFinalCTA = scrollProgress >= 0.88;
+  const showFinalCTA = scrollProgress >= 0.90;
 
   return (
     <section
       ref={containerRef}
       className="relative w-full"
-      style={{ height: "300vh", background: "var(--bg-deep)" }}
-      aria-label="3D Interactive Floor Plan Extrusion — PLAN TO SPACE TO REALITY"
+      style={{ height: "500vh", background: "var(--bg-deep)" }}
+      aria-label="Cinematic storytelling sequence — PLAN TO EXPERIENCE"
     >
       {/* Pinned 100vh viewport */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between">
@@ -124,42 +127,69 @@ export function FloorPlanRise() {
 
         {/* Section Header & Signature HUD Pill (Top) */}
         <div className="relative z-20 arch-container pt-16 sm:pt-20 pb-4 flex justify-between items-start pointer-events-none">
-          <div>
+          <div className="relative h-12 w-full max-w-[600px]">
             <div className="flex items-center gap-2 mb-2">
               <span className="arch-label arch-label--accent">02 / TRANSFORMATION</span>
               <span className="inline-block w-2 h-px bg-indigo/40" />
               <span className="arch-label text-stone hidden sm:inline">1:1 PROJECTION</span>
             </div>
-            <h2 className="font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none">
-              A line on paper becomes living architecture.
-            </h2>
+            
+            <div className="relative">
+              {/* Dynamic Typography Transition for Narrative */}
+              <motion.h2 
+                initial={false}
+                animate={{ opacity: activePhase === "plan" ? 1 : 0, y: activePhase === "plan" ? 0 : -8 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+              >
+                The foundation of truth.
+              </motion.h2>
+              <motion.h2 
+                initial={false}
+                animate={{ opacity: activePhase === "build" ? 1 : 0, y: activePhase === "build" ? 0 : (activePhase === "plan" ? 8 : -8) }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+              >
+                Walls take shape.
+              </motion.h2>
+              <motion.h2 
+                initial={false}
+                animate={{ opacity: activePhase === "light" ? 1 : 0, y: activePhase === "light" ? 0 : (["plan", "build"].includes(activePhase) ? 8 : -8) }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+              >
+                Atmosphere emerges.
+              </motion.h2>
+              <motion.h2 
+                initial={false}
+                animate={{ opacity: activePhase === "walk" ? 1 : 0, y: activePhase === "walk" ? 0 : (["experience"].includes(activePhase) ? -8 : 8) }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+              >
+                Feel the scale.
+              </motion.h2>
+              <motion.h2 
+                initial={false}
+                animate={{ opacity: activePhase === "experience" ? 1 : 0, y: activePhase === "experience" ? 0 : 8 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="absolute top-0 left-0 font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none whitespace-nowrap"
+              >
+                The space before you build it.
+              </motion.h2>
+            </div>
           </div>
 
-          {/* Signature Phase HUD Pill */}
+          {/* Signature Phase HUD Pill - Expanded to 5 stages */}
           <div className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-1.5 border border-white/15 bg-deep/85 backdrop-blur-sm font-mono text-[9px] tracking-widest uppercase pointer-events-auto">
-            <span
-              className={`transition-colors duration-300 ${
-                activePhase === "plan" ? "text-indigo font-bold" : "text-stone/60"
-              }`}
-            >
-              01 PLAN
-            </span>
+            <span className={`transition-colors duration-300 ${activePhase === "plan" ? "text-indigo font-bold" : "text-stone/60"}`}>PLAN</span>
             <span className="text-stone/40">→</span>
-            <span
-              className={`transition-colors duration-300 ${
-                activePhase === "space" ? "text-indigo font-bold" : "text-stone/60"
-              }`}
-            >
-              02 SPACE
-            </span>
+            <span className={`transition-colors duration-300 ${activePhase === "build" ? "text-indigo font-bold" : "text-stone/60"}`}>BUILD</span>
             <span className="text-stone/40">→</span>
-            <span
-              className={`transition-colors duration-300 ${
-                activePhase === "reality" ? "text-indigo font-bold" : "text-stone/60"
-              }`}
-            >
-              03 REALITY
-            </span>
+            <span className={`transition-colors duration-300 ${activePhase === "light" ? "text-indigo font-bold" : "text-stone/60"}`}>LIGHT</span>
+            <span className="text-stone/40">→</span>
+            <span className={`transition-colors duration-300 ${activePhase === "walk" ? "text-indigo font-bold" : "text-stone/60"}`}>WALK</span>
+            <span className="text-stone/40">→</span>
+            <span className={`transition-colors duration-300 ${activePhase === "experience" ? "text-indigo font-bold" : "text-stone/60"}`}>EXP</span>
           </div>
         </div>
 
