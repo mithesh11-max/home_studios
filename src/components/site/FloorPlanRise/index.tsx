@@ -268,6 +268,3 @@ export function FloorPlanRise() {
 }
 
 export default FloorPlanRise;
-
-
-export default FloorPlanRise;
