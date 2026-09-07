@@ -363,10 +363,10 @@ export function FloorPlanScene3D({
           position: OVERVIEW_CAMERA.position,
           fov: isMobile ? 52 : OVERVIEW_CAMERA.fov,
         }}
-        dpr={[1, 1.5]}
-        shadows
+        dpr={isMobile ? 1 : [1, 1.5]}
+        shadows={!isMobile}
         gl={{
-          antialias: true,
+          antialias: !isMobile,
           alpha: false,
           powerPreference: "high-performance",
         }}

@@ -27,11 +27,11 @@ export function RoomSpecPanel({
         </div>
 
         {/* Room Navigation Pill Selector */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-6">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-1.5 mb-6">
           <button
             type="button"
             onClick={() => onSelectRoom(null)}
-            className={`px-2.5 py-1.5 font-mono text-[9px] tracking-wider uppercase border transition-all text-center ${
+            className={`min-h-[42px] sm:min-h-[34px] px-2.5 py-2 sm:py-1.5 font-mono text-[10px] sm:text-[9px] tracking-wider uppercase border transition-all text-center touch-manipulation active:scale-[0.98] ${
               activeRoomId === null
                 ? "bg-indigo text-deep font-bold border-indigo"
                 : "bg-deep/80 text-white/70 border-white/15 hover:border-white/40 hover:text-white"
@@ -47,7 +47,7 @@ export function RoomSpecPanel({
                 key={id}
                 type="button"
                 onClick={() => onSelectRoom(isSelected ? null : id)}
-                className={`px-2 py-1.5 font-mono text-[9px] tracking-wider uppercase border transition-all truncate text-center ${
+                className={`min-h-[42px] sm:min-h-[34px] px-2 py-2 sm:py-1.5 font-mono text-[10px] sm:text-[9px] tracking-wider uppercase border transition-all truncate text-center touch-manipulation active:scale-[0.98] ${
                   isSelected
                     ? "bg-indigo text-deep font-bold border-indigo"
                     : "bg-deep/80 text-white/70 border-white/15 hover:border-white/40 hover:text-white"
