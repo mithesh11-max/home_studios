@@ -263,41 +263,6 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
     invalidate();
   }, [progress, invalidate]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      boxGeom.dispose();
-      floorGeom.dispose();
-      cylGeom.dispose();
-      matPlaster.dispose();
-      matConcrete.dispose();
-      matWood.dispose();
-      matFloor.dispose();
-      matPlanLine.dispose();
-      matPlanDim.dispose();
-      matGlass.dispose();
-      matFabric.dispose();
-      matCushion.dispose();
-      matStone.dispose();
-      matRug.dispose();
-    };
-  }, [
-    boxGeom,
-    floorGeom,
-    cylGeom,
-    matPlaster,
-    matConcrete,
-    matWood,
-    matFloor,
-    matPlanLine,
-    matPlanDim,
-    matGlass,
-    matFabric,
-    matCushion,
-    matStone,
-    matRug,
-  ]);
-
   const p = smoothProgressRef.current;
 
   return (
@@ -344,16 +309,14 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
         <mesh
           position={[0, 3.6, 0.5]}
           rotation={[Math.PI / 2, 0, 0]}
-          material={
-            new THREE.MeshStandardMaterial({
-              color: "#121734",
-              roughness: 0.85,
-              transparent: true,
-              opacity: smoothstep(0.62, 0.92, p) * 0.9,
-            })
-          }
         >
           <planeGeometry args={[8.8, 7.8]} />
+          <meshStandardMaterial
+            color="#121734"
+            roughness={0.85}
+            transparent
+            opacity={smoothstep(0.62, 0.92, p) * 0.9}
+          />
         </mesh>
       )}
 
