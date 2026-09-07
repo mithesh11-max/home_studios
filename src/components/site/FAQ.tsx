@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
+import { DURATION, EASE_ARCH_SMOOTH } from "@/lib/motion";
 
 export interface FAQItem {
   question: string;
@@ -40,7 +41,7 @@ export function FAQ({ items, defaultOpen }: FAQProps) {
               </span>
               <motion.span
                 animate={{ rotate: isOpen ? 45 : 0 }}
-                transition={{ duration: 0.22 }}
+                transition={{ duration: DURATION.TABS, ease: EASE_ARCH_SMOOTH }}
                 className="flex-shrink-0"
                 style={{ color: isOpen ? "var(--indigo)" : "var(--text-secondary)" }}
                 aria-hidden="true"
@@ -58,7 +59,7 @@ export function FAQ({ items, defaultOpen }: FAQProps) {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: DURATION.STANDARD, ease: EASE_ARCH_SMOOTH }}
                   style={{ overflow: "hidden" }}
                   aria-hidden={!isOpen}
                 >
