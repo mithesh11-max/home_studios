@@ -2,9 +2,9 @@ import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "framer-motion";
 import { FloorPlan2D } from "./FloorPlan2D";
-import { ANNOTATIONS } from "./geometry";
+import { ANNOTATIONS, REALITY_CALLOUTS } from "./geometry";
 
-// Lazy-load the heavy Three.js / R3F scene component
+// Lazy-load the Three.js / R3F scene component
 const LazyFloorPlanScene = lazy(() => import("./Scene"));
 
 function isWebGLAvailable(): boolean {
@@ -41,7 +41,7 @@ export function FloorPlanRise() {
     setWebglSupported(isWebGLAvailable());
   }, []);
 
-  // IntersectionObserver: Mount only when approaching, unmount when out of view
+  // IntersectionObserver: Mount when approaching, unmount when out of view
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -51,7 +51,7 @@ export function FloorPlanRise() {
         setIsNearViewport(entry.isIntersecting);
       },
       {
-        rootMargin: "300px 0px 300px 0px", // Preload slightly before scroll arrives
+        rootMargin: "350px 0px 350px 0px", // Preload smoothly before user arrives
       }
     );
 
@@ -59,7 +59,7 @@ export function FloorPlanRise() {
     return () => observer.disconnect();
   }, []);
 
-  // Native scroll progress calculation (0 to 1 across the ~250vh section)
+  // Native scroll progress calculation (0 to 1 across the 300vh container)
   useEffect(() => {
     if (!isNearViewport) return;
 
@@ -88,14 +88,12 @@ export function FloorPlanRise() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isNearViewport]);
 
-  // If mobile, reduced-motion, or no WebGL support, use high-fidelity SVG/Photo 2D fallback
-  if (isMobile || prefersReducedMotion || webglSupported === false) {
+  // Fallback for reduced-motion or unsupported WebGL
+  if (prefersReducedMotion || webglSupported === false) {
     return (
       <FloorPlan2D
         reason={
-          isMobile
-            ? "mobile"
-            : prefersReducedMotion
+          prefersReducedMotion
             ? "reduced-motion"
             : "webgl-fallback"
         }
@@ -103,33 +101,65 @@ export function FloorPlanRise() {
     );
   }
 
-  const annotationsOpacity = Math.max(0, 1 - scrollProgress / 0.18);
-  const showFinalCTA = scrollProgress >= 0.92;
+  // Active Phase identification
+  const activePhase: "plan" | "space" | "reality" =
+    scrollProgress < 0.28 ? "plan" : scrollProgress < 0.68 ? "space" : "reality";
+
+  const annotationsOpacity = Math.max(0, 1 - scrollProgress / 0.22);
+  const realityCalloutsOpacity =
+    scrollProgress >= 0.72 ? Math.min(1, (scrollProgress - 0.72) / 0.12) : 0;
+  const showFinalCTA = scrollProgress >= 0.88;
 
   return (
     <section
       ref={containerRef}
       className="relative w-full"
-      style={{ height: "250vh", background: "var(--bg-deep)" }}
-      aria-label="3D Interactive Floor Plan Extrusion"
+      style={{ height: "300vh", background: "var(--bg-deep)" }}
+      aria-label="3D Interactive Floor Plan Extrusion — PLAN TO SPACE TO REALITY"
     >
       {/* Pinned 100vh viewport */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between">
-        {/* Subtle grid background */}
-        <div className="arch-grid-light absolute inset-0 opacity-40 pointer-events-none" aria-hidden="true" />
+        {/* Subtle architectural grid background */}
+        <div className="arch-grid-dark absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true" />
 
-        {/* Section Header & Metadata Overlay (Top) */}
-        <div className="relative z-10 arch-container pt-20 pb-4 flex justify-between items-start pointer-events-none">
+        {/* Section Header & Signature HUD Pill (Top) */}
+        <div className="relative z-20 arch-container pt-16 sm:pt-20 pb-4 flex justify-between items-start pointer-events-none">
           <div>
-            <p className="arch-label arch-label--accent mb-2">——— 02 / FROM DRAWING TO SPACE</p>
-            <h2 className="font-display text-ink text-[clamp(1.6rem,3.2vw,2.4rem)] font-light leading-none">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="arch-label arch-label--accent">02 / TRANSFORMATION</span>
+              <span className="inline-block w-2 h-px bg-indigo/40" />
+              <span className="arch-label text-stone hidden sm:inline">1:1 PROJECTION</span>
+            </div>
+            <h2 className="font-display text-white text-[clamp(1.5rem,3.2vw,2.4rem)] font-light leading-none">
               A line on paper becomes living architecture.
             </h2>
           </div>
 
-          <div className="hidden md:flex flex-col items-end gap-1">
-            <span className="arch-label">PROJECTION FIELD</span>
-            <span className="arch-label arch-label--accent">1:1 SCALE • BENGALURU</span>
+          {/* Signature Phase HUD Pill */}
+          <div className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-1.5 border border-white/15 bg-deep/85 backdrop-blur-sm font-mono text-[9px] tracking-widest uppercase pointer-events-auto">
+            <span
+              className={`transition-colors duration-300 ${
+                activePhase === "plan" ? "text-indigo font-bold" : "text-stone/60"
+              }`}
+            >
+              01 PLAN
+            </span>
+            <span className="text-stone/40">→</span>
+            <span
+              className={`transition-colors duration-300 ${
+                activePhase === "space" ? "text-indigo font-bold" : "text-stone/60"
+              }`}
+            >
+              02 SPACE
+            </span>
+            <span className="text-stone/40">→</span>
+            <span
+              className={`transition-colors duration-300 ${
+                activePhase === "reality" ? "text-indigo font-bold" : "text-stone/60"
+              }`}
+            >
+              03 REALITY
+            </span>
           </div>
         </div>
 
@@ -138,17 +168,19 @@ export function FloorPlanRise() {
           {isNearViewport && webglSupported && (
             <Suspense
               fallback={
-                <div className="w-full h-full flex items-center justify-center bg-paper">
-                  <span className="arch-label text-stone">PREPARING 3D PERSPECTIVE...</span>
+                <div className="w-full h-full flex items-center justify-center bg-deep">
+                  <span className="arch-label text-stone font-mono text-[10px] tracking-widest">
+                    INITIALIZING ARCHITECTURAL SCENE...
+                  </span>
                 </div>
               }
             >
-              <LazyFloorPlanScene progress={scrollProgress} />
+              <LazyFloorPlanScene progress={scrollProgress} isMobile={isMobile} />
             </Suspense>
           )}
         </div>
 
-        {/* 2D Plan Room Annotations (Fade out after progress > 0.15) */}
+        {/* 2D Plan Room Annotations (Visible during Stage 1 & early Stage 2) */}
         <div
           className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center transition-opacity duration-300"
           style={{ opacity: annotationsOpacity }}
@@ -164,7 +196,7 @@ export function FloorPlanRise() {
                   top: `${50 + ann.z * 6}%`,
                 }}
               >
-                <span className="arch-label text-stone" style={{ fontSize: "9px" }}>
+                <span className="arch-label text-white/90" style={{ fontSize: "9px" }}>
                   {ann.label}
                 </span>
                 {ann.dimension && (
@@ -177,18 +209,51 @@ export function FloorPlanRise() {
           </div>
         </div>
 
-        {/* Final CTA Overlay (Settles at 0.95 - 1.00) */}
+        {/* Stage 7 Reality Spatial Callouts (Fades in at Eye Level) */}
+        {scrollProgress >= 0.70 && (
+          <div
+            className="absolute inset-0 z-15 pointer-events-none arch-container flex flex-col justify-between py-24 sm:py-28 transition-opacity duration-500"
+            style={{ opacity: realityCalloutsOpacity }}
+            aria-hidden={realityCalloutsOpacity < 0.05 ? "true" : undefined}
+          >
+            <div className="flex justify-between items-start">
+              <div className="px-3 py-1.5 bg-deep/85 border border-white/15 backdrop-blur-sm">
+                <p className="arch-label arch-label--accent">3.60M CLEARANCE</p>
+                <p className="text-white/70 text-[10px] font-mono">Double-height pavilion volume</p>
+              </div>
+
+              <div className="px-3 py-1.5 bg-deep/85 border border-white/15 backdrop-blur-sm text-right">
+                <p className="arch-label text-white">DIRECT DAYLIGHT</p>
+                <p className="text-white/70 text-[10px] font-mono">North-facing floor glazing</p>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-end pb-12">
+              <div className="px-3 py-1.5 bg-deep/85 border border-white/15 backdrop-blur-sm">
+                <p className="arch-label text-indigo">1200MM WALKWAY</p>
+                <p className="text-white/70 text-[10px] font-mono">Unobstructed circulation flow</p>
+              </div>
+
+              <div className="px-3 py-1.5 bg-deep/85 border border-white/15 backdrop-blur-sm text-right">
+                <p className="arch-label arch-label--accent">1:1 SCALE VERIFIED</p>
+                <p className="text-white/70 text-[10px] font-mono">RR Nagar studio field</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Final CTA Overlay (Settles at 0.88 - 1.00) */}
         <div
-          className="relative z-20 arch-container pb-12 transition-all duration-500 text-center pointer-events-none"
+          className="relative z-20 arch-container pb-8 sm:pb-12 transition-all duration-500 text-center pointer-events-none"
           style={{
             opacity: showFinalCTA ? 1 : 0,
             transform: `translateY(${showFinalCTA ? 0 : 16}px)`,
           }}
         >
-          <h3 className="font-display text-ink text-[clamp(1.75rem,4vw,3rem)] font-light leading-tight mb-4">
+          <h3 className="font-display text-white text-[clamp(1.6rem,3.6vw,2.8rem)] font-light leading-tight mb-3">
             SEE THE SPACE BEFORE IT EXISTS.
           </h3>
-          <p className="text-stone text-[0.95rem] max-w-[46ch] mx-auto mb-6 leading-relaxed">
+          <p className="text-white/75 text-[0.95rem] max-w-[46ch] mx-auto mb-5 leading-relaxed">
             Every room, corridor and opening mapped to scale so you can verify sightlines and clearance in real life.
           </p>
           <div className="pointer-events-auto">
@@ -201,5 +266,8 @@ export function FloorPlanRise() {
     </section>
   );
 }
+
+export default FloorPlanRise;
+
 
 export default FloorPlanRise;
