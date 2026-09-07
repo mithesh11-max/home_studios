@@ -13,6 +13,7 @@ import { StatCounter } from "@/components/site/StatCounter";
 import { FadeUp } from "@/components/site/TextReveal";
 import { SequenceHero } from "@/components/site/SequenceHero";
 import { FloorPlanRise } from "@/components/site/FloorPlanRise";
+import { SpatialProjectShowcase } from "@/components/site/SpatialProjectShowcase";
 import { useAppointment } from "@/lib/appointment-context";
 import { useSmoothScroll } from "@/lib/lenis-context";
 import { HOME_FAQS, CONTACT } from "@/lib/site-data";
