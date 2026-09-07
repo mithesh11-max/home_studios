@@ -307,13 +307,13 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            STRUCTURAL DESIGN
+            07 / STRUCTURAL DESIGN
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Structural design">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12 items-start">
               <FadeUp>
-                <p className="arch-label arch-label--accent mb-3">06 / STRUCTURAL</p>
+                <p className="arch-label arch-label--accent mb-3">07 / STRUCTURAL</p>
                 <h2 className="font-display text-ink leading-none mb-4"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   Beauty above<br />depends on what<br />lies beneath.
@@ -350,11 +350,11 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            ARCHITECTURE DESIGN — editorial
+            08 / ARCHITECTURE DESIGN — editorial
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16 bg-paper" aria-label="Architecture design">
           <div className="arch-container">
-            <p className="arch-label arch-label--accent mb-6">07 / ARCHITECTURE</p>
+            <p className="arch-label arch-label--accent mb-6">08 / ARCHITECTURE</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
               {ARCH_ITEMS.map((item, i) => (
                 <div
@@ -380,13 +380,13 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            INTERIORS — Before/after slider
+            09 / INTERIORS — Before/after slider
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Interior design">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.6fr] lg:gap-10 items-start">
               <FadeUp>
-                <p className="arch-label arch-label--accent mb-3">08 / INTERIORS</p>
+                <p className="arch-label arch-label--accent mb-3">09 / INTERIORS</p>
                 <h2 className="font-display text-ink leading-none mb-4"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   Test the interior<br />before you build it.
@@ -410,11 +410,11 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            COMPLETE JOURNEY — Oversized serif stages
+            10 / COMPLETE JOURNEY — Oversized serif stages
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16 bg-paper overflow-hidden" aria-label="Complete journey">
           <div className="arch-container">
-            <p className="arch-label arch-label--accent mb-4">09 / JOURNEY</p>
+            <p className="arch-label arch-label--accent mb-4">10 / JOURNEY</p>
             <div>
               {JOURNEY_STAGES.map((stage, i) => (
                 <JourneyStage key={stage.num} stage={stage} index={i} total={JOURNEY_STAGES.length} />
@@ -424,13 +424,13 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            FAQ
+            11 / FAQ
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Frequently asked questions">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.5fr] lg:gap-10 items-start">
               <FadeUp>
-                <p className="arch-label arch-label--accent mb-3">10 / FAQ</p>
+                <p className="arch-label arch-label--accent mb-3">11 / FAQ</p>
                 <h2 className="font-display text-ink leading-none"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   Questions before<br />your first visit.
