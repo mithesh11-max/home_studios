@@ -6,6 +6,7 @@ import { AppointmentProvider } from "@/lib/appointment-context";
 import { AppointmentDialog } from "@/components/site/AppointmentDialog";
 import { TileGridBackground } from "@/components/site/TileGridBackground";
 import { RouteTransition } from "@/components/site/RouteTransition";
+import { SmoothScrollProvider } from "@/lib/lenis-context";
 
 
 function NotFoundComponent() {
