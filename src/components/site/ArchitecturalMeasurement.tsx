@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
 interface ArchitecturalMeasurementProps {
   label: string;
@@ -21,16 +21,16 @@ export function ArchitecturalMeasurement({
 }: ArchitecturalMeasurementProps) {
   const isHorizontal = orientation === "horizontal";
 
-  const lineVariants = {
+  const lineVariants: Variants = {
     hidden: { pathLength: 0, opacity: 0 },
     visible: { 
       pathLength: 1, 
       opacity: 1,
-      transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: delay } 
+      transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] as [number, number, number, number], delay: delay } 
     }
   };
 
-  const textVariants = {
+  const textVariants: Variants = {
     hidden: { opacity: 0, y: isHorizontal ? 4 : 0, x: isHorizontal ? 0 : -4 },
     visible: { 
       opacity: 1, 
