@@ -265,7 +265,7 @@ export function TiltCard({
     const el = ref.current;
     if (!el) return;
     el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)";
-    el.style.transition = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
+    el.style.transition = `transform 0.5s ${CSS_EASE.SMOOTH}`;
   };
 
   return (
@@ -277,7 +277,7 @@ export function TiltCard({
       style={{
         transformStyle: "preserve-3d",
         transform: "perspective(1000px) rotateX(0deg) rotateY(0deg)",
-        transition: "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+        transition: `transform 0.5s ${CSS_EASE.SMOOTH}`,
       }}
     >
       {children}
