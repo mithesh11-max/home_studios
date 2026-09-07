@@ -124,6 +124,14 @@ function ServicesHub() {
           </div>
         </section>
 
+        {/* ── Spatial Project Portfolio ── */}
+        <SpatialProjectShowcase
+          eyebrow="PORTFOLIO & SPATIAL EXECUTION"
+          title="Experience each discipline in space."
+          description="From laser-projected 1:1 floor plans to structural engineering and interior fit-outs. Select any discipline to inspect."
+          showAllLink={false}
+        />
+
         {/* ── Which service? ── */}
         <section className="py-12 bg-paper" style={{ borderTop: "1px solid var(--rule)" }} aria-label="Service guidance">
           <div className="arch-container">
