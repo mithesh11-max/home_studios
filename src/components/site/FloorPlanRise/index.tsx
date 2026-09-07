@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "framer-motion";
 import { FloorPlan2D } from "./FloorPlan2D";
 import { ANNOTATIONS, REALITY_CALLOUTS } from "./geometry";
+import { ErrorBoundary } from "@/components/site/ErrorBoundary";
 
 // Lazy-load the Three.js / R3F scene component
 const LazyFloorPlanScene = lazy(() => import("./Scene"));
