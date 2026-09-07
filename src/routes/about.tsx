@@ -163,6 +163,8 @@ function ScrollMotionExhibition() {
                 <img
                   src={architectureSiteImg}
                   alt="Site structural geometry and cantilever construction"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover object-center"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent pointer-events-none" />
@@ -191,6 +193,8 @@ function ScrollMotionExhibition() {
                 <img
                   src={walkthroughStudioImg}
                   alt="1:1 scale floor plan laser projection field"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover object-center"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent pointer-events-none" />
@@ -216,6 +220,8 @@ function ScrollMotionExhibition() {
             <motion.img
               src={interiorFinishedImg}
               alt="Finished interior architecture and bespoke joinery"
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover object-center"
               style={{ scale: panoramaScale, filter: "contrast(1.02)" }}
             />
