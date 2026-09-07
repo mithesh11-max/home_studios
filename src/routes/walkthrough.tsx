@@ -252,6 +252,9 @@ function WalkthroughPage() {
           </div>
         </section>
 
+        {/* ── 02 / Interactive Architectural Floor Plan Experience ── */}
+        <InteractiveFloorPlan />
+
         {/* ── Included in every session ── */}
         <section className="py-12 lg:py-16 bg-paper" aria-label="What's included">
           <div className="arch-container">
