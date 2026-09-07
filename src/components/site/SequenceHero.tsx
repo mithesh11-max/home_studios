@@ -499,9 +499,9 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollContainerRef]);
 
-  // Butter-smooth 60-120fps rAF render loop
+  // Butter-smooth 60-120fps rAF render loop with cinematic camera locomotion & multi-plane parallax
   useEffect(() => {
-    const loop = () => {
+    const loop = (timestamp: number) => {
       const current = currentFrameRef.current;
       const target = targetFrameRef.current;
       const diff = target - current;
@@ -517,26 +517,80 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
         lastDrawnFrameRef.current = roundedFrame;
       }
 
-      // 2. Direct DOM overlay update (bypasses React virtual DOM reconciliation for zero stutter)
+      // 2. Multi-Plane Optical Parallax & Continuous Camera Breathing
+      const mouse = mouseRef.current;
+      mouse.currentX += (mouse.targetX - mouse.currentX) * 0.06;
+      mouse.currentY += (mouse.targetY - mouse.currentY) * 0.06;
+      const mx = mouse.currentX;
+      const my = mouse.currentY;
+
+      const time = timestamp || performance.now();
+      // Organic steadicam camera breathing (gentle continuous drift)
+      const breathX = Math.sin(time * 0.00032) * 2.5;
+      const breathY = Math.cos(time * 0.00026) * 1.8;
+      const breathScale = 1.015 + Math.sin(time * 0.00018) * 0.004;
+
+      // Overall sequence scroll progress (0 to 1)
+      const scrollProgress = Math.max(0, Math.min(1, target / (TOTAL_FRAMES - 1)));
+      const forwardScale = breathScale + scrollProgress * 0.045;
+
+      // Transform Layer 1: Background Canvas (subtle opposition parallax + forward scaling)
+      if (canvasRef.current) {
+        const bgX = breathX + mx * -7;
+        const bgY = breathY + my * -5;
+        canvasRef.current.style.transform = `translate3d(${bgX.toFixed(2)}px, ${bgY.toFixed(2)}px, 0) scale(${forwardScale.toFixed(4)})`;
+      }
+
+      // Transform Layer 2: Midground Atmospheric Vignette
+      if (vignetteRef.current) {
+        const midX = breathX * 0.5 + mx * -11;
+        const midY = breathY * 0.5 + my * -8;
+        // Soften vignette towards end so the next section emerges through light
+        const exitSoftening = scrollProgress > 0.85 ? (scrollProgress - 0.85) / 0.15 : 0;
+        const vigOpacity = 1 - exitSoftening * 0.35;
+        vignetteRef.current.style.transform = `translate3d(${midX.toFixed(2)}px, ${midY.toFixed(2)}px, 0)`;
+        vignetteRef.current.style.opacity = vigOpacity.toFixed(3);
+      }
+
+      // Transform Layer 3: Initial Arrival Lockup (Recedes smoothly as camera flies into space)
+      if (initialLockupRef.current) {
+        // Recedes over first 28 frames
+        const recedeT = Math.min(1, Math.max(0, (next - 1) / 27));
+        const recedeY = recedeT * 36;
+        const recedeScale = 1 - recedeT * 0.08;
+        const recedeOpacity = Math.max(0, 1 - recedeT * 1.25);
+        const fgX = mx * 14;
+        const fgY = my * 10 - recedeY;
+
+        initialLockupRef.current.style.transform = `translate3d(${fgX.toFixed(2)}px, ${fgY.toFixed(2)}px, 0) scale(${recedeScale.toFixed(3)})`;
+        initialLockupRef.current.style.opacity = recedeOpacity.toFixed(3);
+        initialLockupRef.current.style.pointerEvents = recedeOpacity > 0.35 ? "auto" : "none";
+      }
+
+      // Transform Layer 4: Direct DOM Intermediate Overlays (Space & Interior)
       OVERLAYS.forEach((ov, i) => {
         const el = overlayRefs.current[i];
         if (el) {
           const op = calculateOverlayOpacity(displayFrameNum, ov.frames[0], ov.frames[1]);
+          const ovFgX = mx * 10;
+          const ovFgY = my * 8 + (1 - op) * 14;
           el.style.opacity = String(op);
-          el.style.transform = `translateY(${(1 - op) * 12}px)`;
+          el.style.transform = `translate3d(${ovFgX.toFixed(2)}px, ${ovFgY.toFixed(2)}px, 0)`;
           el.style.pointerEvents = op > 0.5 ? "auto" : "none";
         }
       });
 
-      // 3. Final phase lockup
+      // Transform Layer 5: Final 1:1 Scale Lockup (Arrival at finished architecture)
       const isFinal = displayFrameNum >= 245;
       if (finalLockupRef.current) {
+        const finalFgX = mx * 8;
+        const finalFgY = my * 6 + (isFinal ? 0 : 16);
         finalLockupRef.current.style.opacity = isFinal ? "1" : "0";
-        finalLockupRef.current.style.transform = `translateY(${isFinal ? 0 : 16}px)`;
+        finalLockupRef.current.style.transform = `translate3d(${finalFgX.toFixed(2)}px, ${finalFgY.toFixed(2)}px, 0)`;
         finalLockupRef.current.style.pointerEvents = isFinal ? "auto" : "none";
       }
 
-      // 4. Update Phase only when crossing phase boundaries (only 7 updates across the whole page!)
+      // 4. Update Phase only when crossing phase boundaries
       const newPhase = getActivePhase(displayFrameNum);
       if (newPhase !== currentPhaseIndexRef.current) {
         currentPhaseIndexRef.current = newPhase;
@@ -558,6 +612,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
         isMobile={isMobile}
       />
 
+      {/* Layer 1: Background Sequence Canvas */}
       <canvas
         ref={canvasRef}
         role="img"
@@ -570,19 +625,77 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
           display: "block",
           background: "var(--bg-deep)",
           filter: "saturate(0.88) brightness(0.92)",
+          willChange: "transform",
+          transformOrigin: "center center",
         }}
       />
 
-      {/* Dark Indigo atmospheric tint + vignette */}
+      {/* Layer 2: Midground Dark Indigo atmospheric tint + vignette */}
       <div
-        className="pointer-events-none sticky top-0 -mt-[100dvh] w-screen h-[100dvh] z-10"
+        ref={vignetteRef}
+        className="pointer-events-none sticky top-0 -mt-[100dvh] w-screen h-[100dvh] z-10 will-change-transform"
         style={{
           background: "radial-gradient(ellipse at center, rgba(23, 26, 61, 0.20) 0%, rgba(8, 11, 26, 0.60) 100%)",
         }}
         aria-hidden="true"
       />
 
-      {/* Direct DOM Animated Overlays (Sticky container ensures overlays remain in viewport during scroll) */}
+      {/* Layer 3: Initial Arrival Architectural Lockup (Enters with spatial stagger, recedes on scroll) */}
+      <div
+        ref={initialLockupRef}
+        className="pointer-events-none sticky top-0 -mt-[100dvh] w-screen h-[100dvh] z-20 flex flex-col justify-end pb-8 sm:pb-12 will-change-transform"
+        style={{
+          opacity: isStartAtEnd ? 0 : 1,
+          transform: "translate3d(0, 0, 0)",
+        }}
+      >
+        <div className="arch-container">
+          <div className="max-w-[56ch]">
+            {/* Staggered Item 1: Datum & Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1.0 }}
+              transition={{ duration: 0.7, delay: 0.12, ease: EASE_ARCH_HEAVY }}
+              className="flex items-center gap-3 mb-3"
+            >
+              <span className="arch-label arch-label--accent">01 / ARRIVAL</span>
+              <span className="inline-block w-3 h-px bg-indigo/40" aria-hidden="true" />
+              <span className="arch-label hidden sm:inline" style={{ color: "var(--text-secondary)", fontSize: "9px" }}>
+                1:1 PROJECTION FIELD • RR NAGAR
+              </span>
+            </motion.div>
+
+            {/* Staggered Item 2: Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 18, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1.0 }}
+              transition={{ duration: 0.85, delay: 0.24, ease: EASE_ARCH_SLOW }}
+              className="font-display text-white text-[clamp(2.2rem,4.5vw,4.5rem)] font-light leading-[1.02] tracking-tight mb-4"
+            >
+              Every space starts with a line.
+            </motion.h1>
+
+            {/* Staggered Item 3: Descriptor and subtle scroll guide */}
+            <motion.div
+              initial={{ opacity: 0, y: 14, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1.0 }}
+              transition={{ duration: 0.8, delay: 0.38, ease: EASE_ARCH_HEAVY }}
+              className="flex flex-col sm:flex-row sm:items-baseline gap-3 sm:gap-6"
+            >
+              <p className="text-white/80 text-[0.98rem] leading-relaxed max-w-[42ch]">
+                Walk through your future home at real scale before construction begins.
+              </p>
+
+              <div className="flex items-center gap-2 font-mono text-[9px] tracking-widest text-indigo uppercase">
+                <span>SCROLL TO ENTER</span>
+                <span aria-hidden="true">↓</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Layer 4: Direct DOM Animated Overlays for Intermediate Phases */}
       <div
         className="pointer-events-none sticky top-0 -mt-[100dvh] w-screen h-[100dvh] z-20"
         aria-hidden="true"
@@ -621,7 +734,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
         ))}
       </div>
 
-      {/* HOME — Final Lockup (Holds single <h1>) */}
+      {/* Layer 5: HOME — Final Lockup (Holds single <h1>) */}
       <div
         ref={finalLockupRef}
         id="home-lockup"
@@ -666,6 +779,15 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
           <span className="arch-label arch-label--light">1:1 SCALE</span>
         </div>
       </div>
+
+      {/* Aperture threshold transition to next section */}
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-36 z-30"
+        style={{
+          background: "linear-gradient(to bottom, transparent 0%, rgba(8, 11, 26, 0.75) 60%, var(--bg-deep) 100%)",
+        }}
+        aria-hidden="true"
+      />
     </>
   );
 }
