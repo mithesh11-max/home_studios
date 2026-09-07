@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { FinalCTA } from "@/components/site/FinalCTA";
+import { SpatialProjectShowcase } from "@/components/site/SpatialProjectShowcase";
 import servicesBannerImg from "@/assets/home-studios-hero.jpg";
 
 export const Route = createFileRoute("/services/")({
