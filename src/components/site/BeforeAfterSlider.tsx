@@ -195,30 +195,46 @@ export function BeforeAfterSlider({
           willChange: "left",
         }}
       >
-        {/* Crisp vertical dividing line with glow */}
+        {/* Crisp vertical dividing line with scale ticks */}
         <div
-          className="absolute top-0 bottom-0 w-[2px]"
+          className="absolute top-0 bottom-0 w-[1.5px]"
           style={{
-            background: "linear-gradient(180deg, rgba(255,255,255,0.6) 0%, #ffffff 50%, rgba(255,255,255,0.6) 100%)",
-            boxShadow: "0 0 10px rgba(0,0,0,0.8), 0 0 4px rgba(255,255,255,0.9)",
-          }}
-        />
-
-        {/* Center circular handle button */}
-        <div
-          className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full shadow-2xl transition-transform group-hover:scale-105 active:scale-95"
-          style={{
-            background: "var(--indigo, #6366f1)",
-            border: "2.5px solid #ffffff",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.6), 0 0 12px rgba(99,102,241,0.5)",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, #ffffff 50%, rgba(255,255,255,0.4) 100%)",
+            boxShadow: "0 0 8px rgba(0,0,0,0.8), 0 0 3px rgba(138,134,252,0.8)",
           }}
         >
-          <svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden="true">
-            <path d="M5 1L1 6L5 11" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M13 1L17 6L13 11" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          {/* Architect's scale measurement ticks along divider */}
+          {[15, 25, 35, 65, 75, 85].map((pct) => (
+            <div
+              key={pct}
+              className="absolute left-1/2 -translate-x-1/2 w-3 border-t border-white/60 pointer-events-none"
+              style={{ top: `${pct}%` }}
+            />
+          ))}
+        </div>
+
+        {/* Center architectural handle with zero-radius badge */}
+        <div
+          className="relative z-10 flex h-9 w-9 items-center justify-center shadow-2xl transition-transform group-hover:scale-105 active:scale-95"
+          style={{
+            background: "var(--indigo, #8A86FC)",
+            border: "1.5px solid #ffffff",
+            borderRadius: 0,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.7), 0 0 14px rgba(138,134,252,0.6)",
+          }}
+        >
+          <svg width="16" height="10" viewBox="0 0 16 10" fill="none" aria-hidden="true">
+            <path d="M4 1L1 5L4 9" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M12 1L15 5L12 9" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       </div>
+
+      {/* Technical Corner Registration Crosshairs */}
+      <div className="absolute top-2 left-2 w-2.5 h-2.5 border-t border-l border-white/40 pointer-events-none z-20" />
+      <div className="absolute top-2 right-2 w-2.5 h-2.5 border-t border-r border-white/40 pointer-events-none z-20" />
+      <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l border-white/40 pointer-events-none z-20" />
+      <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-white/40 pointer-events-none z-20" />
     </div>
   );
 }
