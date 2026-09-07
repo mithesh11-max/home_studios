@@ -80,16 +80,23 @@ async function run() {
               console.log('Scrolled to step', i, 'scrollY:', window.scrollY, 'target:', targetY);
             }
           }
-          console.log('Finished deep scroll, final scrollY:', window.scrollY);
-          // Check if error overlay or error text is in DOM
+          console.log('Finished deep scroll down, final scrollY:', window.scrollY);
+          console.log('Now scrolling back up to top...');
+          for (let i = steps; i >= 0; i--) {
+            const targetY = (total / steps) * i;
+            window.scrollTo(0, targetY);
+            window.dispatchEvent(new Event('scroll'));
+            await new Promise(r => setTimeout(r, 100));
+          }
+          console.log('Returned to top, scrollY:', window.scrollY);
           const hasError = document.body.innerText.includes("Something went wrong");
-          console.log('Has Error Text in DOM?:', hasError);
+          console.log('Has Error Text in DOM after round trip?:', hasError);
         })()
       `
     });
 
-    // Wait 7s for scroll to complete and any errors to occur
-    await new Promise(r => setTimeout(r, 7000));
+    // Wait 10s for full round-trip scroll to complete
+    await new Promise(r => setTimeout(r, 10000));
 
   } catch (err) {
     console.error('CDP Error:', err);
