@@ -308,8 +308,8 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
         ref={dirLightRef}
         position={[8.5, 14, 10.5]}
         intensity={1.5}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
+        castShadow={!isMobile}
+        shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]}
         shadow-camera-near={0.5}
         shadow-camera-far={36}
         shadow-camera-left={-10}
