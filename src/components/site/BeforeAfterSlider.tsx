@@ -156,6 +156,8 @@ export function BeforeAfterSlider({
           <img
             src={interiorBeforeImg}
             alt="Raw space before construction"
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover object-center select-none pointer-events-none block"
             draggable={false}
           />
