@@ -558,39 +558,44 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
         aria-hidden="true"
       />
 
-      {/* Direct DOM Animated Overlays */}
-      {OVERLAYS.map((ov, i) => (
-        <div
-          key={ov.id}
-          ref={(el) => { overlayRefs.current[i] = el; }}
-          className="absolute bottom-16 left-0 arch-container transition-transform will-change-transform pointer-events-none z-20"
-          style={{ opacity: 0 }}
-        >
-          <p className="arch-label arch-label--light mb-4">{ov.label}</p>
-          {ov.large ? (
-            <h2
-              className="font-display text-white"
-              style={{
-                fontSize: "var(--text-display-lg)",
-                fontWeight: 300,
-                lineHeight: 1.02,
-                letterSpacing: "-0.02em",
-                maxWidth: "18ch",
-              }}
-            >
-              {ov.copy.split("\n").map((line, idx) => (
-                <span key={idx} className="block overflow-hidden">
-                  <span className="block">{line}</span>
-                </span>
-              ))}
-            </h2>
-          ) : (
-            <p className="text-white/85 max-w-[44ch] text-[1.05rem] leading-relaxed whitespace-pre-line">
-              {ov.copy}
-            </p>
-          )}
-        </div>
-      ))}
+      {/* Direct DOM Animated Overlays (Sticky container ensures overlays remain in viewport during scroll) */}
+      <div
+        className="pointer-events-none sticky top-0 -mt-[100dvh] w-screen h-[100dvh] z-20"
+        aria-hidden="true"
+      >
+        {OVERLAYS.map((ov, i) => (
+          <div
+            key={ov.id}
+            ref={(el) => { overlayRefs.current[i] = el; }}
+            className="absolute bottom-16 left-0 arch-container transition-transform will-change-transform pointer-events-none"
+            style={{ opacity: 0 }}
+          >
+            <p className="arch-label arch-label--light mb-4">{ov.label}</p>
+            {ov.large ? (
+              <h2
+                className="font-display text-white"
+                style={{
+                  fontSize: "var(--text-display-lg)",
+                  fontWeight: 300,
+                  lineHeight: 1.02,
+                  letterSpacing: "-0.02em",
+                  maxWidth: "18ch",
+                }}
+              >
+                {ov.copy.split("\n").map((line, idx) => (
+                  <span key={idx} className="block overflow-hidden">
+                    <span className="block">{line}</span>
+                  </span>
+                ))}
+              </h2>
+            ) : (
+              <p className="text-white/85 max-w-[44ch] text-[1.05rem] leading-relaxed whitespace-pre-line">
+                {ov.copy}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
 
       {/* HOME — Final Lockup (Holds single <h1>) */}
       <div
