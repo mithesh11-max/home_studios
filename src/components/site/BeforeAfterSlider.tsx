@@ -104,6 +104,7 @@ export function BeforeAfterSlider({
       }}
       onPointerDown={onPointerDown}
       aria-label="Before and after interior comparison slider"
+      data-cursor="drag"
     >
       {/* ── Layer 1: AFTER (Finished Interior) — Full background ── */}
       <div className="absolute inset-0 select-none pointer-events-none overflow-hidden">
