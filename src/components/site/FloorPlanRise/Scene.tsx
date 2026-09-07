@@ -487,10 +487,10 @@ export function FloorPlanScene({
     <Canvas
       frameloop="demand"
       camera={{ position: [0, isMobile ? 22 : 16.5, 0.01], fov: isMobile ? 50 : 42 }}
-      dpr={[1, 1.5]}
-      shadows
+      dpr={isMobile ? 1 : [1, 1.5]}
+      shadows={!isMobile}
       gl={{
-        antialias: true,
+        antialias: !isMobile,
         alpha: false,
         powerPreference: "high-performance",
       }}

@@ -191,8 +191,8 @@ function SceneInner({
       <directionalLight
         position={[9, 15, 11]}
         intensity={1.6}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
+        castShadow={!isMobile}
+        shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]}
         shadow-camera-near={0.5}
         shadow-camera-far={35}
         shadow-camera-left={-12}
