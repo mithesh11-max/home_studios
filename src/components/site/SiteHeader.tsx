@@ -52,9 +52,9 @@ export function SiteHeader() {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className={`pointer-events-auto flex items-center justify-between overflow-hidden backdrop-blur-md ${
             isCompact
-              ? "w-auto h-14 mt-4 rounded-full bg-ink/95 border border-white/10 px-5 sm:px-6 gap-6 sm:gap-10 shadow-2xl"
-              : `w-full max-w-[1440px] px-5 sm:px-8 lg:px-12 gap-6 ${
-                  isTop ? "h-20 bg-transparent border-b border-transparent" : "h-16 bg-ink/90 border-b border-rule"
+              ? "w-[calc(100%-2rem)] max-w-[420px] sm:w-auto h-14 mt-3 sm:mt-4 rounded-full bg-ink/95 border border-white/10 px-4 sm:px-6 gap-4 sm:gap-10 shadow-2xl"
+              : `w-full max-w-[1440px] px-4 sm:px-8 lg:px-12 gap-4 sm:gap-6 ${
+                  isTop ? "h-16 sm:h-20 bg-transparent border-b border-transparent" : "h-16 bg-ink/90 border-b border-rule"
                 } rounded-none mt-0`
           }`}
         >
@@ -64,7 +64,7 @@ export function SiteHeader() {
               <img
                 src="/logo-footer.png"
                 alt="Home Studios"
-                className={`w-auto transition-all duration-500 ${isCompact ? "h-[1.15rem]" : "h-7"}`}
+                className={`w-auto transition-all duration-500 ${isCompact ? "h-[1.15rem]" : "h-6 sm:h-7"}`}
                 style={{ opacity: isTop ? 0.9 : 1 }}
               />
             </Link>
@@ -90,7 +90,7 @@ export function SiteHeader() {
           </motion.nav>
 
           {/* Right: CTA + Hamburger */}
-          <motion.div layout className="flex items-center gap-4">
+          <motion.div layout className="flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => open()}
               className={`hidden lg:inline-flex arch-btn arch-btn--primary transition-all duration-300 whitespace-nowrap ${
@@ -101,12 +101,12 @@ export function SiteHeader() {
               {isCompact ? "BOOK" : "BOOK YOUR APPOINTMENT"} <span className="arch-btn-arrow">→</span>
             </button>
 
-            {/* Mobile hamburger */}
+            {/* Mobile hamburger - 44x44px minimum touch target for effortless tapping */}
             <button
               onClick={() => setMenuOpen((v) => !v)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
-              className="lg:hidden flex flex-col justify-center items-center gap-[5px] h-10 w-10 text-white"
+              className="lg:hidden flex flex-col justify-center items-center gap-[5px] h-11 w-11 text-white touch-manipulation active:scale-95 transition-transform"
             >
               <span
                 className="block h-px w-5 bg-current transition-all duration-300"
