@@ -384,11 +384,11 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
         })}
 
       {/* ─────────────────────────────────────────────────────────────
-          STAGE 3: Extruded Architectural Walls & Columns (0.25 -> 0.58)
+          BUILD: Extruded Architectural Walls & Columns (0.20 -> 0.45)
           ───────────────────────────────────────────────────────────── */}
       {WALLS.map((wall) => {
-        const startProgress = 0.24 + wall.stagger * 0.22;
-        const endProgress = startProgress + 0.12;
+        const startProgress = 0.20 + wall.stagger * 0.15;
+        const endProgress = startProgress + 0.10;
         const extrusionFactor = smoothstep(startProgress, endProgress, p);
 
         // Height is at least a hair's width (0.002m) so it sits exactly on plan
