@@ -111,6 +111,7 @@ export function SpatialProjectCard({
         transformStyle: "preserve-3d",
       }}
       data-interactive
+      data-cursor="view"
     >
       {/* 3D Card Shell */}
       <div
