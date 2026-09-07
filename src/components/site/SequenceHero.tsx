@@ -517,22 +517,22 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
         lastDrawnFrameRef.current = roundedFrame;
       }
 
-      // 2. Multi-Plane Optical Parallax & Continuous Camera Breathing
+      // 2. Multi-Plane Optical Parallax & Continuous Camera Breathing (Reduced on mobile to conserve GPU)
       const mouse = mouseRef.current;
       mouse.currentX += (mouse.targetX - mouse.currentX) * 0.06;
       mouse.currentY += (mouse.targetY - mouse.currentY) * 0.06;
-      const mx = mouse.currentX;
-      const my = mouse.currentY;
+      const mx = isMobile ? 0 : mouse.currentX;
+      const my = isMobile ? 0 : mouse.currentY;
 
       const time = timestamp || performance.now();
-      // Organic steadicam camera breathing (gentle continuous drift)
-      const breathX = Math.sin(time * 0.00032) * 2.5;
-      const breathY = Math.cos(time * 0.00026) * 1.8;
-      const breathScale = 1.015 + Math.sin(time * 0.00018) * 0.004;
+      // Organic steadicam camera breathing (gentle continuous drift, disabled on mobile for stable battery/perf)
+      const breathX = isMobile ? 0 : Math.sin(time * 0.00032) * 2.5;
+      const breathY = isMobile ? 0 : Math.cos(time * 0.00026) * 1.8;
+      const breathScale = 1.015 + (isMobile ? 0 : Math.sin(time * 0.00018) * 0.004);
 
       // Overall sequence scroll progress (0 to 1)
       const scrollProgress = Math.max(0, Math.min(1, target / (TOTAL_FRAMES - 1)));
-      const forwardScale = breathScale + scrollProgress * 0.045;
+      const forwardScale = breathScale + scrollProgress * (isMobile ? 0.025 : 0.045);
 
       // Transform Layer 1: Background Canvas (subtle opposition parallax + forward scaling)
       if (canvasRef.current) {
