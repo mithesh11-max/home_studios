@@ -131,6 +131,7 @@ export function FloorPlanNavSVG({
                   opacity: isDimmed ? 0.4 : 1,
                   filter: isHighlighted ? "url(#roomGlow)" : "none",
                 }}
+                data-cursor="enter"
               >
                 {/* Room Floor Plane polygon */}
                 <polygon
