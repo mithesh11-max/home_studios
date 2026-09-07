@@ -108,7 +108,7 @@ export function WalkthroughTabs() {
 
         {/* Dynamic Architectural Badges */}
         <div
-          className="absolute top-3 left-3 arch-label flex items-center gap-2"
+          className="absolute top-3 left-3 arch-label flex items-center gap-2 z-10"
           style={{
             color: "rgba(255,255,255,0.85)",
             background: "rgba(8,11,26,0.75)",
@@ -119,12 +119,34 @@ export function WalkthroughTabs() {
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo" />
           <span>{mode.badge}</span>
         </div>
+
+        {/* Technical Coordinate & Scale Readout */}
+        <div
+          className="absolute top-3 right-3 arch-label hidden sm:block z-10"
+          style={{
+            color: "var(--indigo)",
+            background: "rgba(8,11,26,0.75)",
+            padding: "3px 8px",
+            fontSize: "9px",
+            letterSpacing: "0.15em",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          TOLERANCE: ±0.00m • 1:1 SCALE
+        </div>
+
         <p
-          className="absolute bottom-3 left-4 arch-label"
+          className="absolute bottom-3 left-4 arch-label z-10"
           style={{ color: "rgba(255,255,255,0.65)", fontSize: "9px" }}
         >
           {mode.annotation}
         </p>
+
+        {/* Technical Corner Registration Crosshairs */}
+        <div className="absolute top-2 left-2 w-2.5 h-2.5 border-t border-l border-white/40 pointer-events-none z-20" />
+        <div className="absolute top-2 right-2 w-2.5 h-2.5 border-t border-r border-white/40 pointer-events-none z-20" />
+        <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l border-white/40 pointer-events-none z-20" />
+        <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-white/40 pointer-events-none z-20" />
       </div>
 
       {/* Tab strip */}
