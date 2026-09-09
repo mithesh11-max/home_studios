@@ -14,7 +14,6 @@ import { FadeUp } from "@/components/site/TextReveal";
 import { SequenceHero } from "@/components/site/SequenceHero";
 import { SpatialProjectShowcase } from "@/components/site/SpatialProjectShowcase";
 import { ArchitecturalMeasurement } from "@/components/site/ArchitecturalMeasurement";
-import { PlanSpaceExperience } from "@/components/site/PlanSpaceExperience";
 import { useAppointment } from "@/lib/appointment-context";
 import { useSmoothScroll } from "@/lib/lenis-context";
 import { HOME_FAQS, CONTACT } from "@/lib/site-data";
