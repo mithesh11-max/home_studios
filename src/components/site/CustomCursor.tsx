@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
+
+export type CursorMode = "default" | "hover" | "view" | "project" | "explore" | "drag";
 
 export function CustomCursor() {
   const [hasPointer, setHasPointer] = useState(false);
-  const [cursorState, setCursorState] = useState<"default" | "hover" | "view" | "enter" | "drag">("default");
-  
+  const [cursorMode, setCursorMode] = useState<CursorMode>("default");
+  const [projectNum, setProjectNum] = useState<string>("01");
+
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
-  
-  // High stiffness for extremely low latency trailing
-  const springConfig = { damping: 25, stiffness: 400, mass: 0.15 };
+
+  // Precision low-latency spring trailing
+  const springConfig = { damping: 28, stiffness: 480, mass: 0.12 };
   const smoothX = useSpring(cursorX, springConfig);
   const smoothY = useSpring(cursorY, springConfig);
 
@@ -41,33 +44,58 @@ export function CustomCursor() {
     checkPointer();
 
     const moveCursor = (e: PointerEvent) => {
-      // Ignore simulated pointer events on touch screens
       if (e.pointerType === "touch") return;
 
-      cursorX.set(e.clientX);
-      cursorY.set(e.clientY);
+      let targetX = e.clientX;
+      let targetY = e.clientY;
 
       const target = e.target as HTMLElement;
       if (!target) return;
-      
-      const cursorElement = target.closest('[data-cursor]');
-      const clickableElement = target.closest('a, button, input, textarea, select, [role="button"], [data-interactive]');
+
+      const cursorElement = target.closest<HTMLElement>("[data-cursor]");
+      const clickableElement = target.closest<HTMLElement>(
+        'a, button, [role="button"], [data-interactive], [data-magnetic]'
+      );
+
+      // ── Subtle Magnetic Pull (4–6px max displacement) ──
+      if (clickableElement) {
+        const rect = clickableElement.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const dist = Math.hypot(e.clientX - centerX, e.clientY - centerY);
+
+        // If cursor is close to element center, gently bias toward it
+        if (dist < Math.max(rect.width, rect.height) * 0.75) {
+          const maxDisplacement = 6;
+          const pullStrength = 0.22;
+          const dx = (centerX - e.clientX) * pullStrength;
+          const dy = (centerY - e.clientY) * pullStrength;
+          targetX += Math.max(-maxDisplacement, Math.min(maxDisplacement, dx));
+          targetY += Math.max(-maxDisplacement, Math.min(maxDisplacement, dy));
+        }
+      }
+
+      cursorX.set(targetX);
+      cursorY.set(targetY);
 
       if (cursorElement) {
-        const type = cursorElement.getAttribute('data-cursor');
-        if (type === "view" || type === "enter" || type === "drag") {
-          setCursorState(type as any);
+        const type = cursorElement.getAttribute("data-cursor");
+        const pNum = cursorElement.getAttribute("data-project-num");
+        if (pNum) setProjectNum(pNum);
+
+        if (type === "view" || type === "project" || type === "explore" || type === "drag") {
+          setCursorMode(type);
         } else {
-          setCursorState("hover");
+          setCursorMode("hover");
         }
       } else if (clickableElement) {
         if (clickableElement.tagName === "INPUT" || clickableElement.tagName === "TEXTAREA") {
-          setCursorState("default"); 
+          setCursorMode("default");
         } else {
-          setCursorState("hover");
+          setCursorMode("hover");
         }
       } else {
-        setCursorState("default");
+        setCursorMode("default");
       }
     };
 
@@ -89,47 +117,141 @@ export function CustomCursor() {
 
   if (!hasPointer) return null;
 
-  const isText = cursorState === "view" || cursorState === "enter" || cursorState === "drag";
+  const isBadge = cursorMode === "view" || cursorMode === "project" || cursorMode === "explore" || cursorMode === "drag";
 
   return (
     <motion.div
-      className="fixed top-0 left-0 pointer-events-none z-[9999] flex items-center justify-center mix-blend-difference"
+      className="fixed top-0 left-0 pointer-events-none z-[9999] select-none"
       style={{
         x: smoothX,
         y: smoothY,
         translateX: "-50%",
         translateY: "-50%",
       }}
+      aria-hidden="true"
     >
-      <motion.div
-        layout
-        className="flex items-center justify-center overflow-hidden"
-        initial={false}
-        animate={{
-          width: isText ? "auto" : cursorState === "hover" ? 36 : 6,
-          height: isText ? 28 : cursorState === "hover" ? 36 : 6,
-          borderRadius: 9999,
-          backgroundColor: isText ? "rgba(255, 255, 255, 1)" : cursorState === "hover" ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 1)",
-          border: cursorState === "hover" ? "1px solid rgba(255, 255, 255, 0.5)" : "0px solid transparent",
-          padding: isText ? "0 14px" : "0",
-        }}
-        transition={{ type: "spring", stiffness: 450, damping: 30, mass: 0.3 }}
-      >
-        <AnimatePresence mode="wait">
-          {isText && (
-            <motion.span
-              key={cursorState}
-              initial={{ opacity: 0, scale: 0.5, y: 5 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.5, y: -5 }}
-              transition={{ duration: 0.2 }}
-              className="text-[0.65rem] font-bold tracking-widest text-black uppercase whitespace-nowrap pt-[2px]"
-            >
-              {cursorState}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      <AnimatePresence mode="wait">
+        {/* ── 1. Default Architectural Crosshair with Hairline Ticks ── */}
+        {cursorMode === "default" && (
+          <motion.div
+            key="default"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="relative w-7 h-7 flex items-center justify-center"
+          >
+            {/* Center Core Dot */}
+            <div className="w-1.5 h-1.5 bg-white shadow-[0_0_8px_rgba(138,134,252,0.8)]" />
+
+            {/* Hairline 4-Way Axis Ticks */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-1.5 bg-indigo/75" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-1.5 bg-indigo/75" />
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-px bg-indigo/75" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-px bg-indigo/75" />
+          </motion.div>
+        )}
+
+        {/* ── 2. Hover Reticle (Corner Brackets) ── */}
+        {cursorMode === "hover" && (
+          <motion.div
+            key="hover"
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.7, opacity: 0 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-8 h-8 flex items-center justify-center"
+          >
+            {/* Center Dot */}
+            <div className="w-1.5 h-1.5 bg-indigo" />
+
+            {/* Corner Alignment Reticles */}
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-indigo" />
+            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-indigo" />
+            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-indigo" />
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-indigo" />
+          </motion.div>
+        )}
+
+        {/* ── 3. Image Viewfinder Badge ("VIEW") ── */}
+        {cursorMode === "view" && (
+          <motion.div
+            key="view"
+            initial={{ scale: 0.75, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.75, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="relative px-3 py-1.5 bg-deep/95 border border-indigo/60 backdrop-blur-md shadow-2xl flex items-center gap-1.5"
+          >
+            <div className="w-1 h-1 bg-indigo" />
+            <span className="font-mono text-[9px] tracking-[0.22em] text-white font-bold uppercase">
+              VIEW
+            </span>
+            {/* Corner ticks */}
+            <div className="absolute -top-1 -left-1 w-1.5 h-1.5 border-t border-l border-white/60" />
+            <div className="absolute -bottom-1 -right-1 w-1.5 h-1.5 border-b border-r border-white/60" />
+          </motion.div>
+        )}
+
+        {/* ── 4. Project Curated Badge ("01 / VIEW") ── */}
+        {cursorMode === "project" && (
+          <motion.div
+            key="project"
+            initial={{ scale: 0.75, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.75, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="relative px-3 py-1 bg-deep/95 border border-indigo/70 backdrop-blur-md shadow-2xl flex flex-col items-center justify-center min-w-[56px]"
+          >
+            <span className="font-mono text-[8px] tracking-widest text-indigo font-semibold">
+              {projectNum}
+            </span>
+            <span className="font-mono text-[9px] tracking-[0.2em] text-white font-bold uppercase">
+              VIEW
+            </span>
+            {/* Corner ticks */}
+            <div className="absolute -top-1 -left-1 w-1.5 h-1.5 border-t border-l border-indigo" />
+            <div className="absolute -bottom-1 -right-1 w-1.5 h-1.5 border-b border-r border-indigo" />
+          </motion.div>
+        )}
+
+        {/* ── 5. Spatial Exploration Badge ("EXPLORE") ── */}
+        {cursorMode === "explore" && (
+          <motion.div
+            key="explore"
+            initial={{ scale: 0.75, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.75, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="relative px-3 py-1.5 bg-deep/95 border border-white/35 backdrop-blur-md shadow-2xl flex items-center gap-1.5"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+            <span className="font-mono text-[9px] tracking-[0.2em] text-white font-bold uppercase">
+              EXPLORE
+            </span>
+          </motion.div>
+        )}
+
+        {/* ── 6. Draggable Interaction Badge ("← DRAG →") ── */}
+        {cursorMode === "drag" && (
+          <motion.div
+            key="drag"
+            initial={{ scale: 0.75, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.75, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="relative px-3 py-1.5 bg-deep/95 border border-indigo/80 backdrop-blur-md shadow-2xl flex items-center gap-1.5"
+          >
+            <span className="text-indigo text-[10px] font-mono">←</span>
+            <span className="font-mono text-[9px] tracking-[0.2em] text-white font-bold uppercase">
+              DRAG
+            </span>
+            <span className="text-indigo text-[10px] font-mono">→</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
+
+export default CustomCursor;
