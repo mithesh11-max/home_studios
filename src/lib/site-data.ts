@@ -325,16 +325,16 @@ export function getServiceBySlug(slug: string): ServiceDetail | undefined {
 
 export interface ConstructionPackage {
   name: string;
-  priceLabel: string;
+  gradeLabel: string;
   highlight?: boolean;
 }
 
 export const PACKAGES: ConstructionPackage[] = [
-  { name: "Basic", priceLabel: "₹1,599" },
-  { name: "Deluxe", priceLabel: "₹1,869" },
-  { name: "Luxury", priceLabel: "₹1,999", highlight: true },
-  { name: "Elite", priceLabel: "₹2,359" },
-  { name: "Supreme", priceLabel: "₹2,459" },
+  { name: "Basic", gradeLabel: "Standard Residential" },
+  { name: "Deluxe", gradeLabel: "Enhanced Structural" },
+  { name: "Luxury", gradeLabel: "Architect Specified", highlight: true },
+  { name: "Elite", gradeLabel: "High-Performance" },
+  { name: "Supreme", gradeLabel: "Designer Masterpiece" },
 ];
 
 export interface PackageRow {
