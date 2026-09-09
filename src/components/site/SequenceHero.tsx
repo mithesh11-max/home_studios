@@ -620,7 +620,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
         style={{
           position: "sticky",
           top: 0,
-          width: "100vw",
+          width: "100%",
           height: "100dvh",
           display: "block",
           background: "var(--bg-deep)",
