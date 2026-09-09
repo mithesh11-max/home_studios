@@ -157,9 +157,9 @@ export const SERVICES: ServiceDetail[] = [
     name: "Structural Design",
     icon: Columns3,
     cardSummary:
-      "Excavation, column, footing and plinth beam layouts plus reinforcement schedules — priced on a sliding per-sq.ft scale.",
+      "Excavation, column, footing and plinth beam layouts plus reinforcement schedules engineered to your site conditions.",
     heroLede:
-      "Complete structural drawings — from excavation to reinforcement schedules — priced per sq.ft on a sliding scale, so larger projects cost less per square foot to engineer.",
+      "Complete structural drawings — from excavation to reinforcement schedules — engineered specifically for contractor compliance.",
     overview: [
       "An architectural plan tells you where walls go. Structural design tells you they'll stay up. Skipping or under-engineering structural design is one of the most expensive mistakes a self-managed build can make — undersized footings, misplaced columns or missing reinforcement schedules lead to cracks, settlement issues, or contractors improvising on site with no drawing to follow.",
       "Our structural team works directly against your architectural plan, so column positions, beam depths and footing sizes are resolved before excavation begins — not renegotiated mid-build.",
@@ -177,12 +177,12 @@ export const SERVICES: ServiceDetail[] = [
       { title: "Site support", description: "Our team is available to clarify drawings during construction." },
     ],
     pricingNote:
-      "Pricing depends on your built-up area and site conditions — contact us for a quote specific to your project.",
+      "Scope depends on your built-up area and site conditions — contact us for a detailed specification for your project.",
     faqs: [
       {
         question: "Do I need structural design if I'm building a small house?",
         answer:
-          "Yes — building size doesn't remove the need for engineered footings, columns and reinforcement. Our smallest tier (500–2,000 sq.ft) is priced specifically for independent homes and small villas.",
+          "Yes — building size doesn't remove the need for engineered footings, columns and reinforcement. We engineer structures for all residential scales, from independent homes to expansive villas.",
       },
       {
         question: "Can structural design happen alongside architecture design?",
