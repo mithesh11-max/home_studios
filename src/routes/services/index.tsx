@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { FinalCTA } from "@/components/site/FinalCTA";
 import { SpatialProjectShowcase } from "@/components/site/SpatialProjectShowcase";
+import { ServiceExplorer } from "@/components/site/ServiceExplorer";
 import servicesBannerImg from "@/assets/home-studios-hero.jpg";
 
 export const Route = createFileRoute("/services/")({
@@ -76,53 +77,8 @@ function ServicesHub() {
           </div>
         </section>
 
-        {/* ── Service index ── */}
-        <section className="py-10 bg-paper" aria-label="All services">
-          <div className="arch-container">
-            {SERVICES.map((svc) => {
-              const inner = (
-                <>
-                  <div className="flex items-start gap-5 min-w-0">
-                    <span className="arch-label flex-shrink-0 pt-1" style={{ color: "var(--text-secondary)", minWidth: "1.8rem" }}>{svc.num}</span>
-                    <div className="min-w-0">
-                      <div className="flex items-baseline gap-3 flex-wrap">
-                        <span className="font-display text-[clamp(1.6rem,2.8vw,2.2rem)] font-light text-ink group-hover:text-indigo transition-colors duration-200 leading-none">
-                          {svc.label}
-                        </span>
-                        <span className="arch-label" style={{ color: "var(--text-secondary)" }}>{svc.tag}</span>
-                      </div>
-                      <p className="mt-1.5 text-stone text-[0.88rem] leading-relaxed">{svc.brief}</p>
-                    </div>
-                  </div>
-                  <svg className="arch-service-row__arrow h-5 w-5 flex-shrink-0 mt-1" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                    <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                  </svg>
-                </>
-              );
-
-              return "slug" in svc ? (
-                <Link
-                  key={svc.num}
-                  to="/services/$slug"
-                  params={{ slug: svc.slug! }}
-                  className="arch-service-row group"
-                  style={{ textDecoration: "none", alignItems: "flex-start", paddingTop: "1.1rem", paddingBottom: "1.1rem" }}
-                >
-                  {inner}
-                </Link>
-              ) : (
-                <Link
-                  key={svc.num}
-                  to={svc.to}
-                  className="arch-service-row group"
-                  style={{ textDecoration: "none", alignItems: "flex-start", paddingTop: "1.1rem", paddingBottom: "1.1rem" }}
-                >
-                  {inner}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
+        {/* ── Interactive Service Explorer Matrix ── */}
+        <ServiceExplorer />
 
         {/* ── Spatial Project Portfolio ── */}
         <SpatialProjectShowcase
