@@ -76,10 +76,7 @@ function RootComponent() {
       <QueryClientProvider client={queryClient}>
         <SmoothScrollProvider>
           <AppointmentProvider>
-            {/* 3D Tile grid ripple background & cursor shockwave */}
-            <TileGridBackground />
-
-            {/* Custom Interactive Cursor */}
+            {/* Custom Interactive Architectural Cursor */}
             <CustomCursor />
 
             {/* Route content stacked above background */}
