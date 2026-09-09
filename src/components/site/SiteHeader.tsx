@@ -15,93 +15,81 @@ const NAV = [
 
 export function SiteHeader() {
   const { open } = useAppointment();
-  const [navState, setNavState] = useState<"top" | "compressed" | "compact" | "expanded">("top");
+  const [isCompressed, setIsCompressed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious() || 0;
-    const direction = latest > previous ? "down" : "up";
-
-    if (latest <= 60) {
-      setNavState("top");
-    } else if (latest > 60 && latest < 300) {
-      setNavState("compressed");
-    } else {
-      if (direction === "down") {
-        setNavState("compact");
-      } else {
-        setNavState("expanded");
-      }
-    }
+    setIsCompressed(latest > 50);
   });
 
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
 
-  const isCompact = navState === "compact" && !menuOpen;
-  const isTop = navState === "top" && !menuOpen;
-
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none transition-all duration-300">
-        <motion.div
-          layout
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className={`pointer-events-auto flex items-center justify-between overflow-hidden backdrop-blur-md ${
-            isCompact
-              ? "w-[calc(100%-2rem)] max-w-[420px] sm:w-auto h-14 mt-3 sm:mt-4 rounded-full bg-ink/95 border border-white/10 px-4 sm:px-6 gap-4 sm:gap-10 shadow-2xl"
-              : `w-full max-w-[1440px] px-4 sm:px-8 lg:px-12 gap-4 sm:gap-6 ${
-                  isTop ? "h-16 sm:h-20 bg-transparent border-b border-transparent" : "h-16 bg-ink/90 border-b border-rule"
-                } rounded-none mt-0`
-          }`}
-        >
-          {/* Left: Logo */}
-          <motion.div layout className="flex-shrink-0 flex items-center">
-            <Link to="/" hash={pathname !== "/" ? "hs-content" : undefined} className="flex items-center gap-3">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 pointer-events-auto ${
+          isCompressed
+            ? "h-14 sm:h-16 bg-deep/95 border-b border-rule backdrop-blur-md shadow-lg"
+            : "h-16 sm:h-20 bg-transparent border-b border-transparent"
+        }`}
+      >
+        <div className="w-full max-w-[1440px] h-full mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between gap-4 sm:gap-6">
+          {/* Left: Studio Logo */}
+          <div className="flex-shrink-0 flex items-center">
+            <Link
+              to="/"
+              hash={pathname !== "/" ? "hs-content" : undefined}
+              className="flex items-center gap-3 transition-opacity hover:opacity-80"
+              data-interactive
+            >
               <img
                 src="/logo-footer.png"
-                alt="Home Studios"
-                className={`w-auto transition-all duration-500 ${isCompact ? "h-[1.15rem]" : "h-6 sm:h-7"}`}
-                style={{ opacity: isTop ? 0.9 : 1 }}
+                alt="Home Studios — Real-Size 3D Walkthroughs"
+                className={`w-auto transition-all duration-300 ${
+                  isCompressed ? "h-6 sm:h-6" : "h-6 sm:h-7"
+                }`}
               />
             </Link>
-          </motion.div>
+          </div>
 
-          {/* Center: Nav */}
-          <motion.nav layout className="hidden lg:flex items-center gap-7" aria-label="Primary navigation">
+          {/* Center: Monograph Navigation */}
+          <nav className="hidden lg:flex items-center gap-8" aria-label="Primary navigation">
             {NAV.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 hash={link.to === "/" && pathname !== "/" ? "hs-content" : undefined}
-                className="relative arch-label transition-colors duration-200 hover:text-white"
-                style={{ color: "var(--text-secondary)" }}
+                className="relative arch-label text-[11px] tracking-[0.16em] uppercase transition-colors duration-200 text-stone hover:text-white py-1"
                 activeProps={{
-                  className: "text-white after:content-[''] after:absolute after:-bottom-[6px] after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-[var(--indigo)] after:rounded-full",
-                  style: { fontWeight: 600 }
+                  className:
+                    "text-white font-semibold after:content-[''] after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2px] after:bg-indigo",
                 }}
+                data-interactive
               >
                 {link.label}
               </Link>
             ))}
-          </motion.nav>
+          </nav>
 
-          {/* Right: CTA + Hamburger */}
-          <motion.div layout className="flex items-center gap-2 sm:gap-4">
+          {/* Right: CTA Button + Mobile Hamburger */}
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => open()}
-              className={`hidden lg:inline-flex arch-btn arch-btn--primary transition-all duration-300 whitespace-nowrap ${
-                isCompact ? "h-9 px-4 text-[0.68rem]" : ""
+              className={`hidden lg:inline-flex arch-btn arch-btn--primary transition-all duration-200 ${
+                isCompressed ? "py-2 px-5 text-[10px]" : "py-2.5 px-6 text-[11px]"
               }`}
+              data-interactive
+              data-magnetic
               aria-label="Book your appointment"
             >
-              {isCompact ? "BOOK" : "BOOK YOUR APPOINTMENT"} <span className="arch-btn-arrow">→</span>
+              BOOK YOUR APPOINTMENT <span className="arch-btn-arrow">→</span>
             </button>
 
-            {/* Mobile hamburger - 44x44px minimum touch target for effortless tapping */}
+            {/* Mobile hamburger - accessible 44x44px minimum touch target */}
             <button
               onClick={() => setMenuOpen((v) => !v)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -121,11 +109,13 @@ export function SiteHeader() {
                 style={{ transform: menuOpen ? "translateY(-6px) rotate(-45deg)" : "none" }}
               />
             </button>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </header>
 
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} nav={NAV} />
     </>
   );
 }
+
+export default SiteHeader;
