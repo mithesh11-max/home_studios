@@ -172,18 +172,13 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            02 / PLAN TO EXPERIENCE — Spatial transformation
-            ══════════════════════════════════════════════════════ */}
-        <PlanSpaceExperience />
-
-        {/* ══════════════════════════════════════════════════════
-            03 / WALKTHROUGH MODES
+            02 / WALKTHROUGH MODES
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16 bg-paper" aria-label="Walkthrough modes">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.2fr] lg:gap-12 items-start">
               <div>
-                <p className="arch-label arch-label--accent mb-3">03 / WALKTHROUGH</p>
+                <p className="arch-label arch-label--accent mb-3">02 / WALKTHROUGH</p>
                 <h2 className="font-display text-ink leading-none mb-4"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   Four ways to understand your space before it's built.
@@ -204,13 +199,13 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            04 / WHY HOME STUDIOS — Expandable list
+            03 / WHY HOME STUDIOS — Expandable list
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Why Home Studios">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.4fr] lg:gap-12 items-start">
               <FadeUp>
-                <p className="arch-label arch-label--accent mb-4">04 / WHY</p>
+                <p className="arch-label arch-label--accent mb-4">03 / WHY</p>
                 <h2 className="font-display text-ink leading-none"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   What makes the<br />walkthrough studio<br />different.
@@ -226,11 +221,11 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            05 / PROCESS TIMELINE
+            04 / PROCESS TIMELINE
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16 bg-paper" aria-label="How it works">
           <div className="arch-container">
-            <p className="arch-label arch-label--accent mb-3">05 / PROCESS</p>
+            <p className="arch-label arch-label--accent mb-3">04 / PROCESS</p>
             <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-8">
               <h2 className="font-display text-ink leading-none" style={{ fontSize: "var(--text-display-sm)" }}>
                 How a walkthrough<br />session works.
@@ -246,18 +241,18 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            06 / SPATIAL PROJECTS & SERVICES PORTFOLIO
+            05 / SPATIAL PROJECTS & SERVICES PORTFOLIO
             ══════════════════════════════════════════════════════ */}
-        <SpatialProjectShowcase eyebrow="06 / PORTFOLIO & SERVICES" />
+        <SpatialProjectShowcase eyebrow="05 / PORTFOLIO & SERVICES" />
 
         {/* ══════════════════════════════════════════════════════
-            07 / STRUCTURAL DESIGN
+            06 / STRUCTURAL DESIGN
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Structural design">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12 items-start">
               <FadeUp>
-                <p className="arch-label arch-label--accent mb-3">07 / STRUCTURAL</p>
+                <p className="arch-label arch-label--accent mb-3">06 / STRUCTURAL</p>
                 <h2 className="font-display text-ink leading-none mb-4"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   Beauty above<br />depends on what<br />lies beneath.
@@ -294,11 +289,11 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            08 / ARCHITECTURE DESIGN — editorial
+            07 / ARCHITECTURE DESIGN — editorial
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16 bg-paper" aria-label="Architecture design">
           <div className="arch-container">
-            <p className="arch-label arch-label--accent mb-6">08 / ARCHITECTURE</p>
+            <p className="arch-label arch-label--accent mb-6">07 / ARCHITECTURE</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
               {ARCH_ITEMS.map((item, i) => (
                 <div
@@ -324,13 +319,13 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            09 / INTERIORS — Before/after slider
+            08 / INTERIORS — Before/after slider
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Interior design">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.6fr] lg:gap-10 items-start">
               <FadeUp>
-                <p className="arch-label arch-label--accent mb-3">09 / INTERIORS</p>
+                <p className="arch-label arch-label--accent mb-3">08 / INTERIORS</p>
                 <h2 className="font-display text-ink leading-none mb-4"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   Test the interior<br />before you build it.
@@ -354,11 +349,11 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            10 / COMPLETE JOURNEY — Oversized serif stages
+            09 / COMPLETE JOURNEY — Oversized serif stages
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16 bg-paper overflow-hidden" aria-label="Complete journey">
           <div className="arch-container">
-            <p className="arch-label arch-label--accent mb-4">10 / JOURNEY</p>
+            <p className="arch-label arch-label--accent mb-4">09 / JOURNEY</p>
             <div>
               {JOURNEY_STAGES.map((stage, i) => (
                 <JourneyStage key={stage.num} stage={stage} index={i} total={JOURNEY_STAGES.length} />
@@ -368,13 +363,13 @@ function Index() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            11 / FAQ
+            10 / FAQ
             ══════════════════════════════════════════════════════ */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Frequently asked questions">
           <div className="arch-container">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.5fr] lg:gap-10 items-start">
               <FadeUp>
-                <p className="arch-label arch-label--accent mb-3">11 / FAQ</p>
+                <p className="arch-label arch-label--accent mb-3">10 / FAQ</p>
                 <h2 className="font-display text-ink leading-none"
                   style={{ fontSize: "var(--text-display-sm)" }}>
                   Questions before<br />your first visit.
