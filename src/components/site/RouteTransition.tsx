@@ -16,8 +16,8 @@ function ScrollRestorationHandler({ isPop }: { isPop: boolean }) {
 }
 
 /**
- * Wraps <Outlet> to provide premium spatial transitions between routes.
- * Uses clip-path masking to create an architectural vertical wipe.
+ * Wraps <Outlet> to provide crisp architectural transitions between routes.
+ * Uses clip-path masking to create an architectural vertical unmasking sheet (380ms).
  */
 export function RouteTransition({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -28,7 +28,7 @@ export function RouteTransition({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = router.history.subscribe(() => {
-      isPopRef.current = router.history.action === 'POP';
+      isPopRef.current = router.history.action === "POP";
     });
     return () => unsubscribe();
   }, [router]);
@@ -37,30 +37,24 @@ export function RouteTransition({ children }: { children: ReactNode }) {
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
-        initial={{ 
+        initial={{
           clipPath: "inset(100% 0% 0% 0%)",
-          y: 40,
-          scale: 0.97,
-          opacity: 0,
-          filter: "brightness(0.6) blur(4px)"
+          y: 16,
+          opacity: 0.85,
         }}
-        animate={{ 
+        animate={{
           clipPath: "inset(0% 0% 0% 0%)",
           y: 0,
-          scale: 1,
           opacity: 1,
-          filter: "brightness(1) blur(0px)"
         }}
-        exit={{ 
+        exit={{
           clipPath: "inset(0% 0% 100% 0%)",
-          y: -40,
-          scale: 0.97,
-          opacity: 0,
-          filter: "brightness(0.6) blur(4px)"
+          y: -16,
+          opacity: 0.85,
         }}
-        transition={{ 
-          duration: 0.75, 
-          ease: [0.22, 1, 0.36, 1] 
+        transition={{
+          duration: 0.38,
+          ease: [0.22, 1, 0.36, 1],
         }}
         className="w-full origin-center relative will-change-transform"
       >
@@ -70,3 +64,5 @@ export function RouteTransition({ children }: { children: ReactNode }) {
     </AnimatePresence>
   );
 }
+
+export default RouteTransition;
