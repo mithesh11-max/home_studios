@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { FinalCTA } from "@/components/site/FinalCTA";
 import { FadeUp } from "@/components/site/TextReveal";
+import { PackageSelector } from "@/components/site/PackageSelector";
 import { FAQ } from "@/components/site/FAQ";
 import { CONTACT } from "@/lib/site-data";
 import constructionBannerImg from "@/assets/architecture-site.jpg";
@@ -94,6 +95,9 @@ function Construction() {
             </Link>
           </div>
         </section>
+
+        {/* ── 02 / Package Selector Matrix & Cost Estimator ── */}
+        <PackageSelector />
 
         {/* ── Why build with Home Studios ── */}
         <section className="py-12 lg:py-16" style={{ background: "var(--surface)" }} aria-label="Why build with Home Studios">
