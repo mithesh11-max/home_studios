@@ -93,7 +93,7 @@ export function InteractiveFloorPlan({
 
           {/* Viewport Mode Switcher: 2D Blueprint vs 3D Spatial Camera */}
           {canUse3D && (
-            <div className="flex items-center p-1 bg-deep/90 border border-white/15 self-start lg:self-auto font-mono text-[10px] tracking-widest uppercase">
+            <div className="flex items-center p-1 bg-dark/90 border border-white/15 self-start lg:self-auto font-mono text-[10px] tracking-widest uppercase">
               <button
                 type="button"
                 onClick={() => setViewMode("2d")}

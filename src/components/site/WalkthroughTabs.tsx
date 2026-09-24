@@ -87,7 +87,7 @@ export function WalkthroughTabs() {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  "linear-gradient(180deg, rgba(8,11,26,0.2) 0%, transparent 40%, rgba(8,11,26,0.65) 100%)",
+                  "linear-gradient(180deg, rgba(32, 60, 127,0.2) 0%, transparent 40%, rgba(32, 60, 127,0.65) 100%)",
               }}
             />
           </motion.div>
@@ -103,8 +103,8 @@ export function WalkthroughTabs() {
           <rect x="50" y="50" width="300" height="200" stroke="white" strokeWidth="0.8" />
           <line x1="50" y1="150" x2="200" y2="150" stroke="white" strokeWidth="0.4" />
           <line x1="200" y1="50" x2="200" y2="250" stroke="white" strokeWidth="0.4" />
-          <circle cx="200" cy="150" r="60" stroke="rgba(138,134,252,0.8)" strokeWidth="0.6" strokeDasharray="4 3" fill="none" />
-          <text x="200" y="155" textAnchor="middle" fill="rgba(138,134,252,0.9)" fontSize="7" fontFamily="Manrope" letterSpacing="2">1:1 SCALE</text>
+          <circle cx="200" cy="150" r="60" stroke="rgba(32, 60, 127,0.8)" strokeWidth="0.6" strokeDasharray="4 3" fill="none" />
+          <text x="200" y="155" textAnchor="middle" fill="rgba(32, 60, 127,0.9)" fontSize="7" fontFamily="Sprat" letterSpacing="2">1:1 SCALE</text>
         </svg>
 
         {/* Dynamic Architectural Badges */}
@@ -112,7 +112,7 @@ export function WalkthroughTabs() {
           className="absolute top-3 left-3 arch-label flex items-center gap-2 z-10"
           style={{
             color: "rgba(255,255,255,0.85)",
-            background: "rgba(8,11,26,0.75)",
+            background: "rgba(32, 60, 127,0.75)",
             padding: "3px 8px",
             backdropFilter: "blur(4px)",
           }}
@@ -126,7 +126,7 @@ export function WalkthroughTabs() {
           className="absolute top-3 right-3 arch-label hidden sm:block z-10"
           style={{
             color: "var(--indigo)",
-            background: "rgba(8,11,26,0.75)",
+            background: "rgba(32, 60, 127,0.75)",
             padding: "3px 8px",
             fontSize: "9px",
             letterSpacing: "0.15em",

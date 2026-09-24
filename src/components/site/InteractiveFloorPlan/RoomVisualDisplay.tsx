@@ -50,7 +50,7 @@ export function RoomVisualDisplay({
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(180deg, rgba(8,11,26,0.6) 0%, rgba(8,11,26,0.1) 40%, rgba(8,11,26,0.85) 100%)",
+              "linear-gradient(180deg, rgba(32, 60, 127,0.6) 0%, rgba(32, 60, 127,0.1) 40%, rgba(32, 60, 127,0.85) 100%)",
           }}
           aria-hidden="true"
         />
@@ -61,22 +61,22 @@ export function RoomVisualDisplay({
 
       {/* Top Header Datum Bar */}
       <div className="relative z-10 p-4 sm:p-5 flex items-start justify-between gap-3 pointer-events-none">
-        <div className="flex items-center gap-2 px-2.5 py-1 bg-deep/85 border border-white/15 backdrop-blur-sm">
-          <span className="w-1.5 h-1.5 bg-indigo inline-block" />
-          <span className="font-mono text-[9px] tracking-widest text-indigo font-medium">
+        <div className="flex items-center gap-2 px-2.5 py-1 bg-dark/85 border border-white/15 backdrop-blur-sm">
+          <span className="w-1.5 h-1.5 bg-highlight inline-block" />
+          <span className="font-mono text-[9px] tracking-widest text-highlight font-medium">
             {currentTag}
           </span>
         </div>
 
-        <span className="font-mono text-[9px] tracking-wider text-white/70 px-2.5 py-1 bg-deep/85 border border-white/15 backdrop-blur-sm">
+        <span className="font-mono text-[9px] tracking-wider text-white/70 px-2.5 py-1 bg-dark/85 border border-white/15 backdrop-blur-sm">
           {currentDimensions}
         </span>
       </div>
 
       {/* Bottom Information Caption */}
-      <div className="relative z-10 p-4 sm:p-5 bg-gradient-to-t from-deep via-deep/80 to-transparent pointer-events-none">
+      <div className="relative z-10 p-4 sm:p-5 bg-gradient-to-t from-dark via-dark/80 to-transparent pointer-events-none">
         <div className="flex items-baseline gap-2 mb-1">
-          <span className="font-mono text-[10px] tracking-widest text-indigo">
+          <span className="font-mono text-[10px] tracking-widest text-highlight">
             {currentRoom ? currentRoom.index : "00 / 00"}
           </span>
           <h4 className="font-display text-white text-[clamp(1.2rem,2.2vw,1.5rem)] font-light">

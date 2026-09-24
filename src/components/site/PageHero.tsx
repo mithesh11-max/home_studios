@@ -44,8 +44,8 @@ export function PageHero({ eyebrow, crumbs, title, description, cta }: PageHeroP
           </ol>
         </nav>
 
-        {/* Eyebrow */}
-        <p className="font-mono text-[0.68rem] tracking-[0.18em] uppercase text-accent-hs mb-5">
+        {/* Eyebrow — teal (not navy) so it stays visible on this dark navy hero band */}
+        <p className="font-mono text-[0.68rem] tracking-[0.18em] uppercase mb-5" style={{ color: "var(--highlight)" }}>
           {eyebrow}
         </p>
 

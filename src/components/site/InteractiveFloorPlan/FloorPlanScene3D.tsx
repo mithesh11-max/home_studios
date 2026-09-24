@@ -32,7 +32,7 @@ function SceneInner({
   const matPlaster = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#1B2144"),
+        color: new THREE.Color("#E9E4D6"), // warm pale plaster
         roughness: 0.78,
         metalness: 0.05,
       }),
@@ -42,7 +42,7 @@ function SceneInner({
   const matConcrete = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#22284C"),
+        color: new THREE.Color("#BDB7A9"), // light warm concrete
         roughness: 0.90,
         metalness: 0.08,
       }),
@@ -52,7 +52,7 @@ function SceneInner({
   const matWood = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#44362B"),
+        color: new THREE.Color("#6B4F3A"), // warm wood
         roughness: 0.62,
         metalness: 0.08,
       }),
@@ -62,7 +62,7 @@ function SceneInner({
   const matGlass = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#8A86FC"),
+        color: new THREE.Color("#98BFCB"), // teal glass tint
         roughness: 0.12,
         metalness: 0.85,
         transparent: true,
@@ -74,7 +74,7 @@ function SceneInner({
   const matFabric = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#2C3460"),
+        color: new THREE.Color("#4E7C8C"), // teal upholstery
         roughness: 0.82,
         metalness: 0.02,
       }),
@@ -84,7 +84,7 @@ function SceneInner({
   const matCushion = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#384278"),
+        color: new THREE.Color("#3E5A8D"), // navy cushion
         roughness: 0.78,
         metalness: 0.02,
       }),
@@ -94,7 +94,7 @@ function SceneInner({
   const matStone = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#32385C"),
+        color: new THREE.Color("#B7B0A2"), // light warm stone
         roughness: 0.45,
         metalness: 0.15,
       }),
@@ -104,7 +104,7 @@ function SceneInner({
   const matRug = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#161C38"),
+        color: new THREE.Color("#203C7F"), // navy accent rug
         roughness: 0.95,
         metalness: 0.0,
       }),
@@ -171,7 +171,7 @@ function SceneInner({
   return (
     <>
       {/* Lighting Setup */}
-      <ambientLight intensity={0.65} color="#CBD2F8" />
+      <ambientLight intensity={0.65} color="#DCE8DD" />
       <directionalLight
         position={[9, 15, 11]}
         intensity={1.6}
@@ -185,7 +185,7 @@ function SceneInner({
         shadow-camera-bottom={-12}
         shadow-bias={-0.0004}
       />
-      <hemisphereLight args={["#D8DCFB", "#090D1F", 0.4]} />
+      <hemisphereLight args={["#DCE8DD", "#B1D0CB", 0.4]} />
 
       {/* Dynamic Focused Spotlight for Active Room */}
       <pointLight
@@ -194,7 +194,7 @@ function SceneInner({
         intensity={0}
         distance={10}
         decay={2}
-        color="#D6D4FC"
+        color="#EAF2EA"
       />
 
       {/* Master Site Ground Floor */}
@@ -204,7 +204,7 @@ function SceneInner({
         position={[0, -0.01, 0]}
         receiveShadow
       >
-        <meshStandardMaterial color="#0A0E22" roughness={0.8} />
+        <meshStandardMaterial color="#C7BBA0" roughness={0.8} />
       </mesh>
 
       {/* ────────────────────────────────────────────────────────
@@ -229,8 +229,8 @@ function SceneInner({
             >
               <planeGeometry args={[b.width, b.depth]} />
               <meshStandardMaterial
-                color={isHighlighted ? "#8A86FC" : "#111631"}
-                emissive={isHighlighted ? "#8A86FC" : "#000000"}
+                color={isHighlighted ? "#203C7F" : "#B1D0CB"}
+                emissive={isHighlighted ? "#203C7F" : "#000000"}
                 emissiveIntensity={isSelected ? 0.35 : isHovered ? 0.2 : 0}
                 roughness={0.65}
                 transparent
@@ -242,7 +242,7 @@ function SceneInner({
             {isHighlighted && (
               <lineSegments position={[0, 0.01, 0]}>
                 <edgesGeometry args={[new THREE.BoxGeometry(b.width, 0.02, b.depth)]} />
-                <lineBasicMaterial color="#8A86FC" linewidth={2} />
+                <lineBasicMaterial color="#203C7F" linewidth={2} />
               </lineSegments>
             )}
           </group>
@@ -317,7 +317,7 @@ function SceneInner({
       <group position={[0.25, 0.08, -3.45]}>
         <mesh receiveShadow castShadow>
           <boxGeometry args={[6.5, 0.16, 1.9]} />
-          <meshStandardMaterial color="#1C2248" roughness={0.7} />
+          <meshStandardMaterial color="#BDB7A9" roughness={0.7} />
         </mesh>
         {/* Balustrade perimeter */}
         <mesh position={[0, 0.58, -0.92]}>
@@ -357,7 +357,7 @@ export function FloorPlanScene3D({
         style={{
           width: "100%",
           height: "100%",
-          background: "#080B1A",
+          background: "#C9E1CA",
         }}
       >
         <SceneInner
@@ -369,7 +369,7 @@ export function FloorPlanScene3D({
       </Canvas>
 
       {/* 3D Viewport Datum Watermark */}
-      <div className="absolute top-3 right-3 pointer-events-none px-2 py-1 bg-deep/80 border border-white/10 font-mono text-[8px] tracking-wider text-white/50 backdrop-blur-sm">
+      <div className="absolute top-3 right-3 pointer-events-none px-2 py-1 bg-deep/85 border border-indigo/20 font-mono text-[8px] tracking-wider text-indigo/70 backdrop-blur-sm">
         3D CAMERA LINK: ACTIVE
       </div>
     </div>

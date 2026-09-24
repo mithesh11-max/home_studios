@@ -16,7 +16,7 @@ export function RoomSpecPanel({
   const room = currentId ? ROOMS[currentId] : null;
 
   return (
-    <div className="flex flex-col justify-between h-full bg-[#0c1024] border border-white/12 p-6 sm:p-8">
+    <div className="flex flex-col justify-between h-full bg-dark border border-white/12 p-6 sm:p-8">
       {/* Top: Quick Room Selector Buttons */}
       <div>
         <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
@@ -34,7 +34,7 @@ export function RoomSpecPanel({
             className={`min-h-[42px] sm:min-h-[34px] px-2.5 py-2 sm:py-1.5 font-mono text-[10px] sm:text-[9px] tracking-wider uppercase border transition-all text-center touch-manipulation active:scale-[0.98] ${
               activeRoomId === null
                 ? "bg-indigo text-deep font-bold border-indigo"
-                : "bg-deep/80 text-white/70 border-white/15 hover:border-white/40 hover:text-white"
+                : "bg-dark/80 text-white/70 border-white/15 hover:border-white/40 hover:text-white"
             }`}
           >
             ALL
@@ -50,7 +50,7 @@ export function RoomSpecPanel({
                 className={`min-h-[42px] sm:min-h-[34px] px-2 py-2 sm:py-1.5 font-mono text-[10px] sm:text-[9px] tracking-wider uppercase border transition-all truncate text-center touch-manipulation active:scale-[0.98] ${
                   isSelected
                     ? "bg-indigo text-deep font-bold border-indigo"
-                    : "bg-deep/80 text-white/70 border-white/15 hover:border-white/40 hover:text-white"
+                    : "bg-dark/80 text-white/70 border-white/15 hover:border-white/40 hover:text-white"
                 }`}
                 title={r.name}
               >
@@ -74,7 +74,7 @@ export function RoomSpecPanel({
         </div>
 
         {/* Primary Measurements Grid */}
-        <div className="grid grid-cols-2 gap-3 p-4 bg-deep/90 border border-white/10 mb-6">
+        <div className="grid grid-cols-2 gap-3 p-4 bg-dark/90 border border-white/10 mb-6">
           <div>
             <p className="font-mono text-[9px] tracking-wider text-white/50 uppercase">Dimensions (Metric)</p>
             <p className="font-mono text-[13px] text-indigo font-medium mt-0.5">

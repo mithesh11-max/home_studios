@@ -21,7 +21,7 @@ const SITE = [
 
 export function SiteFooter() {
   return (
-    <footer className="relative overflow-hidden bg-paper text-white/50" style={{ borderTop: "1px solid var(--border)" }}>
+    <footer className="relative overflow-hidden bg-paper text-secondary" style={{ borderTop: "1px solid var(--border)" }}>
       <div className="arch-grid-dark" style={{ opacity: 0.25, position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }} aria-hidden="true" />
 
       <div className="relative arch-container">
@@ -119,7 +119,7 @@ export function SiteFooter() {
               href="https://bettercallmithesh.netlify.app/"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: "var(--primary)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+              style={{ color: "var(--indigo)", textDecoration: "underline", textUnderlineOffset: "3px" }}
             >
               click here
             </a>

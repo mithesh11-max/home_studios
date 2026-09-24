@@ -121,7 +121,7 @@ export function BeforeAfterSlider({
             className="arch-label"
             style={{
               color: "rgba(255,255,255,0.85)",
-              background: "rgba(8,11,26,0.75)",
+              background: "rgba(32, 60, 127,0.75)",
               padding: "2px 8px",
               fontSize: "10px",
               letterSpacing: "0.15em",
@@ -166,7 +166,7 @@ export function BeforeAfterSlider({
               className="arch-label"
               style={{
                 color: "rgba(255,255,255,0.85)",
-                background: "rgba(8,11,26,0.75)",
+                background: "rgba(32, 60, 127,0.75)",
                 padding: "2px 8px",
                 fontSize: "10px",
                 letterSpacing: "0.15em",
@@ -205,7 +205,7 @@ export function BeforeAfterSlider({
           className="absolute top-0 bottom-0 w-[1.5px]"
           style={{
             background: "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, #ffffff 50%, rgba(255,255,255,0.4) 100%)",
-            boxShadow: "0 0 8px rgba(0,0,0,0.8), 0 0 3px rgba(138,134,252,0.8)",
+            boxShadow: "0 0 8px rgba(0,0,0,0.8), 0 0 3px rgba(32, 60, 127,0.8)",
           }}
         >
           {/* Architect's scale measurement ticks along divider */}
@@ -222,10 +222,10 @@ export function BeforeAfterSlider({
         <div
           className="relative z-10 flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center shadow-2xl transition-transform group-hover:scale-105 active:scale-95 touch-manipulation"
           style={{
-            background: "var(--indigo, #8A86FC)",
+            background: "var(--indigo, #203C7F)",
             border: "1.5px solid #ffffff",
             borderRadius: 0,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.7), 0 0 14px rgba(138,134,252,0.6)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.7), 0 0 14px rgba(32, 60, 127,0.6)",
           }}
         >
           <svg width="18" height="12" viewBox="0 0 16 10" fill="none" aria-hidden="true">

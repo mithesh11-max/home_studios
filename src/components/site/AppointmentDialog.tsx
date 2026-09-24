@@ -153,7 +153,7 @@ export function AppointmentDialog() {
                   ref={closeRef}
                   onClick={close}
                   aria-label="Close appointment dialog"
-                  className="flex h-10 w-10 items-center justify-center transition-colors flex-shrink-0 hover:text-white"
+                  className="flex h-10 w-10 items-center justify-center transition-colors flex-shrink-0 hover:text-indigo"
                   style={{ border: "1px solid var(--border-interactive)", color: "var(--text-secondary)" }}
                 >
                   <X className="h-4 w-4" />

@@ -7,7 +7,7 @@
  * - Pointer click fires a high-velocity shockwave burst
  * - Idle drops periodic ambient raindrop ripples
  * - Shaded 3D extruded side walls on lifted tiles
- * - Indigo edge glow (#8A86FC) over deep midnight background (#080B1A)
+ * - Navy blueprint edge glow (#203C7F) over the mint canvas (#C9E1CA)
  * - Pure 2D Canvas at 60fps with clamped DPR (1.5)
  * - Auto-pauses on background tab and respects prefers-reduced-motion
  */
@@ -28,8 +28,8 @@ const cfg = {
   idle: 0,
   click: 2.6,
   boost: 1.6,
-  color: [138, 134, 252] as [number, number, number],
-  bg: [8, 11, 26] as [number, number, number],
+  color: [32, 60, 127] as [number, number, number],   // #203C7F navy — lit/active tile color
+  bg: [201, 225, 202] as [number, number, number],     // #C9E1CA mint — matches page canvas so resting tiles fade to invisible
 };
 
 const MAX = 24;
@@ -409,7 +409,7 @@ export function TileGridBackground() {
         inset: 0,
         width: "100vw",
         height: "100vh",
-        opacity: 0.35,
+        opacity: 0.55,
         pointerEvents: "none",
         zIndex: 0,
         transform: "translate3d(0, 0, 0)",

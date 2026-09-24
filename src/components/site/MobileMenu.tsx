@@ -94,10 +94,10 @@ export function MobileMenu({ open, onClose, nav }: MobileMenuProps) {
           >
             <p className="arch-label mb-4" style={{ color: "var(--text-muted)" }}>Contact</p>
             <div className="space-y-1 mb-6">
-              <a href={CONTACT.phoneHref} className="flex items-center min-h-[44px] text-[0.95rem] transition-colors hover:text-white" style={{ color: "var(--text-secondary)" }}>
+              <a href={CONTACT.phoneHref} className="flex items-center min-h-[44px] text-[0.95rem] transition-colors hover:text-indigo" style={{ color: "var(--text-secondary)" }}>
                 {CONTACT.phone}
               </a>
-              <a href={CONTACT.emailHref} className="flex items-center min-h-[44px] text-[0.95rem] transition-colors hover:text-white" style={{ color: "var(--text-secondary)" }}>
+              <a href={CONTACT.emailHref} className="flex items-center min-h-[44px] text-[0.95rem] transition-colors hover:text-indigo" style={{ color: "var(--text-secondary)" }}>
                 {CONTACT.email}
               </a>
             </div>

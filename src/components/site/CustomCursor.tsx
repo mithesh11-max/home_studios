@@ -142,7 +142,7 @@ export function CustomCursor() {
             className="relative w-7 h-7 flex items-center justify-center"
           >
             {/* Center Core Dot */}
-            <div className="w-1.5 h-1.5 bg-white shadow-[0_0_8px_rgba(138,134,252,0.8)]" />
+            <div className="w-1.5 h-1.5 bg-indigo shadow-[0_0_8px_rgba(32,60,127,0.55)]" />
 
             {/* Hairline 4-Way Axis Ticks */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-1.5 bg-indigo/75" />
@@ -184,12 +184,12 @@ export function CustomCursor() {
             className="relative px-3 py-1.5 bg-deep/95 border border-indigo/60 backdrop-blur-md shadow-2xl flex items-center gap-1.5"
           >
             <div className="w-1 h-1 bg-indigo" />
-            <span className="font-mono text-[9px] tracking-[0.22em] text-white font-bold uppercase">
+            <span className="font-mono text-[9px] tracking-[0.22em] text-primary font-bold uppercase">
               VIEW
             </span>
             {/* Corner ticks */}
-            <div className="absolute -top-1 -left-1 w-1.5 h-1.5 border-t border-l border-white/60" />
-            <div className="absolute -bottom-1 -right-1 w-1.5 h-1.5 border-b border-r border-white/60" />
+            <div className="absolute -top-1 -left-1 w-1.5 h-1.5 border-t border-l border-indigo/50" />
+            <div className="absolute -bottom-1 -right-1 w-1.5 h-1.5 border-b border-r border-indigo/50" />
           </motion.div>
         )}
 
@@ -206,7 +206,7 @@ export function CustomCursor() {
             <span className="font-mono text-[8px] tracking-widest text-indigo font-semibold">
               {projectNum}
             </span>
-            <span className="font-mono text-[9px] tracking-[0.2em] text-white font-bold uppercase">
+            <span className="font-mono text-[9px] tracking-[0.2em] text-primary font-bold uppercase">
               VIEW
             </span>
             {/* Corner ticks */}
@@ -223,10 +223,10 @@ export function CustomCursor() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.75, opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative px-3 py-1.5 bg-deep/95 border border-white/35 backdrop-blur-md shadow-2xl flex items-center gap-1.5"
+            className="relative px-3 py-1.5 bg-deep/95 border border-indigo/35 backdrop-blur-md shadow-2xl flex items-center gap-1.5"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
-            <span className="font-mono text-[9px] tracking-[0.2em] text-white font-bold uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo animate-ping inline-block" />
+            <span className="font-mono text-[9px] tracking-[0.2em] text-primary font-bold uppercase">
               EXPLORE
             </span>
           </motion.div>
@@ -243,7 +243,7 @@ export function CustomCursor() {
             className="relative px-3 py-1.5 bg-deep/95 border border-indigo/80 backdrop-blur-md shadow-2xl flex items-center gap-1.5"
           >
             <span className="text-indigo text-[10px] font-mono">←</span>
-            <span className="font-mono text-[9px] tracking-[0.2em] text-white font-bold uppercase">
+            <span className="font-mono text-[9px] tracking-[0.2em] text-primary font-bold uppercase">
               DRAG
             </span>
             <span className="text-indigo text-[10px] font-mono">→</span>

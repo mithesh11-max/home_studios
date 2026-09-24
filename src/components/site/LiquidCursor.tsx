@@ -78,7 +78,7 @@ function StaticDot() {
       <circle
         ref={ref}
         r={7}
-        fill="#8A86FC"
+        fill="#203C7F"
         opacity={0.85}
       />
     </svg>
@@ -290,7 +290,7 @@ function LiquidBlob() {
         </filter>
       </defs>
 
-      <g filter="url(#hs-goo)" fill="#8A86FC">
+      <g filter="url(#hs-goo)" fill="#203C7F">
         {Array.from({ length: NODE_COUNT }, (_, i) => (
           <circle
             key={i}

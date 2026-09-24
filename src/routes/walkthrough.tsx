@@ -105,14 +105,14 @@ function WalkthroughPage() {
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "linear-gradient(160deg, rgba(28,25,20,0.85) 0%, rgba(17,17,17,0.7) 50%, rgba(17,17,17,0.95) 100%)",
+                "linear-gradient(160deg, rgba(32, 60, 127,0.85) 0%, rgba(32, 60, 127,0.7) 50%, rgba(32, 60, 127,0.95) 100%)",
             }}
             aria-hidden="true"
           />
           <div className="arch-grid-dark absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true" />
 
           <div className="relative arch-container">
-            <p className="arch-label arch-label--accent mb-4">01 / WALKTHROUGH</p>
+            <p className="arch-label mb-4" style={{ color: "var(--highlight)" }}>01 / WALKTHROUGH</p>
             <h1 className="font-display text-white leading-[0.92] mb-6"
               style={{ fontSize: "var(--text-display-lg)" }}>
               WALK THROUGH<br />YOUR FUTURE HOME<br />BEFORE IT'S BUILT.
@@ -177,7 +177,7 @@ function WalkthroughPage() {
                     className="absolute inset-0 pointer-events-none"
                     style={{
                       background:
-                        "linear-gradient(180deg, rgba(17,17,17,0.1) 0%, transparent 40%, rgba(17,17,17,0.4) 100%)",
+                        "linear-gradient(180deg, rgba(32, 60, 127,0.1) 0%, transparent 40%, rgba(32, 60, 127,0.4) 100%)",
                     }}
                   />
                   {/* Subtle Blueprint SVG overlay lines */}
@@ -220,7 +220,7 @@ function WalkthroughPage() {
                     className="absolute top-4 left-4 arch-label"
                     style={{
                       color: "rgba(255,255,255,0.9)",
-                      background: "rgba(17,17,17,0.75)",
+                      background: "rgba(32, 60, 127,0.75)",
                       padding: "4px 10px",
                       backdropFilter: "blur(4px)",
                     }}

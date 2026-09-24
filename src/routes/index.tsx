@@ -500,7 +500,7 @@ function ArchImageReveal() {
         {/* Subtle dark indigo overlay */}
         <div
           className="absolute inset-0"
-          style={{ background: "linear-gradient(180deg, transparent 50%, rgba(8,11,26,0.6) 100%)" }}
+          style={{ background: "linear-gradient(180deg, transparent 50%, rgba(32, 60, 127,0.6) 100%)" }}
           aria-hidden="true"
         />
 
@@ -524,7 +524,7 @@ function ArchImageReveal() {
       {/* Architectural corner annotations */}
       <motion.p
         className="absolute top-3 right-3 arch-label"
-        style={{ color: "rgba(255,255,255,0.7)", background: "rgba(8,11,26,0.75)", padding: "2px 6px" }}
+        style={{ color: "rgba(255,255,255,0.7)", background: "rgba(32, 60, 127,0.75)", padding: "2px 6px" }}
         initial={{ opacity: 0 }}
         animate={inView ? { opacity: 1 } : {}}
         transition={{ duration: 0.6, delay: 1.0 }}
@@ -534,7 +534,7 @@ function ArchImageReveal() {
       </motion.p>
       <motion.p
         className="absolute bottom-3 left-3 arch-label"
-        style={{ color: "rgba(255,255,255,0.7)", background: "rgba(8,11,26,0.75)", padding: "2px 6px" }}
+        style={{ color: "rgba(255,255,255,0.7)", background: "rgba(32, 60, 127,0.75)", padding: "2px 6px" }}
         initial={{ opacity: 0 }}
         animate={inView ? { opacity: 1 } : {}}
         transition={{ duration: 0.6, delay: 1.1 }}

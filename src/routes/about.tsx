@@ -75,7 +75,7 @@ function ParallaxStudioBanner() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(180deg, rgba(17,17,17,0.3) 0%, transparent 45%, rgba(17,17,17,0.5) 100%)",
+            "linear-gradient(180deg, rgba(32, 60, 127,0.3) 0%, transparent 45%, rgba(32, 60, 127,0.5) 100%)",
         }}
         aria-hidden="true"
       />
@@ -88,7 +88,7 @@ function ParallaxStudioBanner() {
             className="arch-label"
             style={{
               color: "rgba(255,255,255,0.85)",
-              background: "rgba(17,17,17,0.65)",
+              background: "rgba(32, 60, 127,0.65)",
               padding: "4px 12px",
               backdropFilter: "blur(4px)",
             }}
@@ -99,7 +99,7 @@ function ParallaxStudioBanner() {
             className="arch-label hidden sm:inline-block"
             style={{
               color: "rgba(255,255,255,0.65)",
-              background: "rgba(17,17,17,0.65)",
+              background: "rgba(32, 60, 127,0.65)",
               padding: "4px 12px",
               backdropFilter: "blur(4px)",
             }}
@@ -109,7 +109,7 @@ function ParallaxStudioBanner() {
         </div>
 
         <div className="max-w-[560px] p-6 lg:p-8 bg-ink/80 backdrop-blur-md border border-white/10">
-          <p className="arch-label arch-label--accent mb-2.5">PHYSICAL & SPATIAL MODELING</p>
+          <p className="arch-label mb-2.5" style={{ color: "var(--highlight)" }}>PHYSICAL & SPATIAL MODELING</p>
           <p className="font-display text-white text-[1.35rem] sm:text-[1.7rem] font-light leading-snug mb-3">
             Every massing, void and light path is verified in physical space before construction begins.
           </p>
@@ -290,14 +290,14 @@ function About() {
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "linear-gradient(160deg, rgba(28,25,20,0.85) 0%, rgba(17,17,17,0.7) 45%, rgba(17,17,17,0.95) 100%)",
+                "linear-gradient(160deg, rgba(32, 60, 127,0.85) 0%, rgba(32, 60, 127,0.7) 45%, rgba(32, 60, 127,0.95) 100%)",
             }}
             aria-hidden="true"
           />
           <div className="arch-grid-dark absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true" />
 
           <div className="relative arch-container">
-            <p className="arch-label arch-label--accent mb-4">ABOUT HOME STUDIOS</p>
+            <p className="arch-label mb-4" style={{ color: "var(--highlight)" }}>ABOUT HOME STUDIOS</p>
             <h1 className="font-display text-white leading-[0.92] mb-6"
               style={{ fontSize: "var(--text-display-lg)" }}>
               BUILT BY PEOPLE<br />WHO'D RATHER YOU<br />FIND THE MISTAKE<br />ON THE FLOOR.
@@ -341,12 +341,12 @@ function About() {
         {/* ── Large typographic philosophy statements ── */}
         <section
           className="py-12 lg:py-16 overflow-hidden"
-          style={{ background: "var(--surface)" }}
+          style={{ background: "var(--text-primary)" }}
           aria-label="Philosophy"
         >
           <div className="arch-grid-dark absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true" />
           <div className="relative arch-container">
-            <p className="arch-label arch-label--light mb-6">PHILOSOPHY</p>
+            <p className="arch-label mb-6" style={{ color: "var(--highlight)" }}>PHILOSOPHY</p>
             {[
               { word: "SPACE", sub: "Designed from how you live in it." },
               { word: "SCALE", sub: "Tested at 1:1 before a wall is built." },

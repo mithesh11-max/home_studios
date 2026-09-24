@@ -285,9 +285,9 @@ export function ServiceExplorer() {
 
           {/* Right Column: Sticky Live Architectural Viewport (Desktop) */}
           <div className="hidden lg:block sticky top-28">
-            <div className="relative w-full bg-deep border border-rule overflow-hidden shadow-2xl">
+            <div className="relative w-full bg-dark border border-rule overflow-hidden shadow-2xl">
               {/* Top Viewport Datum Bar */}
-              <div className="p-3 px-4 bg-deep/95 border-b border-white/10 flex items-center justify-between text-white/80">
+              <div className="p-3 px-4 bg-dark/95 border-b border-white/10 flex items-center justify-between text-white/80">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-indigo inline-block animate-pulse" />
                   <span className="font-mono text-[10px] tracking-widest text-indigo uppercase">
@@ -330,7 +330,7 @@ export function ServiceExplorer() {
                       className="absolute inset-0 pointer-events-none"
                       style={{
                         background:
-                          "linear-gradient(180deg, rgba(8, 11, 26, 0.25) 0%, rgba(8, 11, 26, 0.1) 40%, rgba(8, 11, 26, 0.92) 100%)",
+                          "linear-gradient(180deg, rgba(32, 60, 127, 0.25) 0%, rgba(32, 60, 127, 0.1) 40%, rgba(32, 60, 127, 0.92) 100%)",
                       }}
                     />
                   </motion.div>
@@ -344,7 +344,7 @@ export function ServiceExplorer() {
               </div>
 
               {/* Bottom Technical HUD & Direct Action */}
-              <div className="p-6 bg-deep border-t border-white/10 text-white">
+              <div className="p-6 bg-dark border-t border-white/10 text-white">
                 <div className="mb-5">
                   <span className="font-mono text-[9px] tracking-widest text-indigo uppercase block mb-1">
                     ENGINEERING DELIVERABLES

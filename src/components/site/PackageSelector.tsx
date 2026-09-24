@@ -24,7 +24,7 @@ export function PackageSelector() {
 
   return (
     <section
-      className="py-14 lg:py-22 bg-[#080B1A] text-white relative overflow-hidden"
+      className="py-14 lg:py-22 bg-[#203C7F] text-white relative overflow-hidden"
       aria-label="Construction packages specification comparison"
     >
       {/* Subtle drafting grid overlay */}
@@ -51,12 +51,12 @@ export function PackageSelector() {
           </div>
 
           {/* View Mode Switcher (Desktop) */}
-          <div className="flex items-center gap-1 p-1 bg-[#10152B] border border-white/15 self-start lg:self-auto">
+          <div className="flex items-center gap-1 p-1 bg-[#2A4A8F] border border-white/15 self-start lg:self-auto">
             <button
               onClick={() => setViewMode("focused")}
               className={`px-3.5 py-1.5 font-mono text-[10px] tracking-widest uppercase transition-all ${
                 viewMode === "focused"
-                  ? "bg-indigo text-deep font-semibold shadow-sm"
+                  ? "bg-[#C9E1CA] text-[#203C7F] font-semibold shadow-sm"
                   : "text-white/70 hover:text-white"
               }`}
               data-interactive
@@ -67,7 +67,7 @@ export function PackageSelector() {
               onClick={() => setViewMode("table")}
               className={`px-3.5 py-1.5 font-mono text-[10px] tracking-widest uppercase transition-all ${
                 viewMode === "table"
-                  ? "bg-indigo text-deep font-semibold shadow-sm"
+                  ? "bg-[#C9E1CA] text-[#203C7F] font-semibold shadow-sm"
                   : "text-white/70 hover:text-white"
               }`}
               data-interactive
@@ -90,8 +90,8 @@ export function PackageSelector() {
                   onClick={() => setSelectedTier(idx)}
                   className={`relative p-4 sm:p-5 text-left transition-all duration-200 outline-none select-none border ${
                     isSelected
-                      ? "bg-[#182042] border-indigo shadow-lg"
-                      : "bg-[#10152B] border-white/12 hover:border-white/30 hover:bg-[#141935]"
+                      ? "bg-[#2A4A8F] border-[#98BFCB] shadow-lg"
+                      : "bg-[#1B336C] border-white/12 hover:border-white/30 hover:bg-[#264080]"
                   }`}
                   data-interactive
                   data-cursor="view"
@@ -100,17 +100,17 @@ export function PackageSelector() {
                   {isSelected && (
                     <motion.div
                       layoutId="active-pkg-pill"
-                      className="absolute top-0 inset-x-0 h-0.5 bg-indigo"
+                      className="absolute top-0 inset-x-0 h-0.5 bg-[#98BFCB]"
                       transition={{ duration: 0.22, ease: EASE_ARCH_SMOOTH }}
                     />
                   )}
 
                   <div className="flex items-center justify-between gap-1 mb-1.5">
-                    <span className="font-mono text-[10px] tracking-widest text-indigo font-semibold">
+                    <span className="font-mono text-[10px] tracking-widest text-[#98BFCB] font-semibold">
                       {TIER_NUMS[idx]}
                     </span>
                     {pkg.highlight && (
-                      <span className="px-1.5 py-0.5 bg-indigo/25 text-indigo text-[8px] font-mono tracking-wider font-semibold border border-indigo/30">
+                      <span className="px-1.5 py-0.5 bg-[#98BFCB]/25 text-[#98BFCB] text-[8px] font-mono tracking-wider font-semibold border border-[#98BFCB]/40">
                         POPULAR
                       </span>
                     )}
@@ -131,16 +131,16 @@ export function PackageSelector() {
 
         {/* ── View Mode: Focused Tier Inspection ── */}
         {viewMode === "focused" ? (
-          <div className="bg-[#10152B] border border-white/15 p-6 sm:p-8 shadow-2xl">
+          <div className="bg-[#1B336C] border border-white/15 p-6 sm:p-8 shadow-2xl">
             {/* Tier Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 mb-7 border-b border-white/12">
               <div>
                 <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                  <span className="font-mono text-[11px] tracking-widest text-indigo font-semibold">
+                  <span className="font-mono text-[11px] tracking-widest text-[#98BFCB] font-semibold">
                     TIER {TIER_NUMS[selectedTier]} // {activePackage.name.toUpperCase()} SPECIFICATION
                   </span>
                   {activePackage.highlight && (
-                    <span className="px-2 py-0.5 bg-indigo/20 text-indigo text-[9px] font-mono tracking-widest font-semibold border border-indigo/30">
+                    <span className="px-2 py-0.5 bg-[#98BFCB]/20 text-[#98BFCB] text-[9px] font-mono tracking-widest font-semibold border border-[#98BFCB]/40">
                       MOST REQUESTED
                     </span>
                   )}
@@ -150,8 +150,8 @@ export function PackageSelector() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 bg-[#0c1024] px-4 py-2.5 border border-white/15 self-start sm:self-auto">
-                <span className="w-2 h-2 bg-indigo inline-block animate-pulse" />
+              <div className="flex items-center gap-2 bg-[#152A5C] px-4 py-2.5 border border-white/15 self-start sm:self-auto">
+                <span className="w-2 h-2 bg-[#98BFCB] inline-block animate-pulse" />
                 <span className="font-mono text-[10px] tracking-widest text-white/85 uppercase">
                   100% WRITTEN BOQ GUARANTEE
                 </span>
@@ -165,11 +165,11 @@ export function PackageSelector() {
                 return (
                   <div
                     key={row.category}
-                    className="p-4 bg-[#0c1024] border border-white/12 flex flex-col justify-between hover:border-indigo/40 transition-colors"
+                    className="p-4 bg-[#152A5C] border border-white/12 flex flex-col justify-between hover:border-[#98BFCB]/50 transition-colors"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-mono text-[10px] tracking-widest uppercase text-indigo font-medium">
+                        <span className="font-mono text-[10px] tracking-widest uppercase text-[#98BFCB] font-medium">
                           0{rIdx + 1} / {row.category}
                         </span>
                       </div>
@@ -206,10 +206,10 @@ export function PackageSelector() {
           </div>
         ) : (
           /* ── View Mode: Full Side-by-Side Comparison Matrix ── */
-          <div className="overflow-x-auto border border-white/15 bg-[#10152B] shadow-2xl">
+          <div className="overflow-x-auto border border-white/15 bg-[#1B336C] shadow-2xl">
             <table className="w-full text-left border-collapse min-w-[760px]">
               <thead>
-                <tr className="border-b border-white/15 bg-[#0c1024]">
+                <tr className="border-b border-white/15 bg-[#152A5C]">
                   <th className="p-4 font-mono text-[10px] tracking-widest uppercase text-white/50 w-[180px]">
                     CATEGORY
                   </th>
@@ -219,11 +219,11 @@ export function PackageSelector() {
                       onClick={() => setSelectedTier(i)}
                       className={`p-4 cursor-pointer transition-colors ${
                         selectedTier === i
-                          ? "bg-indigo/20 border-x border-indigo/50"
+                          ? "bg-[#98BFCB]/20 border-x border-[#98BFCB]/50"
                           : "hover:bg-white/5"
                       }`}
                     >
-                      <div className="font-mono text-[9px] text-indigo mb-0.5">{TIER_NUMS[i]}</div>
+                      <div className="font-mono text-[9px] text-[#98BFCB] mb-0.5">{TIER_NUMS[i]}</div>
                       <div className="font-display text-[1.2rem] font-light text-white leading-tight">
                         {pkg.name}
                       </div>
@@ -238,9 +238,9 @@ export function PackageSelector() {
                 {PACKAGE_ROWS.map((row, rIdx) => (
                   <tr
                     key={row.category}
-                    className={rIdx % 2 === 0 ? "bg-[#10152B]" : "bg-[#0c1024]"}
+                    className={rIdx % 2 === 0 ? "bg-[#1B336C]" : "bg-[#152A5C]"}
                   >
-                    <td className="p-4 font-mono text-[10px] tracking-wider uppercase text-indigo font-semibold bg-[#0c1024] border-r border-white/12">
+                    <td className="p-4 font-mono text-[10px] tracking-wider uppercase text-[#98BFCB] font-semibold bg-[#152A5C] border-r border-white/12">
                       {row.category}
                     </td>
                     {row.values.map((val, colIdx) => (
@@ -249,7 +249,7 @@ export function PackageSelector() {
                         onClick={() => setSelectedTier(colIdx)}
                         className={`p-4 transition-colors cursor-pointer leading-snug ${
                           selectedTier === colIdx
-                            ? "bg-indigo/10 text-white font-medium border-x border-indigo/50"
+                            ? "bg-[#98BFCB]/15 text-white font-medium border-x border-[#98BFCB]/50"
                             : "text-white/75"
                         }`}
                       >

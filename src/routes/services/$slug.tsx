@@ -56,12 +56,12 @@ function ServiceDetail() {
         {/* ── Hero ── */}
         <section
           className="relative pt-32 pb-14 lg:pb-18 overflow-hidden"
-          style={{ background: "linear-gradient(160deg, #1C1914 0%, #111111 100%)" }}
+          style={{ background: "linear-gradient(160deg, var(--indigo-strong) 0%, #152A5C 100%)" }}
           aria-label={`${service.name} hero`}
         >
           <div className="arch-grid-dark absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true" />
           <div className="relative arch-container">
-            <p className="arch-label arch-label--accent mb-4">SERVICE — {service.name.toUpperCase()}</p>
+            <p className="arch-label mb-4" style={{ color: "var(--highlight)" }}>SERVICE — {service.name.toUpperCase()}</p>
             <h1 className="font-display text-white leading-[0.92] mb-6"
               style={{ fontSize: "var(--text-display-lg)" }}>
               {headline.split("\n").map((line, i) => (

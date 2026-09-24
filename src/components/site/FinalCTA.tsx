@@ -33,7 +33,7 @@ export function FinalCTA({
       <div className="relative arch-container">
         <div className="max-w-[800px]">
           <p className="arch-label mb-6" style={{ color: "var(--indigo)" }}>{eyebrow}</p>
-          <h2 className="font-display text-white leading-[0.95]"
+          <h2 className="font-display text-ink leading-[0.95]"
             style={{ fontSize: "var(--text-display-md)" }}>
             {title.split("\n").map((line, i) => (
               <span key={i} className="block">{line}</span>

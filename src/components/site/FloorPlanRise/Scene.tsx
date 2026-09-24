@@ -39,7 +39,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matPlaster = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#1B2144"),
+        color: new THREE.Color("#E9E4D6"), // warm pale plaster
         roughness: 0.76,
         metalness: 0.04,
       }),
@@ -49,7 +49,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matConcrete = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#252B52"),
+        color: new THREE.Color("#BDB7A9"), // light warm concrete
         roughness: 0.90,
         metalness: 0.08,
       }),
@@ -59,7 +59,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matWood = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#483A2E"),
+        color: new THREE.Color("#6B4F3A"), // warm wood
         roughness: 0.58,
         metalness: 0.08,
       }),
@@ -69,7 +69,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matFloor = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#0F142A"),
+        color: new THREE.Color("#C7BBA0"), // light wood floor
         roughness: 0.70,
         metalness: 0.05,
         transparent: true,
@@ -81,7 +81,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matPlanLine = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: new THREE.Color("#8A86FC"), // Soft Electric Indigo blueprint trace
+        color: new THREE.Color("#203C7F"), // Navy blueprint trace (brand anchor)
         transparent: true,
         opacity: 0.92,
       }),
@@ -91,7 +91,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matPlanDim = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: new THREE.Color("#A9AED0"),
+        color: new THREE.Color("#647E9D"), // navy-teal dimension lines
         transparent: true,
         opacity: 0.75,
       }),
@@ -101,7 +101,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matGlass = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#7F8CF8"),
+        color: new THREE.Color("#98BFCB"), // teal glass tint
         roughness: 0.12,
         metalness: 0.85,
         transparent: true,
@@ -113,7 +113,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matFabric = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#2C3460"),
+        color: new THREE.Color("#4E7C8C"), // teal upholstery
         roughness: 0.82,
         metalness: 0.02,
       }),
@@ -123,7 +123,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matCushion = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#384278"),
+        color: new THREE.Color("#3E5A8D"), // navy cushion
         roughness: 0.78,
         metalness: 0.02,
       }),
@@ -133,7 +133,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matStone = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#32385C"),
+        color: new THREE.Color("#B7B0A2"), // light warm stone
         roughness: 0.45,
         metalness: 0.15,
       }),
@@ -143,7 +143,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   const matRug = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#161C38"),
+        color: new THREE.Color("#203C7F"), // navy accent rug
         roughness: 0.95,
         metalness: 0.0,
       }),
@@ -268,7 +268,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
   return (
     <>
       {/* Dynamic Lighting System */}
-      <ambientLight intensity={lerp(0.5, 0.85, smoothstep(0.4, 0.9, p))} color="#CBD2F8" />
+      <ambientLight intensity={lerp(0.5, 0.85, smoothstep(0.4, 0.9, p))} color="#DCE8DD" />
       <directionalLight
         ref={dirLightRef}
         position={[8.5, 14, 10.5]}
@@ -283,7 +283,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
         shadow-camera-bottom={-10}
         shadow-bias={-0.0004}
       />
-      <hemisphereLight args={["#D8DCFB", "#0D1126", 0.45]} />
+      <hemisphereLight args={["#DCE8DD", "#B1D0CB", 0.45]} />
 
       {/* Warm Interior Spot in Living Pavilion (activates at eye level) */}
       <pointLight
@@ -312,7 +312,7 @@ function ArchitecturalScene({ progress, isMobile = false }: SceneContentProps) {
         >
           <planeGeometry args={[8.8, 7.8]} />
           <meshStandardMaterial
-            color="#121734"
+            color="#D9D2C2"
             roughness={0.85}
             transparent
             opacity={smoothstep(0.62, 0.92, p) * 0.9}
@@ -460,7 +460,7 @@ export function FloorPlanScene({
       style={{
         width: "100%",
         height: "100%",
-        background: "#080B1A", // Dark Indigo deep background
+        background: "#C9E1CA", // mint canvas background
       }}
     >
       <ArchitecturalScene progress={progress} isMobile={isMobile} />

@@ -202,7 +202,7 @@ function StaticHero({ isMobile = false }: { isMobile?: boolean }) {
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(180deg, rgba(8,11,26,0.3) 0%, rgba(8,11,26,0.9) 100%)",
+          background: "linear-gradient(180deg, rgba(32, 60, 127,0.3) 0%, rgba(32, 60, 127,0.9) 100%)",
         }}
         aria-hidden="true"
       />
@@ -635,7 +635,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
         ref={vignetteRef}
         className="pointer-events-none sticky top-0 -mt-[100dvh] w-full h-[100dvh] z-10 will-change-transform"
         style={{
-          background: "radial-gradient(ellipse at center, rgba(23, 26, 61, 0.20) 0%, rgba(8, 11, 26, 0.60) 100%)",
+          background: "radial-gradient(ellipse at center, rgba(23, 26, 61, 0.20) 0%, rgba(32, 60, 127, 0.60) 100%)",
         }}
         aria-hidden="true"
       />
@@ -784,7 +784,7 @@ function CanvasHero({ scrollContainerRef, isMobile, onPhaseChange }: CanvasHeroP
       <div
         className="pointer-events-none absolute bottom-0 left-0 right-0 h-36 z-15"
         style={{
-          background: "linear-gradient(to bottom, transparent 0%, rgba(8, 11, 26, 0.75) 60%, var(--bg-deep) 100%)",
+          background: "linear-gradient(to bottom, transparent 0%, rgba(32, 60, 127, 0.75) 60%, var(--bg-deep) 100%)",
         }}
         aria-hidden="true"
       />

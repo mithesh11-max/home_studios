@@ -39,24 +39,27 @@ export function RouteTransition({ children }: { children: ReactNode }) {
         key={location.pathname}
         initial={{
           clipPath: "inset(100% 0% 0% 0%)",
-          y: 16,
           opacity: 0.85,
         }}
         animate={{
           clipPath: "inset(0% 0% 0% 0%)",
-          y: 0,
           opacity: 1,
         }}
         exit={{
           clipPath: "inset(0% 0% 100% 0%)",
-          y: -16,
           opacity: 0.85,
         }}
         transition={{
           duration: 0.38,
           ease: [0.22, 1, 0.36, 1],
         }}
-        className="w-full origin-center relative will-change-transform"
+        // Deliberately no `y`/transform here: this wrapper is an ancestor of the
+        // fixed-position SiteHeader in every route. Any transform on it (even a
+        // resting translateY(0)) creates a CSS containing block that breaks
+        // position:fixed for descendants, so the header scrolls away with the
+        // page instead of staying pinned. clip-path + opacity give the same
+        // "unmasking sheet" transition without ever touching transform.
+        className="w-full origin-center relative"
       >
         <ScrollRestorationHandler isPop={isPopRef.current} />
         {children}

@@ -63,10 +63,13 @@ export function SiteHeader() {
                 key={link.to}
                 to={link.to}
                 hash={link.to === "/" && pathname !== "/" ? "hs-content" : undefined}
-                className="relative arch-label text-[11px] tracking-[0.16em] uppercase transition-colors duration-200 text-stone hover:text-white py-1"
+                className={`relative arch-label text-[11px] tracking-[0.16em] uppercase transition-colors duration-200 py-1 ${
+                  isCompressed ? "text-secondary hover:text-primary" : "text-white/85 hover:text-white"
+                }`}
                 activeProps={{
-                  className:
-                    "text-white font-semibold after:content-[''] after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2px] after:bg-indigo",
+                  className: `font-semibold after:content-[''] after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2px] after:bg-indigo ${
+                    isCompressed ? "text-primary" : "text-white"
+                  }`,
                 }}
                 data-interactive
               >
@@ -94,7 +97,9 @@ export function SiteHeader() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
-              className="lg:hidden flex flex-col justify-center items-center gap-[5px] h-11 w-11 text-white touch-manipulation active:scale-95 transition-transform"
+              className={`lg:hidden flex flex-col justify-center items-center gap-[5px] h-11 w-11 touch-manipulation active:scale-95 transition-transform ${
+                menuOpen || isCompressed ? "text-primary" : "text-white"
+              }`}
             >
               <span
                 className="block h-px w-5 bg-current transition-all duration-300"

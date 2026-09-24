@@ -54,7 +54,7 @@ function Contact() {
         {/* ── Hero ── */}
         <section
           className="relative pt-32 pb-14 lg:pb-18 overflow-hidden"
-          style={{ background: "var(--bg-deep)" }}
+          style={{ background: "var(--text-primary)" }}
           aria-label="Contact hero"
         >
           <div className="arch-grid-dark absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true" />
@@ -62,7 +62,7 @@ function Contact() {
 
             {/* Left: headline & neat spacious contact directory */}
             <div>
-              <p className="arch-label arch-label--accent mb-4">GET IN TOUCH</p>
+              <p className="arch-label mb-4" style={{ color: "var(--highlight)" }}>GET IN TOUCH</p>
               <h1 className="font-display text-white leading-[0.92]"
                 style={{ fontSize: "var(--text-display-lg)" }}>
                 LET'S BUILD<br />SOMETHING<br />REAL.
@@ -77,12 +77,12 @@ function Contact() {
                 {/* 01: Direct Phone */}
                 <div className="p-4 sm:p-5 border border-white/10 hover:border-white/20 transition-colors bg-white/[0.02]">
                   <div className="flex items-center justify-between gap-4 mb-2">
-                    <span className="arch-label arch-label--accent">01 / TELEPHONE</span>
+                    <span className="arch-label" style={{ color: "var(--highlight)" }}>01 / TELEPHONE</span>
                     <span className="arch-label" style={{ color: "rgba(255,255,255,0.3)" }}>MON – SAT · 9AM – 7PM</span>
                   </div>
                   <a
                     href={CONTACT.phoneHref}
-                    className="inline-block font-sans font-600 text-[1.2rem] sm:text-[1.35rem] text-white hover:text-indigo transition-colors tracking-wide leading-snug"
+                    className="inline-block font-sans font-600 text-[1.2rem] sm:text-[1.35rem] text-white hover:text-highlight transition-colors tracking-wide leading-snug"
                   >
                     {CONTACT.phone}
                   </a>
@@ -94,16 +94,16 @@ function Contact() {
                 {/* 02: WhatsApp Direct */}
                 <div className="p-4 sm:p-5 border border-white/10 hover:border-white/20 transition-colors bg-white/[0.02]">
                   <div className="flex items-center justify-between gap-4 mb-2">
-                    <span className="arch-label arch-label--accent">02 / WHATSAPP CHAT</span>
+                    <span className="arch-label" style={{ color: "var(--highlight)" }}>02 / WHATSAPP CHAT</span>
                     <span className="arch-label" style={{ color: "rgba(255,255,255,0.3)" }}>INSTANT MESSAGING</span>
                   </div>
                   <a
                     href={CONTACT.whatsappHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 font-sans font-600 text-[1.05rem] sm:text-[1.15rem] text-white hover:text-indigo transition-colors leading-snug"
+                    className="inline-flex items-center gap-2 font-sans font-600 text-[1.05rem] sm:text-[1.15rem] text-white hover:text-highlight transition-colors leading-snug"
                   >
-                    Chat with Home Studios <ArrowUpRight className="h-4 w-4" style={{ color: "var(--indigo)" }} />
+                    Chat with Home Studios <ArrowUpRight className="h-4 w-4" style={{ color: "var(--highlight)" }} />
                   </a>
                   <p className="mt-1.5 text-white/45 text-[0.84rem] leading-relaxed">
                     Fastest way to share floor plans, reserve walkthrough slots, and receive estimates.
@@ -113,12 +113,12 @@ function Contact() {
                 {/* 03: Email */}
                 <div className="p-4 sm:p-5 border border-white/10 hover:border-white/20 transition-colors bg-white/[0.02]">
                   <div className="flex items-center justify-between gap-4 mb-2">
-                    <span className="arch-label arch-label--accent">03 / OFFICIAL EMAIL</span>
+                    <span className="arch-label" style={{ color: "var(--highlight)" }}>03 / OFFICIAL EMAIL</span>
                     <span className="arch-label" style={{ color: "rgba(255,255,255,0.3)" }}>PLANS & RFPS</span>
                   </div>
                   <a
                     href={CONTACT.emailHref}
-                    className="inline-block font-sans font-500 text-[1rem] text-white hover:text-indigo transition-colors"
+                    className="inline-block font-sans font-500 text-[1rem] text-white hover:text-highlight transition-colors"
                   >
                     {CONTACT.email}
                   </a>
@@ -130,7 +130,7 @@ function Contact() {
                 {/* 04: Studio Address */}
                 <div className="p-4 sm:p-5 border border-white/10 hover:border-white/20 transition-colors bg-white/[0.02]">
                   <div className="flex items-center justify-between gap-4 mb-2">
-                    <span className="arch-label arch-label--accent">04 / STUDIO LABORATORY</span>
+                    <span className="arch-label" style={{ color: "var(--highlight)" }}>04 / STUDIO LABORATORY</span>
                     <span className="arch-label" style={{ color: "rgba(255,255,255,0.3)" }}>RR NAGAR · BENGALURU</span>
                   </div>
                   <div className="text-white text-[0.9rem] leading-relaxed space-y-0.5">
@@ -140,10 +140,10 @@ function Contact() {
                   </div>
                   <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[0.78rem] text-white/40">
                     <span className="flex items-center gap-1.5">
-                      <Clock className="h-3 w-3" style={{ color: "var(--indigo)" }} />
+                      <Clock className="h-3 w-3" style={{ color: "var(--highlight)" }} />
                       Mon – Sat: 9:00 AM – 7:00 PM
                     </span>
-                    <span style={{ color: "var(--indigo)" }}>Sessions by advance appointment</span>
+                    <span style={{ color: "var(--highlight)" }}>Sessions by advance appointment</span>
                   </div>
                 </div>
               </div>
@@ -159,13 +159,13 @@ function Contact() {
               className="p-8 lg:p-10"
               style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
             >
-              <h2 className="font-display text-white text-[1.6rem] font-light mb-2">Send an enquiry</h2>
+              <h2 className="font-display text-ink text-[1.6rem] font-light mb-2">Send an enquiry</h2>
               <p className="text-[0.85rem] mb-8" style={{ color: "var(--text-muted)" }}>We reply to most enquiries within one business day.</p>
 
               {sent ? (
                 <div className="py-8 text-center border" style={{ borderColor: "var(--border)" }}>
                   <p className="arch-label arch-label--accent mb-3">✓ OPENING WHATSAPP</p>
-                  <p className="font-display text-white text-[1.4rem] font-light mb-3">Message prepared.</p>
+                  <p className="font-display text-ink text-[1.4rem] font-light mb-3">Message prepared.</p>
                   <p className="text-[0.88rem] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                     Your enquiry has been composed in WhatsApp. If it didn't open automatically,
                     message us directly at{" "}
@@ -210,7 +210,7 @@ function Contact() {
                   <button type="submit" className="arch-btn arch-btn--primary w-full justify-center">
                     SEND VIA WHATSAPP <span className="arch-btn-arrow">→</span>
                   </button>
-                  <p className="text-white/25 text-[0.75rem] text-center">
+                  <p className="text-muted text-[0.75rem] text-center">
                     This will open WhatsApp with your enquiry pre-filled. We reply within one business day.
                   </p>
                 </form>

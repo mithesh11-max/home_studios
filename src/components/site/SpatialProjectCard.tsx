@@ -113,12 +113,12 @@ export function SpatialProjectCard({
     >
       {/* Rectilinear Architectural Shell (No card rotation or distortion) */}
       <div
-        className="relative w-full aspect-[4/3] sm:aspect-[16/11] bg-[#0c1024] border border-white/12 overflow-hidden transition-all duration-400 ease-out"
+        className="relative w-full aspect-[4/3] sm:aspect-[16/11] bg-[#98BFCB] border border-indigo/15 overflow-hidden transition-all duration-400 ease-out"
         style={{
-          borderColor: isHovered ? "rgba(138, 134, 252, 0.45)" : "rgba(255, 255, 255, 0.12)",
+          borderColor: isHovered ? "rgba(32, 60, 127, 0.45)" : "rgba(255, 255, 255, 0.12)",
           boxShadow: isHovered
-            ? "0 16px 36px -12px rgba(8, 11, 26, 0.8), 0 0 0 1px rgba(138, 134, 252, 0.2)"
-            : "0 6px 20px -8px rgba(8, 11, 26, 0.5)",
+            ? "0 16px 36px -12px rgba(32, 60, 127, 0.8), 0 0 0 1px rgba(32, 60, 127, 0.2)"
+            : "0 6px 20px -8px rgba(32, 60, 127, 0.5)",
         }}
       >
         {/* ── Layer 1: Recessed Image Window with Subtle ±6px Optical Shift ── */}
@@ -158,7 +158,7 @@ export function SpatialProjectCard({
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(180deg, rgba(8, 11, 26, 0.45) 0%, rgba(8, 11, 26, 0.15) 42%, rgba(8, 11, 26, 0.90) 100%)",
+              "linear-gradient(180deg, rgba(32, 60, 127, 0.45) 0%, rgba(32, 60, 127, 0.15) 42%, rgba(32, 60, 127, 0.90) 100%)",
           }}
           aria-hidden="true"
         />
@@ -170,14 +170,14 @@ export function SpatialProjectCard({
         <div className="absolute top-0 inset-x-0 p-4 sm:p-5 flex justify-between items-start pointer-events-none z-10">
           {/* Index Stamp: 01 / 06 */}
           <div
-            className="flex items-center gap-2 px-2.5 py-1 bg-deep/90 border border-white/15 transition-colors duration-300"
+            className="flex items-center gap-2 px-2.5 py-1 bg-dark/90 border border-white/15 transition-colors duration-300"
             style={{
-              borderColor: isHovered ? "rgba(138, 134, 252, 0.4)" : "rgba(255, 255, 255, 0.15)",
+              borderColor: isHovered ? "rgba(32, 60, 127, 0.4)" : "rgba(255, 255, 255, 0.15)",
             }}
           >
             <span
               className="font-mono text-[10px] tracking-widest font-semibold transition-colors duration-300"
-              style={{ color: isHovered ? "var(--indigo)" : "#FFFFFF" }}
+              style={{ color: isHovered ? "var(--highlight)" : "#FFFFFF" }}
             >
               {project.indexLabel}
             </span>
@@ -191,7 +191,7 @@ export function SpatialProjectCard({
           <span
             className="px-2.5 py-1 font-mono text-[9px] tracking-widest uppercase transition-all duration-300"
             style={{
-              backgroundColor: isHovered ? "var(--indigo)" : "rgba(8, 11, 26, 0.85)",
+              backgroundColor: isHovered ? "var(--indigo)" : "rgba(32, 60, 127, 0.85)",
               color: isHovered ? "var(--bg-deep)" : "rgba(255, 255, 255, 0.85)",
               border: isHovered ? "1px solid var(--indigo)" : "1px solid rgba(255, 255, 255, 0.15)",
             }}
@@ -206,7 +206,7 @@ export function SpatialProjectCard({
             <div className="min-w-0 flex-1">
               <p
                 className="font-mono text-[9px] tracking-widest uppercase mb-1.5 transition-colors duration-300"
-                style={{ color: isHovered ? "var(--indigo)" : "rgba(255, 255, 255, 0.55)" }}
+                style={{ color: isHovered ? "var(--highlight)" : "rgba(255, 255, 255, 0.55)" }}
               >
                 {project.meta.location}
               </p>
@@ -215,7 +215,7 @@ export function SpatialProjectCard({
               <h3
                 className="font-display text-white text-[clamp(1.35rem,2.5vw,1.75rem)] font-light leading-tight transition-all duration-300"
                 style={{
-                  color: isHovered ? "var(--indigo)" : "#FFFFFF",
+                  color: isHovered ? "var(--highlight)" : "#FFFFFF",
                   transform: isHovered && !prefersReducedMotion ? "translateX(4px)" : "translateX(0px)",
                 }}
               >
@@ -231,7 +231,7 @@ export function SpatialProjectCard({
             <div
               className="flex-shrink-0 w-9 h-9 border border-white/20 flex items-center justify-center transition-all duration-300"
               style={{
-                backgroundColor: isHovered ? "var(--indigo)" : "rgba(8, 11, 26, 0.75)",
+                backgroundColor: isHovered ? "var(--indigo)" : "rgba(32, 60, 127, 0.75)",
                 borderColor: isHovered ? "var(--indigo)" : "rgba(255, 255, 255, 0.2)",
                 transform: isHovered && !prefersReducedMotion ? "translate(3px, -3px)" : "translate(0, 0)",
               }}
@@ -257,19 +257,19 @@ export function SpatialProjectCard({
         {/* Architectural Corner Alignment Reticles */}
         <div
           className="absolute top-2 left-2 w-2 h-2 border-t border-l pointer-events-none transition-colors duration-300"
-          style={{ borderColor: isHovered ? "var(--indigo)" : "rgba(255, 255, 255, 0.25)" }}
+          style={{ borderColor: isHovered ? "var(--highlight)" : "rgba(255, 255, 255, 0.25)" }}
         />
         <div
           className="absolute top-2 right-2 w-2 h-2 border-t border-r pointer-events-none transition-colors duration-300"
-          style={{ borderColor: isHovered ? "var(--indigo)" : "rgba(255, 255, 255, 0.25)" }}
+          style={{ borderColor: isHovered ? "var(--highlight)" : "rgba(255, 255, 255, 0.25)" }}
         />
         <div
           className="absolute bottom-2 left-2 w-2 h-2 border-b border-l pointer-events-none transition-colors duration-300"
-          style={{ borderColor: isHovered ? "var(--indigo)" : "rgba(255, 255, 255, 0.25)" }}
+          style={{ borderColor: isHovered ? "var(--highlight)" : "rgba(255, 255, 255, 0.25)" }}
         />
         <div
           className="absolute bottom-2 right-2 w-2 h-2 border-b border-r pointer-events-none transition-colors duration-300"
-          style={{ borderColor: isHovered ? "var(--indigo)" : "rgba(255, 255, 255, 0.25)" }}
+          style={{ borderColor: isHovered ? "var(--highlight)" : "rgba(255, 255, 255, 0.25)" }}
         />
 
         {/* Selection Expansion Mask */}
@@ -278,9 +278,9 @@ export function SpatialProjectCard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.25, ease: EASE_ARCH_SMOOTH }}
-            className="absolute inset-0 bg-deep/92 z-30 flex items-center justify-center pointer-events-none"
+            className="absolute inset-0 bg-dark/92 z-30 flex items-center justify-center pointer-events-none"
           >
-            <span className="font-mono text-[10px] tracking-widest text-indigo uppercase">
+            <span className="font-mono text-[10px] tracking-widest text-highlight uppercase">
               ENTERING SPACE →
             </span>
           </motion.div>
