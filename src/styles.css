@@ -261,6 +261,9 @@
     font-weight: 400;
     line-height: 1.6;
     overflow-x: hidden;
+    /* Prevent long URLs / email addresses from causing layout overflow */
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   /* ── Display typography ── */
@@ -673,6 +676,17 @@
   .arch-wa-float:hover {
     background: var(--indigo-strong);
     transform: translateY(-2px);
+  }
+  /* ── WhatsApp float: hide label text at xs so it doesn't overlap content ── */
+  @media (max-width: 390px) {
+    .arch-wa-float {
+      bottom: 1.25rem;
+      right: 1.25rem;
+      padding: 0.75rem;
+    }
+    .arch-wa-float-label {
+      display: none;
+    }
   }
 
   /* ── Custom cursor fallback ── */
