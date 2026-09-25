@@ -3,12 +3,12 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { EASE_ARCH_HEAVY, EASE_ARCH_SMOOTH } from "@/lib/motion";
 
-import walkthroughStudioImg from "@/assets/walkthrough-studio.jpg";
-import architectureSiteImg from "@/assets/architecture-site.jpg";
-import aboutStudioBannerImg from "@/assets/about-studio-banner.jpg";
-import homeStudiosHeroImg from "@/assets/home-studios-hero.jpg";
-import walkthroughArImg from "@/assets/walkthrough-ar.jpg";
-import interiorFinishedImg from "@/assets/interior-finished.jpg";
+import walkthroughStudioImg from "@/assets/walkthrough-studio.webp";
+import architectureSiteImg from "@/assets/architecture-site.webp";
+import aboutStudioBannerImg from "@/assets/about-studio-banner.webp";
+import homeStudiosHeroImg from "@/assets/home-studios-hero.webp";
+import walkthroughArImg from "@/assets/walkthrough-ar.webp";
+import interiorFinishedImg from "@/assets/interior-finished.webp";
 
 export interface ServiceExplorerItem {
   num: string;

@@ -9,10 +9,10 @@ import { InteractiveFloorPlan } from "@/components/site/InteractiveFloorPlan";
 import { ArchitecturalMeasurement } from "@/components/site/ArchitecturalMeasurement";
 import { CONTACT } from "@/lib/site-data";
 
-import walkthroughFurnitureImg from "@/assets/walkthrough-furniture.jpg";
-import walkthroughStudioImg from "@/assets/walkthrough-studio.jpg";
-import walkthroughArImg from "@/assets/walkthrough-ar.jpg";
-import walkthroughVrImg from "@/assets/walkthrough-vr.jpg";
+import walkthroughFurnitureImg from "@/assets/walkthrough-furniture.webp";
+import walkthroughStudioImg from "@/assets/walkthrough-studio.webp";
+import walkthroughArImg from "@/assets/walkthrough-ar.webp";
+import walkthroughVrImg from "@/assets/walkthrough-vr.webp";
 
 export const Route = createFileRoute("/walkthrough")({
   component: WalkthroughPage,

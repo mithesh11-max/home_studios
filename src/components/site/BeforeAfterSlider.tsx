@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect, type KeyboardEvent } from "react";
-import interiorBeforeImg from "@/assets/interior-before.jpg";
-import interiorFinishedImg from "@/assets/interior-finished.jpg";
+import interiorBeforeImg from "@/assets/interior-before.webp";
+import interiorFinishedImg from "@/assets/interior-finished.webp";
 
 interface BeforeAfterSliderProps {
   beforeLabel?: string;

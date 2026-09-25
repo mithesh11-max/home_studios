@@ -1,9 +1,9 @@
-import interiorFinishedImg from "@/assets/interior-finished.jpg";
-import walkthroughFurnitureImg from "@/assets/walkthrough-furniture.jpg";
-import walkthroughVrImg from "@/assets/walkthrough-vr.jpg";
-import aboutStudioBannerImg from "@/assets/about-studio-banner.jpg";
-import homeStudiosHeroImg from "@/assets/home-studios-hero.jpg";
-import walkthroughStudioImg from "@/assets/walkthrough-studio.jpg";
+import interiorFinishedImg from "@/assets/interior-finished.webp";
+import walkthroughFurnitureImg from "@/assets/walkthrough-furniture.webp";
+import walkthroughVrImg from "@/assets/walkthrough-vr.webp";
+import aboutStudioBannerImg from "@/assets/about-studio-banner.webp";
+import homeStudiosHeroImg from "@/assets/home-studios-hero.webp";
+import walkthroughStudioImg from "@/assets/walkthrough-studio.webp";
 
 export type RoomId = "living" | "kitchen" | "bedroom" | "bathroom" | "balcony";
 

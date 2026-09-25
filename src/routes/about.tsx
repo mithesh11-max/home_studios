@@ -8,10 +8,10 @@ import { FadeUp } from "@/components/site/TextReveal";
 import { FAQ } from "@/components/site/FAQ";
 import { CONTACT } from "@/lib/site-data";
 
-import aboutStudioBannerImg from "@/assets/about-studio-banner.jpg";
-import architectureSiteImg from "@/assets/architecture-site.jpg";
-import walkthroughStudioImg from "@/assets/walkthrough-studio.jpg";
-import interiorFinishedImg from "@/assets/interior-finished.jpg";
+import aboutStudioBannerImg from "@/assets/about-studio-banner.webp";
+import architectureSiteImg from "@/assets/architecture-site.webp";
+import walkthroughStudioImg from "@/assets/walkthrough-studio.webp";
+import interiorFinishedImg from "@/assets/interior-finished.webp";
 
 export const Route = createFileRoute("/about")({
   component: About,

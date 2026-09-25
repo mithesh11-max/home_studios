@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { motion, useScroll, useTransform, useMotionValueEvent, useReducedMotion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import architectureImg from "@/assets/architecture-site.jpg";
-import interiorFinishedImg from "@/assets/interior-finished.jpg";
+import architectureImg from "@/assets/architecture-site.webp";
+import interiorFinishedImg from "@/assets/interior-finished.webp";
 import { EASE_ARCH_HEAVY, EASE_ARCH_SMOOTH } from "@/lib/motion";
 
 interface FloorPlan2DProps {

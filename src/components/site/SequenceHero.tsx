@@ -45,7 +45,8 @@ const LOADER_TIMEOUT_MS = 5000;
 function getFrameSrc(n: number, isMobile: boolean): string {
   const num = String(n).padStart(3, "0");
   if (isMobile) {
-    return `/sequence/mobile/ezgif-frame-${num}.jpg`;
+    // 540×960 portrait WebP frames (~9.6 MB total vs 17.2 MB for full mobile JPGs).
+    return `/sequence/mobile-webp/ezgif-frame-${num}.webp`;
   }
   return `/sequence/ezgif-frame-${num}.jpg`;
 }
@@ -194,10 +195,12 @@ function StaticHero({ isMobile = false }: { isMobile?: boolean }) {
       aria-label="Hero"
     >
       <img
-        src={isMobile ? "/sequence/mobile/ezgif-frame-090.jpg" : "/sequence/ezgif-frame-090.jpg"}
+        src={isMobile ? "/sequence/mobile-webp/ezgif-frame-090.webp" : "/sequence/ezgif-frame-090.jpg"}
         alt="Double-height living room with floor-to-ceiling glass walls — Home Studios 1:1 walkthrough"
         className="absolute inset-0 w-full h-full object-cover object-center"
         style={{ filter: "saturate(0.88) brightness(0.6)" }}
+        width={isMobile ? 540 : 1920}
+        height={isMobile ? 960 : 1080}
       />
       <div
         className="absolute inset-0"

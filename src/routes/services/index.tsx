@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { FinalCTA } from "@/components/site/FinalCTA";
 import { SpatialProjectShowcase } from "@/components/site/SpatialProjectShowcase";
 import { ServiceExplorer } from "@/components/site/ServiceExplorer";
-import servicesBannerImg from "@/assets/home-studios-hero.jpg";
+import servicesBannerImg from "@/assets/home-studios-hero.webp";
 
 export const Route = createFileRoute("/services/")({
   component: ServicesHub,

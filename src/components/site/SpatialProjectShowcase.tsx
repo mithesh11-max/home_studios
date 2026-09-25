@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import { SpatialProjectCard, type ProjectItem } from "./SpatialProjectCard";
 
-import walkthroughStudioImg from "@/assets/walkthrough-studio.jpg";
-import architectureSiteImg from "@/assets/architecture-site.jpg";
-import aboutStudioBannerImg from "@/assets/about-studio-banner.jpg";
-import walkthroughArImg from "@/assets/walkthrough-ar.jpg";
-import homeStudiosHeroImg from "@/assets/home-studios-hero.jpg";
-import interiorFinishedImg from "@/assets/interior-finished.jpg";
+import walkthroughStudioImg from "@/assets/walkthrough-studio.webp";
+import architectureSiteImg from "@/assets/architecture-site.webp";
+import aboutStudioBannerImg from "@/assets/about-studio-banner.webp";
+import walkthroughArImg from "@/assets/walkthrough-ar.webp";
+import homeStudiosHeroImg from "@/assets/home-studios-hero.webp";
+import interiorFinishedImg from "@/assets/interior-finished.webp";
 
 export const FEATURED_PROJECTS: ProjectItem[] = [
   {

@@ -8,7 +8,7 @@ import { FadeUp } from "@/components/site/TextReveal";
 import { PackageSelector } from "@/components/site/PackageSelector";
 import { FAQ } from "@/components/site/FAQ";
 import { CONTACT } from "@/lib/site-data";
-import constructionBannerImg from "@/assets/architecture-site.jpg";
+import constructionBannerImg from "@/assets/architecture-site.webp";
 
 export const Route = createFileRoute("/construction")({
   component: Construction,

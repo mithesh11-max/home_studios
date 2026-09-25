@@ -2,9 +2,13 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DURATION, EASE_ARCH_SMOOTH, DISTANCE } from "@/lib/motion";
 
+import laserImgWebp from "@/assets/walkthrough-studio.webp";
 import laserImg from "@/assets/walkthrough-studio.jpg";
+import arImgWebp from "@/assets/walkthrough-ar.webp";
 import arImg from "@/assets/walkthrough-ar.jpg";
+import vrImgWebp from "@/assets/walkthrough-vr.webp";
 import vrImg from "@/assets/walkthrough-vr.jpg";
+import furnitureImgWebp from "@/assets/walkthrough-furniture.webp";
 import furnitureImg from "@/assets/walkthrough-furniture.jpg";
 
 const MODES = [
@@ -14,6 +18,7 @@ const MODES = [
     label: "LASER",
     title: "Laser Projection",
     image: laserImg,
+    imageWebp: laserImgWebp,
     badge: "1:1 LASER PROJECTION",
     annotation: "PROJECTION FIELD — TRUE SCALE",
     desc: "Commercial-grade laser projectors cast your exact floor plan onto the studio floor at true 1:1 scale — every wall, doorway and dimension exactly where it will sit on site.",
@@ -25,6 +30,7 @@ const MODES = [
     label: "AR",
     title: "Augmented Reality",
     image: arImg,
+    imageWebp: arImgWebp,
     badge: "AR SPATIAL OVERLAY",
     annotation: "TABLET 3D WIREFRAME & TEXTURES",
     desc: "iPad-based AR overlays finished walls, cabinets, fittings and materials onto the live studio floor — so you see both the scale and the look simultaneously.",
@@ -36,6 +42,7 @@ const MODES = [
     label: "VR",
     title: "Virtual Reality",
     image: vrImg,
+    imageWebp: vrImgWebp,
     badge: "1:1 VIRTUAL REALITY",
     annotation: "IMMERSIVE INTERIOR SIMULATION",
     desc: "Step inside a fully rendered, dimensionally accurate version of your future home — stand in the kitchen, look out the window, feel the ceiling height.",
@@ -47,6 +54,7 @@ const MODES = [
     label: "FURNITURE",
     title: "Real Furniture",
     image: furnitureImg,
+    imageWebp: furnitureImgWebp,
     badge: "REAL FURNITURE ON WHEELS",
     annotation: "CLEARANCE & SPATIAL CIRCULATION",
     desc: "Full-size, wheeled furniture — sofas, beds, kitchen counters, wardrobes — placed inside the projected outline so you understand true furniture scale and clearance.",
@@ -77,11 +85,16 @@ export function WalkthroughTabs() {
             transition={{ duration: DURATION.STANDARD, ease: EASE_ARCH_SMOOTH }}
             className="absolute inset-0 w-full h-full"
           >
-            <img
-              src={mode.image}
-              alt={mode.title}
-              className="w-full h-full object-cover object-center"
-            />
+            <picture>
+              <source srcSet={mode.imageWebp} type="image/webp" />
+              <img
+                src={mode.image}
+                alt={mode.title}
+                className="w-full h-full object-cover object-center"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
             {/* Subtle bottom edge vignette for caption contrast */}
             <div
               className="absolute inset-0 pointer-events-none"

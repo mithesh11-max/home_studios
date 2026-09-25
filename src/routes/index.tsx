@@ -17,7 +17,7 @@ import { ArchitecturalMeasurement } from "@/components/site/ArchitecturalMeasure
 import { useAppointment } from "@/lib/appointment-context";
 import { useSmoothScroll } from "@/lib/lenis-context";
 import { HOME_FAQS, CONTACT } from "@/lib/site-data";
-import architectureImg from "@/assets/architecture-site.jpg";
+import architectureImg from "@/assets/architecture-site.webp";
 
 export const Route = createFileRoute("/")({
   component: Index,
