@@ -280,6 +280,19 @@
     outline-offset: 2px;
   }
 
+  /* Accessible high-contrast focus outlines against dark and navy surfaces */
+  .dark :focus-visible,
+  [data-theme="dark"] :focus-visible,
+  [class*="bg-[#203C7F]"] :focus-visible,
+  [class*="bg-deep"] :focus-visible,
+  [class*="bg-ink"] :focus-visible,
+  [class*="text-white"] :focus-visible,
+  .arch-wa-float:focus-visible,
+  .arch-btn--indigo:focus-visible {
+    outline: 2px solid var(--mint);
+    outline-offset: 2px;
+  }
+
   /* ── Selection ── */
   ::selection {
     background: rgba(138, 134, 252, 0.2);

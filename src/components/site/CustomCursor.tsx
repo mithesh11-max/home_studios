@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
-import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useSpring, AnimatePresence, useReducedMotion } from "framer-motion";
 
 export type CursorMode = "default" | "hover" | "view" | "project" | "explore" | "drag";
 
 export function CustomCursor() {
+  const prefersReducedMotion = useReducedMotion();
   const [hasPointer, setHasPointer] = useState(false);
   const [cursorMode, setCursorMode] = useState<CursorMode>("default");
   const [projectNum, setProjectNum] = useState<string>("01");
@@ -115,7 +116,7 @@ export function CustomCursor() {
     };
   }, [cursorX, cursorY]);
 
-  if (!hasPointer) return null;
+  if (prefersReducedMotion || !hasPointer) return null;
 
   const isBadge = cursorMode === "view" || cursorMode === "project" || cursorMode === "explore" || cursorMode === "drag";
 

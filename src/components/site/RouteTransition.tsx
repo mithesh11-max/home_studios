@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useLocation, useRouter } from "@tanstack/react-router";
 import { useSmoothScroll } from "@/lib/lenis-context";
 
@@ -18,10 +18,12 @@ function ScrollRestorationHandler({ isPop }: { isPop: boolean }) {
 /**
  * Wraps <Outlet> to provide crisp architectural transitions between routes.
  * Uses clip-path masking to create an architectural vertical unmasking sheet (380ms).
+ * When prefers-reduced-motion is set, route changes are instant (opacity only, 50ms).
  */
 export function RouteTransition({ children }: { children: ReactNode }) {
   const location = useLocation();
   const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
 
   // Track if navigation is via browser back/forward (POP) to preserve scroll position
   const isPopRef = useRef(false);
@@ -37,22 +39,26 @@ export function RouteTransition({ children }: { children: ReactNode }) {
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
-        initial={{
-          clipPath: "inset(100% 0% 0% 0%)",
-          opacity: 0.85,
-        }}
-        animate={{
-          clipPath: "inset(0% 0% 0% 0%)",
-          opacity: 1,
-        }}
-        exit={{
-          clipPath: "inset(0% 0% 100% 0%)",
-          opacity: 0.85,
-        }}
-        transition={{
-          duration: 0.38,
-          ease: [0.22, 1, 0.36, 1],
-        }}
+        initial={
+          prefersReducedMotion
+            ? { opacity: 1 }
+            : { clipPath: "inset(100% 0% 0% 0%)", opacity: 0.85 }
+        }
+        animate={
+          prefersReducedMotion
+            ? { opacity: 1 }
+            : { clipPath: "inset(0% 0% 0% 0%)", opacity: 1 }
+        }
+        exit={
+          prefersReducedMotion
+            ? { opacity: 1 }
+            : { clipPath: "inset(0% 0% 100% 0%)", opacity: 0.85 }
+        }
+        transition={
+          prefersReducedMotion
+            ? { duration: 0.05 }
+            : { duration: 0.38, ease: [0.22, 1, 0.36, 1] }
+        }
         // Deliberately no `y`/transform here: this wrapper is an ancestor of the
         // fixed-position SiteHeader in every route. Any transform on it (even a
         // resting translateY(0)) creates a CSS containing block that breaks

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppointment } from "@/lib/appointment-context";
@@ -23,6 +23,9 @@ export function MobileMenu({ open, onClose, nav }: MobileMenuProps) {
   const { open: openAppt } = useAppointment();
   const { stop, start } = useSmoothScroll();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Remember which element had focus before opening, so we can restore it on close
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   // Lock scroll and pause Lenis
   useEffect(() => {
@@ -39,10 +42,69 @@ export function MobileMenu({ open, onClose, nav }: MobileMenuProps) {
     };
   }, [open, stop, start]);
 
+  // Capture previously focused element and move focus into the menu when opened
+  useEffect(() => {
+    if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      // Focus the first focusable item inside the panel after the animation starts
+      const timer = setTimeout(() => {
+        const focusables = panelRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])',
+        );
+        focusables?.[0]?.focus();
+      }, 80);
+      return () => clearTimeout(timer);
+    } else {
+      // Restore focus to the trigger that opened the menu
+      previousFocusRef.current?.focus();
+    }
+  }, [open]);
+
+  // Focus trap: keep Tab/Shift+Tab cycling within the panel
+  useEffect(() => {
+    if (!open) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const getFocusables = () =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.closest("[aria-hidden]"));
+
+    const trap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const focusables = getFocusables();
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", trap);
+    return () => document.removeEventListener("keydown", trap);
+  }, [open, onClose]);
+
   return (
     <AnimatePresence>
       {open && (
         <motion.div
+          ref={panelRef}
           className="fixed inset-0 z-40 flex flex-col"
           style={{ backgroundColor: "var(--surface)", paddingTop: "64px" }}
           initial={{ clipPath: "inset(0 0 100% 0)" }}

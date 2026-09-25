@@ -42,14 +42,17 @@ export function AppointmentDialog() {
   const { stop, start } = useSmoothScroll();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const [sent, setSent] = useState(false);
 
   // Focus management
   useEffect(() => {
     if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement | null;
       setTimeout(() => closeRef.current?.focus(), 50);
     } else {
       setSent(false);
+      previousFocusRef.current?.focus();
     }
   }, [isOpen]);
 
