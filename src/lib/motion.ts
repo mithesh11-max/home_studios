@@ -1,0 +1,463 @@
+// Motion engine: Lenis smooth scroll + GSAP ScrollTrigger scenes.
+// All content is real HTML; this only layers movement on top, and steps aside
+// when the visitor prefers reduced motion.
+
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
+import Lenis from "lenis";
+import { frames } from "./frames";
+
+gsap.registerPlugin(ScrollTrigger, SplitText);
+ScrollTrigger.config({ ignoreMobileResize: true });
+
+let lenis: Lenis | null = null;
+let loading = true;
+
+const expo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
+export function scrollToTarget(href: string) {
+  const target = href === "#top" ? 0 : document.querySelector<HTMLElement>(href);
+  if (target === null) return;
+  if (lenis) {
+    lenis.scrollTo(target, { duration: 1.8, easing: expo, force: true });
+  } else {
+    const top = typeof target === "number" ? 0 : target.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top });
+  }
+}
+
+export function lockScroll(lock: boolean) {
+  document.documentElement.classList.toggle("is-locked", lock);
+  if (loading) return;
+  if (lock) lenis?.stop();
+  else lenis?.start();
+}
+
+/** Size a single-line wordmark so it spans its container edge to edge. */
+function fitWordmark(el: HTMLElement) {
+  const parent = el.parentElement;
+  if (!parent) return;
+  const cs = getComputedStyle(parent);
+  const avail = parent.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  el.style.fontSize = "100px";
+  const w = el.offsetWidth;
+  if (w > 0) el.style.fontSize = `${(100 * avail) / w}px`;
+}
+
+export function createMotion(): () => void {
+  const root = document.documentElement;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const q = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
+  const qa = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => Array.from(r.querySelectorAll<T>(s));
+
+  let killed = false;
+  const cleanups: (() => void)[] = [];
+  const splits: SplitText[] = [];
+  const on = <K extends keyof WindowEventMap>(t: K, fn: (e: WindowEventMap[K]) => void, o?: AddEventListenerOptions) => {
+    window.addEventListener(t, fn, o);
+    cleanups.push(() => window.removeEventListener(t, fn));
+  };
+
+  root.classList.add("js", "is-loading");
+  if (!reduce) root.classList.add("motion");
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.scrollTo(0, 0);
+  loading = true;
+
+  // ── Wordmarks always span the full width ────────────────────────
+  const marks = qa("[data-hero-mark], [data-footer-mark]");
+  const fitAll = () => marks.forEach(fitWordmark);
+  fitAll();
+  ScrollTrigger.addEventListener("refreshInit", fitAll);
+  cleanups.push(() => ScrollTrigger.removeEventListener("refreshInit", fitAll));
+
+  // ── Smooth scroll ────────────────────────────────────────────────
+  if (!reduce) {
+    lenis = new Lenis({ lerp: 0.08, smoothWheel: true, wheelMultiplier: 0.9 });
+    lenis.on("scroll", ScrollTrigger.update);
+    const raf = (t: number) => lenis?.raf(t * 1000);
+    gsap.ticker.add(raf);
+    gsap.ticker.lagSmoothing(0);
+    lenis.stop();
+    cleanups.push(() => {
+      gsap.ticker.remove(raf);
+      lenis?.destroy();
+      lenis = null;
+    });
+  }
+
+  const onClick = (e: MouseEvent) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
+    const href = a?.getAttribute("href");
+    if (!a || !href || href === "#") return;
+    e.preventDefault();
+    scrollToTarget(href);
+    if (href === "#main") q<HTMLElement>("#main")?.focus({ preventScroll: true });
+  };
+  document.addEventListener("click", onClick);
+  cleanups.push(() => document.removeEventListener("click", onClick));
+
+  // ── Nav state ───────────────────────────────────────────────────
+  const nav = q("[data-nav]");
+  // While the wordmark is travelling up into the menu bar, keep the bar fully clear
+  // (no frosted backdrop), so the letters never pass behind a blur.
+  const onScroll = () => {
+    const clearUntil = reduce ? 40 : window.innerHeight * 1.1 - 2;
+    nav?.classList.toggle("is-scrolled", window.scrollY > clearUntil);
+  };
+  on("scroll", onScroll, { passive: true });
+
+  const links = qa<HTMLAnchorElement>("[data-navlink]");
+  const io = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((en) => {
+        if (en.isIntersecting)
+          links.forEach((l) => l.classList.toggle("is-active", l.getAttribute("href") === `#${en.target.id}`));
+      }),
+    { rootMargin: "-45% 0px -50% 0px" },
+  );
+  qa("section[id]").forEach((s) => io.observe(s));
+  cleanups.push(() => io.disconnect());
+
+  const ctx = gsap.context(() => {});
+
+  // ── Loader ──────────────────────────────────────────────────────
+  const loader = q("[data-loader]");
+  const count = q("[data-loader-count]");
+  const bar = q("[data-loader-bar]");
+  let target = 0.01;
+  let shown = 1;
+  let fontsReady = !document.fonts;
+  const t0 = performance.now();
+  // Wait for the actual brand face (not just document.fonts.ready, which can resolve
+  // before the stylesheet has asked for it), then re-fit the wordmarks.
+  const fontLoad = document.fonts
+    ? Promise.all([document.fonts.load('700 100px "Archivo Variable"'), document.fonts.load('400 16px "Archivo Variable"')])
+    : Promise.resolve([]);
+  void fontLoad.catch(() => []).then(() => {
+    fontsReady = true;
+    fitAll();
+    ScrollTrigger.refresh();
+  });
+  const onFontsDone = () => fitAll();
+  document.fonts?.addEventListener("loadingdone", onFontsDone);
+  cleanups.push(() => document.fonts?.removeEventListener("loadingdone", onFontsDone));
+  frames.start();
+  const offProgress = frames.onProgress((c) => (target = Math.max(0.01, c)));
+  cleanups.push(() => offProgress());
+  const safety = window.setTimeout(() => {
+    target = 1;
+    fontsReady = true;
+  }, 9000);
+  cleanups.push(() => window.clearTimeout(safety));
+
+  let loaderRaf = 0;
+  const loaderTick = () => {
+    if (killed) return;
+    const goal = target * 100;
+    shown = Math.min(goal, shown + Math.max(0.5, (goal - shown) * 0.08));
+    const pct = Math.max(1, Math.min(100, Math.round(shown)));
+    if (count) count.textContent = `${pct}%`;
+    if (bar) bar.style.transform = `scaleX(${shown / 100})`;
+    const minTime = reduce ? 300 : 1300;
+    if (shown >= 99.9 && fontsReady && performance.now() - t0 > minTime) finishLoading();
+    else loaderRaf = requestAnimationFrame(loaderTick);
+  };
+  loaderRaf = requestAnimationFrame(loaderTick);
+  cleanups.push(() => cancelAnimationFrame(loaderRaf));
+
+  function finishLoading() {
+    if (killed) return;
+    if (count) count.textContent = "100%";
+    if (bar) bar.style.transform = "scaleX(1)";
+    fitAll();
+    buildScenes();
+    ctx.add(() => {
+      const tl = gsap.timeline({ onComplete: () => loader?.setAttribute("hidden", "") });
+      if (reduce) {
+        tl.to(loader, { autoAlpha: 0, duration: 0.3 });
+        return;
+      }
+      tl.to(".loader-foot, .loader-line", { opacity: 0, y: -12, duration: 0.5, ease: "power2.in" })
+        .to(loader, { clipPath: "inset(0% 0% 100% 0%)", duration: 1.1, ease: "expo.inOut" }, "-=0.1")
+        // The brand mark rises letter by letter.
+        .fromTo(
+          "[data-hero-ch]",
+          { yPercent: 118, rotate: 6 },
+          { yPercent: 0, rotate: 0, duration: 1.6, ease: "expo.out", stagger: 0.05 },
+          "-=0.6",
+        )
+        .fromTo("[data-hero-fade]", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 1.1, ease: "power3.out", stagger: 0.07 }, "-=1.2")
+        .fromTo(".nav-links, .nav-cta, .nav-toggle, .brand img", { opacity: 0 }, { opacity: 1, duration: 0.9, ease: "power2.out" }, "<");
+    });
+    loading = false;
+    root.classList.remove("is-loading");
+    if (!root.classList.contains("is-locked")) lenis?.start();
+  }
+
+  // ── Scroll scenes ───────────────────────────────────────────────
+  function buildScenes() {
+    ctx.add(() => {
+      const veil = q("[data-smoke-veil]");
+      qa("[data-veil]").forEach((sec) => {
+        ScrollTrigger.create({
+          trigger: sec,
+          start: "top 60%",
+          end: "bottom 60%",
+          onToggle: (s) => {
+            if (s.isActive) gsap.to(veil, { opacity: Number(sec.dataset["veil"] ?? 0), duration: 1, ease: "power2.out", overwrite: true });
+          },
+        });
+      });
+
+      if (reduce) return;
+
+      heroDock();
+      statementScene();
+
+      qa("[data-split]").forEach((el) => {
+        const s = new SplitText(el, { type: "lines", mask: "lines", linesClass: "split-line" });
+        splits.push(s);
+        gsap.from(s.lines, {
+          yPercent: 105, duration: 1.2, ease: "expo.out", stagger: 0.09,
+          scrollTrigger: { trigger: el, start: "top 86%", once: true },
+        });
+      });
+
+      qa("[data-fade]").forEach((el) => {
+        gsap.from(el, { opacity: 0, y: 28, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 88%", once: true } });
+      });
+
+      processScene();
+
+      // Numbers: rules draw, figures count.
+      const stats = qa("[data-stat]");
+      if (stats.length) {
+        gsap.fromTo(stats, { "--draw": 0 }, {
+          "--draw": 1, duration: 1.4, ease: "expo.out", stagger: 0.1,
+          scrollTrigger: { trigger: stats[0]!, start: "top 88%", once: true },
+        });
+        gsap.from(stats.map((s) => s.querySelector("dt")), {
+          yPercent: 40, opacity: 0, duration: 1.3, ease: "expo.out", stagger: 0.1,
+          scrollTrigger: { trigger: stats[0]!, start: "top 88%", once: true },
+        });
+      }
+      qa("[data-count]").forEach((el) => {
+        const to = Number(el.dataset["count"]);
+        const o = { v: 0 };
+        gsap.to(o, {
+          v: to, duration: 2.2, ease: "power3.out",
+          onUpdate: () => (el.textContent = Math.round(o.v).toLocaleString("en-IN")),
+          scrollTrigger: { trigger: el, start: "top 92%", once: true },
+        });
+      });
+
+      // Services: rule draws, then names slide in.
+      const rows = qa("[data-row]");
+      if (rows.length) {
+        gsap.fromTo(rows, { "--draw": 0 }, {
+          "--draw": 1, duration: 1.4, ease: "expo.out", stagger: 0.07,
+          scrollTrigger: { trigger: rows[0]!, start: "top 85%", once: true },
+        });
+        gsap.from(rows.map((r) => r.querySelector(".svc")), {
+          opacity: 0, yPercent: 40, duration: 1.2, ease: "expo.out", stagger: 0.07,
+          scrollTrigger: { trigger: rows[0]!, start: "top 85%", once: true },
+        });
+      }
+
+      // Studio band: opens from a framed card to full bleed.
+      const band = q("[data-band-inner]");
+      if (band) {
+        gsap.fromTo(band, { clipPath: "inset(10% 12% 10% 12% round 10px)" }, {
+          clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "none",
+          scrollTrigger: { trigger: band, start: "top 92%", end: "center 55%", scrub: true },
+        });
+        gsap.fromTo(q("img", band), { scale: 1.3 }, {
+          scale: 1, ease: "none",
+          scrollTrigger: { trigger: band, start: "top bottom", end: "bottom top", scrub: true },
+        });
+      }
+
+      // Gallery: title rises letter by letter; photos unmask upward; columns drift at different speeds.
+      gsap.fromTo("[data-gallery-ch]", { yPercent: 118, rotate: 7 }, {
+        yPercent: 0, rotate: 0, duration: 1.5, ease: "expo.out", stagger: 0.06,
+        scrollTrigger: { trigger: "[data-gallery-title]", start: "top 90%", toggleActions: "play none none reverse" },
+      });
+      qa("[data-g-reveal]").forEach((el) => {
+        const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: "top 92%", once: true } });
+        tl.fromTo(el, { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5, ease: "expo.out" })
+          .fromTo(q("img", el), { scale: 1.35 }, { scale: 1, duration: 1.8, ease: "expo.out" }, 0);
+      });
+      ScrollTrigger.matchMedia({
+        "(min-width: 761px)": () => {
+          const drift = [70, -110, 30];
+          qa("[data-g-col]").forEach((col) => {
+            const d = drift[Number(col.dataset["gCol"])] ?? 0;
+            gsap.fromTo(col, { y: d }, {
+              y: -d, ease: "none",
+              scrollTrigger: { trigger: ".gallery-grid", start: "top bottom", end: "bottom top", scrub: true },
+            });
+          });
+        },
+      });
+
+      // Footer: the wordmark rises letter by letter, and sinks again if you scroll back up.
+      gsap.fromTo(
+        "[data-footer-ch]",
+        { yPercent: 118, rotate: 7 },
+        {
+          yPercent: 0, rotate: 0, duration: 1.5, ease: "expo.out", stagger: 0.055,
+          scrollTrigger: { trigger: "[data-footer-mark]", start: "top 96%", toggleActions: "play none none reverse" },
+        },
+      );
+
+      if (finePointer) pointerFx();
+    });
+
+    const refresh = () => ScrollTrigger.refresh();
+    requestAnimationFrame(refresh);
+    on("load", refresh);
+  }
+
+  // The big wordmark shrinks into the menu bar as you scroll out of the hero.
+  function heroDock() {
+    const hero = q("[data-hero]");
+    const mark = q("[data-hero-mark]");
+    const navText = q("[data-brand-text]");
+    if (!hero || !mark || !navText) return;
+    const scale = () => navText.offsetWidth / mark.offsetWidth;
+    const dx = () => navText.getBoundingClientRect().left - mark.offsetLeft;
+    const dy = () => navText.getBoundingClientRect().top - mark.offsetTop;
+
+    const tl = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: {
+        trigger: hero, start: "top top", end: "+=110%", pin: true, scrub: 1.1,
+        anticipatePin: 1, invalidateOnRefresh: true,
+      },
+    });
+    tl.to(".hero-top, .hero-base", { opacity: 0, y: -40, duration: 0.35 }, 0)
+      .fromTo(mark, { x: 0, y: 0, scale: 1 }, { x: dx, y: dy, scale, duration: 1, ease: "power2.inOut" }, 0)
+      .fromTo(navText, { opacity: 0 }, { opacity: 1, duration: 0.1 }, 0.9)
+      .to(mark, { opacity: 0, duration: 0.1 }, 0.9);
+  }
+
+  // Four lines, one at a time, each lifting out as the next arrives.
+  function statementScene() {
+    const st = q("[data-statement]");
+    if (!st) return;
+    const lines = qa("[data-statement-line]", st);
+    gsap.set(lines.slice(1), { yPercent: 70, opacity: 0, filter: "blur(10px)" });
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: st, start: "top top", end: `+=${lines.length * 90}%`, pin: true, scrub: 0.8, anticipatePin: 1 },
+    });
+    tl.to({}, { duration: 0.5 });
+    lines.forEach((l, i) => {
+      if (i === 0) return;
+      tl.to(lines[i - 1]!, { yPercent: -70, opacity: 0, filter: "blur(10px)", duration: 1, ease: "power2.in" })
+        .to(l, { yPercent: 0, opacity: 1, filter: "blur(0px)", duration: 1, ease: "power2.out" }, "<0.45")
+        .to({}, { duration: 0.6 });
+    });
+  }
+
+  // Steps travel sideways; each number lights up as it reaches the middle.
+  function processScene() {
+    const sec = q("[data-process]");
+    const track = q("[data-track]");
+    if (!sec || !track) return;
+    const barEl = q("[data-track-bar]");
+    const dist = () => Math.max(0, track.scrollWidth - window.innerWidth);
+    const move = gsap.to(track, {
+      x: () => -dist(),
+      ease: "none",
+      scrollTrigger: {
+        trigger: sec, start: "top top", end: () => `+=${dist()}`, pin: true, scrub: 0.8,
+        anticipatePin: 1, invalidateOnRefresh: true,
+        onUpdate: (s) => barEl && (barEl.style.transform = `scaleX(${s.progress})`),
+      },
+    });
+    qa("[data-panel]", sec).forEach((p) => {
+      gsap.fromTo(q("[data-panel-n]", p), { opacity: 0.14 }, {
+        opacity: 1, ease: "none",
+        scrollTrigger: { trigger: p, containerAnimation: move, start: "left 80%", end: "left 40%", scrub: true },
+      });
+    });
+    const img = q(".panel-img img", sec);
+    if (img) {
+      gsap.fromTo(img, { xPercent: 0, scale: 1.15 }, {
+        xPercent: 8, scale: 1.15, ease: "none",
+        scrollTrigger: { trigger: img.parentElement!, containerAnimation: move, start: "left right", end: "right left", scrub: true },
+      });
+    }
+  }
+
+  function pointerFx() {
+    const cur = q("[data-cursor]");
+    const curImg = q("[data-cursor-img]");
+    if (cur) {
+      const xTo = gsap.quickTo(cur, "x", { duration: 0.4, ease: "power3" });
+      const yTo = gsap.quickTo(cur, "y", { duration: 0.4, ease: "power3" });
+      let lastPreview = "";
+      const move = (e: PointerEvent) => {
+        cur.classList.add("is-on");
+        xTo(e.clientX);
+        yTo(e.clientY);
+        const t = e.target as HTMLElement;
+        const pv = t.closest?.<HTMLElement>("[data-preview]");
+        cur.classList.toggle("has-img", !!pv);
+        const src = pv?.dataset["preview"] ?? "";
+        if (src && src !== lastPreview && curImg) {
+          curImg.style.backgroundImage = `url("${src}")`;
+          lastPreview = src;
+        }
+      };
+      const leave = () => cur.classList.remove("is-on", "has-img");
+      on("pointermove", move, { passive: true });
+      document.addEventListener("pointerleave", leave);
+      cleanups.push(() => document.removeEventListener("pointerleave", leave));
+    }
+
+    qa("[data-magnetic]").forEach((el) => {
+      const xTo = gsap.quickTo(el, "x", { duration: 0.5, ease: "power3" });
+      const yTo = gsap.quickTo(el, "y", { duration: 0.5, ease: "power3" });
+      const move = (e: PointerEvent) => {
+        const r = el.getBoundingClientRect();
+        xTo((e.clientX - (r.left + r.width / 2)) * 0.25);
+        yTo((e.clientY - (r.top + r.height / 2)) * 0.35);
+      };
+      const leave = () => {
+        xTo(0);
+        yTo(0);
+      };
+      el.addEventListener("pointermove", move);
+      el.addEventListener("pointerleave", leave);
+      cleanups.push(() => {
+        el.removeEventListener("pointermove", move);
+        el.removeEventListener("pointerleave", leave);
+      });
+    });
+  }
+
+  let rt = 0;
+  // Phones resize the viewport whenever the address bar slides in or out while scrolling.
+  // Only re-measure when the width really changes (rotation, desktop resize), so pinned
+  // sections never jump mid-scroll on a phone.
+  let lastW = window.innerWidth;
+  on("resize", () => {
+    if (window.innerWidth === lastW) return;
+    lastW = window.innerWidth;
+    window.clearTimeout(rt);
+    rt = window.setTimeout(() => (reduce ? fitAll() : ScrollTrigger.refresh()), 200);
+  });
+
+  return () => {
+    killed = true;
+    splits.forEach((s) => s.revert());
+    ctx.revert();
+    cleanups.forEach((f) => f());
+    root.classList.remove("js", "motion", "is-loading");
+    loading = true;
+  };
+}
