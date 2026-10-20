@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Dark Onyx Base Gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1917" />
+      <stop offset="100%" stop-color="#090807" />
+    </linearGradient>
+
+    <!-- Warm Ochre / Solar Glow Gradient -->
+    <linearGradient id="ochre" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+  </defs>
+
+  <!-- Luxury dark squircle with warm ochre rim (100% visible on dark/light tabs) -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bg)" stroke="#ea580c" stroke-width="2.5" />
+
+  <!-- Architectural House Silhouette with Integrated 'H' -->
+  <!-- Unified Roof -->
+  <path d="M 32 10 L 53 27 L 45 27 L 32 16 L 19 27 L 11 27 Z" fill="#f5f2eb" />
+
+  <!-- Left 'H' Pillar / Wall -->
+  <rect x="15" y="24" width="7.5" height="27" rx="2" fill="#f5f2eb" />
+
+  <!-- Right 'H' Pillar / Wall -->
+  <rect x="41.5" y="24" width="7.5" height="27" rx="2" fill="#f5f2eb" />
+
+  <!-- Architectural Lintel / Crossbar -->
+  <rect x="19" y="34" width="26" height="5" rx="1.5" fill="#f5f2eb" />
+
+  <!-- Solar Core / Pendant Light in the upper apex -->
+  <circle cx="32" cy="24.5" r="4.5" fill="url(#ochre)" />
+
+  <!-- Walkthrough Portal / Doorway at 1:1 scale -->
+  <rect x="27.5" y="39" width="9" height="12" rx="2" fill="url(#ochre)" />
+</svg>
