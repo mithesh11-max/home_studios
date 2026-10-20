@@ -447,10 +447,10 @@ export function createMotion(): () => void {
   // Phones: the wordmark flies into the menu bar on its own as soon as you start
   // scrolling (time-based, ~0.8s) and flies back when you return to the top. Each word
   // is re-aimed every frame at its word in the bar, so it lands exactly even while the
-  // Phones: the big wordmark flies smoothly into the top-left menu bar.
-  // Immune to fast scrolling: measures once, clones into a fixed overlay layer,
-  // animates via pure GPU transforms with zero per-frame layout recalculations,
-  // and swaps instantly upon arrival.
+  // Phones: the wordmark flies into the menu bar on its own as you scroll away from the hero,
+  // and glides smoothly back into place when returning.
+  // Measures document positions once, tracks live scroll passively with zero forced reflows,
+  // and clamps against iOS overscroll bounce.
   function heroDockPhone() {
     const lineA = q<HTMLElement>("[data-hm-a]");
     const lineB = q<HTMLElement>("[data-hm-b]");
@@ -468,6 +468,96 @@ export function createMotion(): () => void {
     let overlay: HTMLElement | null = null;
     let cloneA: HTMLElement | null = null;
     let cloneB: HTMLElement | null = null;
+
+    let cachedScrollY = Math.max(0, window.scrollY);
+    let lastScrollY = cachedScrollY;
+
+    // Document positions (independent of scroll)
+    const docA = { x: 0, y: 0, w: 0, h: 0 };
+    const docB = { x: 0, y: 0, w: 0, h: 0 };
+    const navBoxA = { x: 0, y: 0, w: 0, h: 0 };
+    const navBoxB = { x: 0, y: 0, w: 0, h: 0 };
+
+    let scaleA = 1;
+    let scaleB = 1;
+    let maskPadA = 0;
+    let maskPadB = 0;
+    let heroFontSize = 70;
+    let heroLineHeight = 60;
+    let heroColor = "var(--bone)";
+    let csLineHeight = "0.86";
+    let csLetterSpacing = "-0.025em";
+    let csFontWeight = "700";
+    let csFontStretch = "125%";
+
+    const anim = { pA: 0, pB: 0 };
+
+    const measureHome = () => {
+      if (state === "docking" || state === "undocking") return;
+
+      const curY = Math.max(0, window.scrollY);
+      const prevTransformA = lineA.style.transform;
+      const prevTransformB = lineB.style.transform;
+      lineA.style.transform = "none";
+      lineB.style.transform = "none";
+
+      const rA = lineA.getBoundingClientRect();
+      const rB = lineB.getBoundingClientRect();
+      const rNavA = navA.getBoundingClientRect();
+      const rNavB = navB.getBoundingClientRect();
+
+      lineA.style.transform = prevTransformA;
+      lineB.style.transform = prevTransformB;
+
+      docA.x = rA.left;
+      docA.y = rA.top + curY;
+      docA.w = rA.width;
+      docA.h = rA.height;
+
+      docB.x = rB.left;
+      docB.y = rB.top + curY;
+      docB.w = rB.width;
+      docB.h = rB.height;
+
+      navBoxA.x = rNavA.left;
+      navBoxA.y = rNavA.top;
+      navBoxA.w = rNavA.width;
+      navBoxA.h = rNavA.height;
+
+      navBoxB.x = rNavB.left;
+      navBoxB.y = rNavB.top;
+      navBoxB.w = rNavB.width;
+      navBoxB.h = rNavB.height;
+
+      const heroMark = lineA.closest<HTMLElement>("[data-hero-mark]");
+      const cs = heroMark ? getComputedStyle(heroMark) : getComputedStyle(lineA);
+      heroFontSize = parseFloat(cs.fontSize) || 70;
+      heroLineHeight = parseFloat(cs.lineHeight) || heroFontSize * 0.86;
+      heroColor = cs.color || "var(--bone)";
+      csLineHeight = cs.lineHeight;
+      csLetterSpacing = cs.letterSpacing;
+      csFontWeight = cs.fontWeight;
+      csFontStretch = cs.fontStretch;
+
+      scaleA = docA.w > 0 ? navBoxA.w / docA.w : 0.15;
+      scaleB = docB.w > 0 ? navBoxB.w / docB.w : 0.15;
+
+      // Account for .mask vertical padding (0.06em)
+      maskPadA = 0.06 * heroFontSize * scaleA;
+      maskPadB = 0.06 * heroFontSize * scaleB;
+    };
+
+    measureHome();
+
+    const onResize = () => {
+      measureHome();
+      if (overlay) render();
+    };
+    window.addEventListener("resize", onResize, { passive: true });
+    window.addEventListener("orientationchange", onResize, { passive: true });
+    if ("fonts" in document) {
+      document.fonts.ready.then(onResize).catch(() => {});
+    }
 
     const cleanupOverlay = () => {
       overlay?.remove();
@@ -497,6 +587,8 @@ export function createMotion(): () => void {
       }
       return () => {
         phoneDock = null;
+        window.removeEventListener("resize", onResize);
+        window.removeEventListener("orientationchange", onResize);
         moreCleanup?.();
         lineA.style.visibility = "";
         lineB.style.visibility = "";
@@ -505,39 +597,44 @@ export function createMotion(): () => void {
       };
     }
 
-    const setupFlight = () => {
-      cleanupOverlay();
+    const render = () => {
+      if (!cloneA || !cloneB) return;
+      const scrollY = cachedScrollY;
 
-      lineA.style.transform = "none";
-      lineB.style.transform = "none";
-      lineA.style.opacity = "1";
-      lineB.style.opacity = "1";
+      const heroX_A = docA.x;
+      const heroY_A = docA.y - scrollY;
+      const heroX_B = docB.x;
+      const heroY_B = docB.y - scrollY;
 
-      const rHeroA = lineA.getBoundingClientRect();
-      const rHeroB = lineB.getBoundingClientRect();
-      const rNavA = navA.getBoundingClientRect();
-      const rNavB = navB.getBoundingClientRect();
+      const navX_A = navBoxA.x;
+      const navY_A = navBoxA.y - maskPadA;
+      const navX_B = navBoxB.x;
+      const navY_B = navBoxB.y - maskPadB;
 
-      const heroMark = lineA.closest<HTMLElement>("[data-hero-mark]");
-      const cs = heroMark ? getComputedStyle(heroMark) : getComputedStyle(lineA);
-      const heroFontSizeNum = parseFloat(cs.fontSize) || 70;
+      const tA = anim.pA;
+      const tB = anim.pB;
 
-      const scaleA = rNavA.width / rHeroA.width;
-      const scaleB = rNavB.width / rHeroB.width;
+      const curX_A = heroX_A + (navX_A - heroX_A) * tA;
+      const curY_A = heroY_A + (navY_A - heroY_A) * tA;
+      const curScale_A = 1 + (scaleA - 1) * tA;
 
-      // Account for .mask's padding-top (0.06em) so baselines match nav words perfectly
-      const targetXA = rNavA.left - rHeroA.left;
-      const targetYA = (rNavA.top - rHeroA.top) - (0.06 * heroFontSizeNum * scaleA);
+      const curX_B = heroX_B + (navX_B - heroX_B) * tB;
+      const curY_B = heroY_B + (navY_B - heroY_B) * tB;
+      const curScale_B = 1 + (scaleB - 1) * tB;
 
-      const targetXB = rNavB.left - rHeroB.left;
-      const targetYB = (rNavB.top - rHeroB.top) - (0.06 * heroFontSizeNum * scaleB);
+      gsap.set(cloneA, { x: curX_A, y: curY_A, scale: curScale_A, force3D: true });
+      gsap.set(cloneB, { x: curX_B, y: curY_B, scale: curScale_B, force3D: true });
+    };
+
+    const ensureOverlay = () => {
+      if (overlay) return;
 
       overlay = document.createElement("div");
       overlay.className = "hero-dock-overlay";
 
       const wrapper = document.createElement("div");
       wrapper.className = "hero-mark wordmark-type";
-      wrapper.style.cssText = `position:absolute;top:0;left:0;margin:0;padding:0;pointer-events:none;font-size:${cs.fontSize};line-height:${cs.lineHeight};letter-spacing:${cs.letterSpacing};font-weight:${cs.fontWeight};font-stretch:${cs.fontStretch};color:${cs.color};`;
+      wrapper.style.cssText = `position:absolute;top:0;left:0;margin:0;padding:0;pointer-events:none;font-size:${heroFontSize}px;line-height:${csLineHeight};letter-spacing:${csLetterSpacing};font-weight:${csFontWeight};font-stretch:${csFontStretch};color:${heroColor};`;
 
       cloneA = lineA.cloneNode(true) as HTMLElement;
       cloneB = lineB.cloneNode(true) as HTMLElement;
@@ -546,8 +643,8 @@ export function createMotion(): () => void {
       cloneB.removeAttribute("id");
 
       cloneA.style.position = "absolute";
-      cloneA.style.left = `${rHeroA.left}px`;
-      cloneA.style.top = `${rHeroA.top}px`;
+      cloneA.style.left = "0px";
+      cloneA.style.top = "0px";
       cloneA.style.margin = "0";
       cloneA.style.transformOrigin = "0 0";
       cloneA.style.willChange = "transform";
@@ -555,8 +652,8 @@ export function createMotion(): () => void {
       cloneA.style.opacity = "1";
 
       cloneB.style.position = "absolute";
-      cloneB.style.left = `${rHeroB.left}px`;
-      cloneB.style.top = `${rHeroB.top}px`;
+      cloneB.style.left = "0px";
+      cloneB.style.top = "0px";
       cloneB.style.margin = "0";
       cloneB.style.transformOrigin = "0 0";
       cloneB.style.willChange = "transform";
@@ -571,16 +668,20 @@ export function createMotion(): () => void {
       lineA.style.visibility = "hidden";
       lineB.style.visibility = "hidden";
       gsap.set(navText, { opacity: 0 });
+    };
 
+    const buildTimeline = () => {
       tl?.kill();
       tl = gsap.timeline({
         paused: true,
+        onUpdate: render,
         onComplete: () => {
           state = "docked";
           isDocked = true;
           gsap.set(navText, { opacity: 1 });
+          lineA.style.visibility = "hidden";
+          lineB.style.visibility = "hidden";
           cleanupOverlay();
-          tl = null;
           onScroll();
         },
         onReverseComplete: () => {
@@ -590,24 +691,13 @@ export function createMotion(): () => void {
           lineB.style.visibility = "visible";
           gsap.set(navText, { opacity: 0 });
           cleanupOverlay();
-          tl = null;
           onScroll();
         },
       });
 
-      tl.fromTo(
-        cloneA,
-        { x: 0, y: 0, scale: 1, force3D: true },
-        { x: targetXA, y: targetYA, scale: scaleA, duration: 0.58, ease: "expo.out", force3D: true },
-        0
-      );
-
-      tl.fromTo(
-        cloneB,
-        { x: 0, y: 0, scale: 1, force3D: true },
-        { x: targetXB, y: targetYB, scale: scaleB, duration: 0.58, ease: "expo.out", force3D: true },
-        0.05
-      );
+      // Quick flight: ~0.56s with expo.out, STUDIOS lagging HOME by 0.045s
+      tl.to(anim, { pA: 1, duration: 0.56, ease: "expo.out" }, 0);
+      tl.to(anim, { pB: 1, duration: 0.56, ease: "expo.out" }, 0.045);
 
       return tl;
     };
@@ -624,7 +714,10 @@ export function createMotion(): () => void {
         return;
       }
       state = "docking";
-      const timeline = setupFlight();
+      ensureOverlay();
+      const timeline = buildTimeline();
+      timeline.progress(0);
+      render();
       timeline.play();
     };
 
@@ -642,28 +735,64 @@ export function createMotion(): () => void {
       state = "undocking";
       isDocked = false;
       onScroll();
-      const timeline = setupFlight();
+      ensureOverlay();
+      const timeline = buildTimeline();
       timeline.progress(1);
+      render();
       timeline.reverse();
     };
 
     phoneDock = {
       docked: () => isDocked,
       onScroll: (y) => {
-        if (y > 4) dock();
-        else undock();
+        cachedScrollY = Math.max(0, y);
+        const dy = cachedScrollY - lastScrollY;
+        const curY = cachedScrollY;
+
+        // If overlay is in flight, update its live position synchronously on scroll
+        if (overlay) render();
+
+        // Check if hero wordmark's home position is coming on screen
+        const heroOnScreen = docA.y - curY > -heroLineHeight * 1.5;
+
+        if (state === "docked") {
+          // Trigger return earlier: when scrolling up and hero position is approaching, or near top
+          if ((dy < -1 && heroOnScreen) || curY < 8) {
+            undock();
+          }
+        } else if (state === "undocked") {
+          if (curY > 4) {
+            dock();
+          }
+        } else if (state === "docking") {
+          // Mid-flight going up: flip to reverse if user clearly scrolls up
+          if (dy < -2 && (heroOnScreen || curY < 8)) {
+            undock();
+          }
+        } else if (state === "undocking") {
+          // Mid-flight returning: flip back to docking if user clearly scrolls down past 16
+          if (dy > 2 && curY > 16) {
+            dock();
+          }
+        }
+
+        lastScrollY = curY;
       },
     };
 
     if (window.scrollY > 4) {
       isDocked = true;
       state = "docked";
+      anim.pA = 1;
+      anim.pB = 1;
       gsap.set(navText, { opacity: 1 });
       lineA.style.visibility = "hidden";
       lineB.style.visibility = "hidden";
     } else {
       isDocked = false;
       state = "undocked";
+      anim.pA = 0;
+      anim.pB = 0;
       gsap.set(navText, { opacity: 0 });
       lineA.style.visibility = "visible";
       lineB.style.visibility = "visible";
@@ -681,6 +810,8 @@ export function createMotion(): () => void {
       tl = null;
       cleanupOverlay();
       phoneDock = null;
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
       moreCleanup?.();
       lineA.style.visibility = "";
       lineB.style.visibility = "";
