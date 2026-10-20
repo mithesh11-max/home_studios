@@ -321,21 +321,22 @@ function Statement() {
 }
 
 function Process() {
+  const n = (i: number) => String(i + 1).padStart(2, "0");
   return (
     <section id="process" className="process" data-veil="0.55" data-process>
-      <div className="process-stage">
       <div className="wrap process-head">
         <h2 className="h2" data-split>How a walkthrough works</h2>
         <p className="process-meta">Two to three hours, one floor at a time</p>
       </div>
-      <div className="track" data-track>
+      {/* Phones: one photo, then the steps as a list. */}
+      <div className="track process-phone" data-track>
         <figure className="panel panel-img">
           <img src={planLinesImg} alt="Bedroom and bath outlines projected in light at full size on the studio floor" width={853} height={900} loading="lazy" />
           <figcaption>Your plan, projected at full size on the studio floor</figcaption>
         </figure>
         {STEPS.map((s, i) => (
           <article key={s.t} className="panel panel-step" data-panel>
-            <span className="panel-n" data-panel-n>{String(i + 1).padStart(2, "0")}</span>
+            <span className="panel-n" data-panel-n>{n(i)}</span>
             <div>
               <h3>{s.t}</h3>
               <p>{s.d}</p>
@@ -343,9 +344,39 @@ function Process() {
           </article>
         ))}
       </div>
-      <div className="wrap track-meter" aria-hidden="true">
-        <span className="track-bar"><span data-track-bar /></span>
-      </div>
+      {/* Computers: the steps scroll on the right while the photo of the current step is
+          held on the left. */}
+      <div className="wrap process-desk" data-process-desk>
+        <div className="pd-media" aria-hidden="true">
+          <div className="pd-frame" data-pd-frame>
+            <div className="pd-inner" data-pd-inner>
+              {STEPS.map((s) => (
+                <img key={s.t} src={s.img} alt="" loading="lazy" data-pd-img />
+              ))}
+              <div className="pd-count">
+                <span className="pd-n wordmark-type">
+                  <span className="pd-n-track" data-pd-track>
+                    {STEPS.map((s, i) => (
+                      <span key={s.t}>{n(i)}</span>
+                    ))}
+                  </span>
+                </span>
+                <span className="pd-of">/ {n(STEPS.length - 1)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ol className="pd-steps">
+          {STEPS.map((s, i) => (
+            <li key={s.t} className="pd-step" data-pd-step>
+              <span className="pd-num">{n(i)}</span>
+              <div>
+                <h3>{s.t}</h3>
+                <p>{s.d}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );

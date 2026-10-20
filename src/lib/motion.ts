@@ -268,7 +268,7 @@ export function createMotion(): () => void {
       mm.add("(min-width: 769px) and (min-height: 501px)", () => {
         heroDock();
         statementScene(false);
-        return processDesktop();
+        return processDesk();
       });
       mm.add("(max-width: 768px), (max-height: 500px)", () => {
         const undoDock = heroDockPhone();
@@ -1004,40 +1004,77 @@ export function createMotion(): () => void {
     };
   }
 
-  // Computers: steps travel sideways inside a sticky stage; numbers light up mid-screen.
-  function processDesktop() {
-    const sec = q("[data-process]");
-    const track = q("[data-track]");
-    if (!sec || !track) return;
-    const barEl = q("[data-track-bar]");
-    const dist = () => Math.max(0, track.scrollWidth - window.innerWidth);
-    const setHeight = () => (sec.style.height = `${window.innerHeight + dist()}px`);
-    setHeight();
-    ScrollTrigger.addEventListener("refreshInit", setHeight);
-    const move = gsap.to(track, {
-      x: () => -dist(),
-      ease: "none",
-      scrollTrigger: {
-        trigger: sec, start: "top top", end: "bottom bottom", scrub: 0.8, invalidateOnRefresh: true,
-        onUpdate: (s) => barEl && (barEl.style.transform = `scaleX(${s.progress})`),
-      },
-    });
-    qa("[data-panel]", sec).forEach((p) => {
-      gsap.fromTo(q("[data-panel-n]", p), { opacity: 0.14 }, {
-        opacity: 1, ease: "none",
-        scrollTrigger: { trigger: p, containerAnimation: move, start: "left 80%", end: "left 40%", scrub: true },
+  // Computers: the page scrolls normally. The steps go by on the right; the step being
+  // read is bright and the others step back. On the left, a framed photo of that step is
+  // held in place, cross-fading (with a slow settle) as the step changes, and a large
+  // counter rolls to its number. The frame opens with an upward wipe when it arrives.
+  function processDesk() {
+    const box = q("[data-process-desk]");
+    if (!box) return;
+    const frame = q("[data-pd-frame]", box);
+    const inner = q("[data-pd-inner]", box);
+    const imgs = qa("[data-pd-img]", box);
+    const steps = qa("[data-pd-step]", box);
+    const track = q("[data-pd-track]", box);
+    let active = -1;
+    let z = 1;
+
+    const go = (i: number, instant = false) => {
+      if (i === active) return;
+      const prev = active;
+      active = i;
+      steps.forEach((s, k) => s.classList.toggle("is-active", k === i));
+      // Anything that is neither arriving nor leaving is cleared at once.
+      imgs.forEach((im, k) => {
+        if (k !== i && k !== prev) gsap.set(im, { opacity: 0, overwrite: true });
+      });
+      const img = imgs[i];
+      if (img) {
+        // Newest photo on top (the shading and counter sit above every photo).
+        img.style.zIndex = String((z = (z % 900) + 1));
+        if (instant) gsap.set(img, { opacity: 1, scale: 1, overwrite: true });
+        else gsap.fromTo(img, { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 1.4, ease: "expo.out", overwrite: true });
+      }
+      // The previous photo stays underneath until the new one has mostly faded in.
+      const old = prev >= 0 ? imgs[prev] : undefined;
+      if (old) gsap.to(old, { opacity: 0, duration: 0.4, delay: instant ? 0 : 0.7, overwrite: true });
+      if (track) {
+        const y = (-100 * i) / steps.length;
+        if (instant) gsap.set(track, { yPercent: y });
+        else gsap.to(track, { yPercent: y, duration: 1.1, ease: "expo.out", overwrite: true });
+      }
+    };
+    go(0, true);
+
+    // A step is current while it crosses the middle of the screen, level with the photo.
+    steps.forEach((s, i) =>
+      ScrollTrigger.create({
+        trigger: s, start: "top 60%", end: "bottom 60%",
+        onToggle: (self) => self.isActive && go(i),
+      }),
+    );
+
+    // Arrival: each step's hairline draws and the step rises in; the frame wipes open.
+    steps.forEach((s) => {
+      gsap.fromTo(s, { "--draw": 0 }, {
+        "--draw": 1, duration: 1.4, ease: "expo.out",
+        scrollTrigger: { trigger: s, start: "top 88%", once: true },
+      });
+      gsap.from(s, {
+        y: 40, opacity: 0, duration: 1.2, ease: "power3.out", clearProps: "transform,opacity",
+        scrollTrigger: { trigger: s, start: "top 88%", once: true },
       });
     });
-    const img = q(".panel-img img", sec);
-    if (img) {
-      gsap.fromTo(img, { xPercent: 0, scale: 1.15 }, {
-        xPercent: 8, scale: 1.15, ease: "none",
-        scrollTrigger: { trigger: img.parentElement!, containerAnimation: move, start: "left right", end: "right left", scrub: true },
-      });
+    if (frame && inner) {
+      const tl = gsap.timeline({ scrollTrigger: { trigger: box, start: "top 82%", once: true } });
+      tl.fromTo(frame, { yPercent: 100 }, { yPercent: 0, duration: 1.5, ease: "expo.out", clearProps: "transform" }, 0)
+        .fromTo(inner, { yPercent: -100 }, { yPercent: 0, duration: 1.5, ease: "expo.out", clearProps: "transform" }, 0);
+      if (imgs[0]) tl.fromTo(imgs[0], { scale: 1.25 }, { scale: 1, duration: 1.8, ease: "expo.out" }, 0);
     }
+
     return () => {
-      ScrollTrigger.removeEventListener("refreshInit", setHeight);
-      sec.style.height = "";
+      steps.forEach((s) => s.classList.remove("is-active"));
+      imgs.forEach((im) => (im.style.zIndex = ""));
     };
   }
 
