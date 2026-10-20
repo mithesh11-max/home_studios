@@ -348,7 +348,7 @@ export function createMotion(): () => void {
       // Gallery: title rises letter by letter; photos unmask upward; columns drift at different speeds.
       gsap.fromTo("[data-gallery-ch]", { yPercent: 118, rotate: 7 }, {
         yPercent: 0, rotate: 0, duration: 1.5, ease: "expo.out", stagger: 0.06,
-        scrollTrigger: { trigger: "[data-gallery-title]", start: "top 90%", toggleActions: "play none none reverse" },
+        scrollTrigger: { trigger: "[data-gallery-title]", start: "top 92%", once: true },
       });
       ScrollTrigger.matchMedia({
         "(min-width: 761px)": () => {
