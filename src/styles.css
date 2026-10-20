@@ -529,13 +529,19 @@ main, .footer { position: relative; z-index: 1; }
 }
 
 @media (max-width: 768px) {
-  /* Hero: kicker on top, big two-line wordmark low on the screen, intro and button beneath. */
+  /* Hero: compact natural height on phones with no wasted blank void */
+  .hero-stage, .motion .hero-stage { position: relative !important; height: auto !important; min-height: 0 !important; }
   .hero-top { display: contents; }
   .hk-wrap, .hi-wrap { padding-inline: var(--gutter); }
-  .hk-wrap { order: 1; padding-top: calc(92px + env(safe-area-inset-top, 0px)); }
-  .hero-mark-wrap { order: 2; margin-top: auto; }
-  .hi-wrap { order: 3; padding-top: 20px; }
-  .hero-base { order: 4; }
+  .hk-wrap { order: 1; padding-top: calc(88px + env(safe-area-inset-top, 0px)); }
+  .hero-mark-wrap { order: 2; margin-top: clamp(18px, 3vh, 26px); }
+  .hi-wrap { order: 3; padding-top: clamp(14px, 2vh, 18px); }
+  .hero-base {
+    order: 4;
+    margin-top: clamp(14px, 2vh, 20px);
+    padding-top: 0;
+    padding-bottom: clamp(12px, 2vh, 18px);
+  }
   .hero-kicker { font-size: 14px; }
   .hero-intro { max-width: 32ch; gap: 18px; }
   .hero-intro p { font-size: 1.02rem; }
@@ -565,18 +571,27 @@ main, .footer { position: relative; z-index: 1; }
 
 /* Phones, and phones held sideways (short screens): statement and steps scroll naturally. */
 @media (max-width: 768px), (max-height: 500px) {
-  /* Statement: shorter scroll, larger type. */
-  /* Statement plays by itself: one screen, no long scroll. */
-  .motion .statement { height: auto; }
+  /* Statement: natural compact height, eliminating excessive empty gap above the text */
+  .motion .statement { height: auto !important; scroll-margin-top: 68px; }
   .motion .statement-stage {
     position: relative;
-    height: 88svh;
-    min-height: 460px;
+    height: auto !important;
+    min-height: 280px !important;
+    padding-top: clamp(16px, 2.5vh, 24px) !important;
+    padding-bottom: clamp(84px, 14vh, 108px) !important;
     touch-action: pan-y;
     user-select: none;
     -webkit-user-select: none;
     cursor: pointer;
     overflow: hidden;
+  }
+  .motion .statement-inner {
+    height: auto !important;
+    min-height: 120px !important;
+    padding-block: 0 !important;
+    place-items: center;
+    text-align: center;
+    gap: 0;
   }
   .st-dots {
     display: flex !important;
@@ -585,7 +600,7 @@ main, .footer { position: relative; z-index: 1; }
     gap: 6px;
     position: absolute;
     left: 50%;
-    bottom: clamp(68px, 14.5svh, 92px);
+    bottom: clamp(48px, 8vh, 62px) !important;
     transform: translateX(-50%);
     z-index: 25;
   }
@@ -624,7 +639,7 @@ main, .footer { position: relative; z-index: 1; }
     gap: 10px;
     position: absolute;
     left: 50%;
-    bottom: clamp(22px, 5.5svh, 34px);
+    bottom: clamp(12px, 2vh, 18px) !important;
     transform: translateX(-50%);
     padding: 8px 18px;
     border-radius: 999px;
@@ -669,9 +684,9 @@ main, .footer { position: relative; z-index: 1; }
     text-transform: uppercase;
   }
   .motion .track { will-change: auto; }
-  /* Hero: the wordmark docks by itself, so the hero is a single screen. */
-  .motion .hero { height: auto; }
-  .motion .hero-stage { position: relative; }
+  /* Hero: the wordmark docks by itself, compact natural height on phones. */
+  .motion .hero { height: auto !important; }
+  .motion .hero-stage { position: relative !important; height: auto !important; min-height: 0 !important; }
   .statement-line { font-size: clamp(2.2rem, 9.6vw, 2.9rem); }
 
   /* How it works: a vertical list on phones. */
