@@ -24,9 +24,9 @@ const WA = "https://wa.me/918660823337";
 const EMAIL = "contact@homestudios.co.in";
 const ADDRESS = ["18th Main, Sapthagiri Layout, Chansandra", "Rajarajeshwari Nagar, Bengaluru 560098"];
 const MAP_EMBED =
-  "https://www.google.com/maps?q=18th+Main,+Sapthagiri+Layout,+Chansandra,+Rajarajeshwari+Nagar,+Bengaluru,+Karnataka+560098&output=embed";
+  "https://maps.google.com/maps?q=HOME+STUDIOS+INDIA,+18th+Main,+Sapthagiri+Layout,+Chansandra,+Rajarajeshwari+Nagar,+Bengaluru,+Karnataka+560098&t=&z=16&ie=UTF8&iwloc=&output=embed";
 const MAP_LINK =
-  "https://www.google.com/maps/search/?api=1&query=18th+Main+Sapthagiri+Layout+Chansandra+Rajarajeshwari+Nagar+Bengaluru+560098";
+  "https://www.google.com/maps/search/?api=1&query=HOME+STUDIOS+INDIA+18th+Main+Sapthagiri+Layout+Chansandra+Rajarajeshwari+Nagar+Bengaluru+560098";
 const HOURS = "Monday to Saturday, 9 am to 7 pm";
 const BRAND = "HOME STUDIOS";
 
@@ -548,7 +548,17 @@ function Contact({ need, setNeed }: { need: string; setNeed: (n: string) => void
           </div>
         </form>
         <div className="map" data-fade>
-          <iframe title="Map showing the Home Studios walkthrough studio in Rajarajeshwari Nagar" src={MAP_EMBED} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+          <iframe title="Map showing HOME STUDIOS INDIA in Rajarajeshwari Nagar" src={MAP_EMBED} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+          <a href={MAP_LINK} target="_blank" rel="noopener" className="map-badge" aria-label="Open HOME STUDIOS INDIA in Google Maps">
+            <span className="map-badge-pin" aria-hidden="true">
+              <svg width="18" height="22" viewBox="0 0 24 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 8.8 10.5 17.1 11 17.5.3.2.7.3 1 .3s.7-.1 1-.3c.5-.4 11-8.7 11-17.5 0-6.627-5.373-12-12-12z" fill="#e53935"/>
+                <circle cx="12" cy="11.5" r="4.5" fill="#ffffff"/>
+              </svg>
+            </span>
+            <span className="map-badge-text">HOME STUDIOS INDIA</span>
+            <span className="map-badge-sub">Open in Maps ↗</span>
+          </a>
         </div>
       </div>
     </section>
