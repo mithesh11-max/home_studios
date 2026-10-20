@@ -447,76 +447,244 @@ export function createMotion(): () => void {
   // Phones: the wordmark flies into the menu bar on its own as soon as you start
   // scrolling (time-based, ~0.8s) and flies back when you return to the top. Each word
   // is re-aimed every frame at its word in the bar, so it lands exactly even while the
-  // page keeps moving underneath; the swap to the real menu-bar text happens only once
-  // the two overlap perfectly, so there is no visible cross-fade.
+  // Phones: the big wordmark flies smoothly into the top-left menu bar.
+  // Immune to fast scrolling: measures once, clones into a fixed overlay layer,
+  // animates via pure GPU transforms with zero per-frame layout recalculations,
+  // and swaps instantly upon arrival.
   function heroDockPhone() {
-    const lineA = q("[data-hm-a]");
-    const lineB = q("[data-hm-b]");
-    const navA = q("[data-brand-a]");
-    const navB = q("[data-brand-b]");
-    const navText = q("[data-brand-text]");
+    const lineA = q<HTMLElement>("[data-hm-a]");
+    const lineB = q<HTMLElement>("[data-hm-b]");
+    const navA = q<HTMLElement>("[data-brand-a]");
+    const navB = q<HTMLElement>("[data-brand-b]");
+    const navText = q<HTMLElement>("[data-brand-text]");
     if (!lineA || !lineB || !navA || !navB || !navText) return;
-    const lines = [lineA, lineB];
-    const words = [navA, navB];
-    const state = { p: 0 };
-    let goal = 0;
-    let tween: gsap.core.Tween | null = null;
-    gsap.set(navText, { opacity: 0 });
 
-    // Untransformed layout position of a line on screen right now.
-    const base = (el: HTMLElement) => {
-      const r = el.getBoundingClientRect();
-      const m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
-      return { x: r.left - m.e, y: r.top - m.f, w: el.offsetWidth };
+    const lines = [lineA, lineB];
+    const moreBtn = q<HTMLElement>("[data-more]");
+
+    let isDocked = false;
+    let state: "undocked" | "docking" | "docked" | "undocking" = "undocked";
+    let tl: gsap.core.Timeline | null = null;
+    let overlay: HTMLElement | null = null;
+    let cloneA: HTMLElement | null = null;
+    let cloneB: HTMLElement | null = null;
+
+    const cleanupOverlay = () => {
+      overlay?.remove();
+      overlay = null;
+      cloneA = null;
+      cloneB = null;
     };
-    const easeX = gsap.parseEase("expo.inOut");
-    const easeYLate = gsap.parseEase("power3.in");
-    const render = () => {
-      const p = state.p;
-      lines.forEach((line, i) => {
-        const b = base(line);
-        const w = words[i]!.getBoundingClientRect();
-        const s = words[i]!.offsetWidth / b.w;
-        const e = easeX(p);
-        // The second word rises a touch later, so it tucks in beside the first.
-        const ey = i === 1 ? easeYLate(p) * 0.35 + e * 0.65 : e;
-        gsap.set(line, { x: (w.left - b.x) * e, y: (w.top - b.y) * ey, scale: 1 + (s - 1) * e });
-      });
-    };
-    const go = (to: number) => {
-      if (goal === to) return;
-      goal = to;
-      tween?.kill();
-      if (to === 0) {
-        // Leaving the bar: show the flying words exactly over the menu-bar text, then swap.
-        gsap.set(lines, { opacity: 1 });
-        gsap.set(navText, { opacity: 0 });
+
+    if (reduce) {
+      const onReduceScroll = (y: number) => {
+        const docked = y > 4;
+        isDocked = docked;
+        gsap.set(navText, { opacity: docked ? 1 : 0 });
+        lineA.style.visibility = docked ? "hidden" : "visible";
+        lineB.style.visibility = docked ? "hidden" : "visible";
+      };
+      phoneDock = {
+        docked: () => isDocked,
+        onScroll: onReduceScroll,
+      };
+      onReduceScroll(window.scrollY);
+      let moreCleanup: (() => void) | null = null;
+      if (moreBtn) {
+        const onMore = () => onReduceScroll(100);
+        moreBtn.addEventListener("click", onMore);
+        moreCleanup = () => moreBtn.removeEventListener("click", onMore);
       }
-      tween = gsap.to(state, {
-        p: to, duration: 0.85, ease: "none", onUpdate: render,
+      return () => {
+        phoneDock = null;
+        moreCleanup?.();
+        lineA.style.visibility = "";
+        lineB.style.visibility = "";
+        gsap.set(lines, { clearProps: "transform,opacity,visibility" });
+        gsap.set(navText, { clearProps: "opacity" });
+      };
+    }
+
+    const setupFlight = () => {
+      cleanupOverlay();
+
+      lineA.style.transform = "none";
+      lineB.style.transform = "none";
+      lineA.style.opacity = "1";
+      lineB.style.opacity = "1";
+
+      const rHeroA = lineA.getBoundingClientRect();
+      const rHeroB = lineB.getBoundingClientRect();
+      const rNavA = navA.getBoundingClientRect();
+      const rNavB = navB.getBoundingClientRect();
+
+      const heroMark = lineA.closest<HTMLElement>("[data-hero-mark]");
+      const cs = heroMark ? getComputedStyle(heroMark) : getComputedStyle(lineA);
+      const heroFontSizeNum = parseFloat(cs.fontSize) || 70;
+
+      const scaleA = rNavA.width / rHeroA.width;
+      const scaleB = rNavB.width / rHeroB.width;
+
+      // Account for .mask's padding-top (0.06em) so baselines match nav words perfectly
+      const targetXA = rNavA.left - rHeroA.left;
+      const targetYA = (rNavA.top - rHeroA.top) - (0.06 * heroFontSizeNum * scaleA);
+
+      const targetXB = rNavB.left - rHeroB.left;
+      const targetYB = (rNavB.top - rHeroB.top) - (0.06 * heroFontSizeNum * scaleB);
+
+      overlay = document.createElement("div");
+      overlay.className = "hero-dock-overlay";
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "hero-mark wordmark-type";
+      wrapper.style.cssText = `position:absolute;top:0;left:0;margin:0;padding:0;pointer-events:none;font-size:${cs.fontSize};line-height:${cs.lineHeight};letter-spacing:${cs.letterSpacing};font-weight:${cs.fontWeight};font-stretch:${cs.fontStretch};color:${cs.color};`;
+
+      cloneA = lineA.cloneNode(true) as HTMLElement;
+      cloneB = lineB.cloneNode(true) as HTMLElement;
+
+      cloneA.removeAttribute("id");
+      cloneB.removeAttribute("id");
+
+      cloneA.style.position = "absolute";
+      cloneA.style.left = `${rHeroA.left}px`;
+      cloneA.style.top = `${rHeroA.top}px`;
+      cloneA.style.margin = "0";
+      cloneA.style.transformOrigin = "0 0";
+      cloneA.style.willChange = "transform";
+      cloneA.style.visibility = "visible";
+      cloneA.style.opacity = "1";
+
+      cloneB.style.position = "absolute";
+      cloneB.style.left = `${rHeroB.left}px`;
+      cloneB.style.top = `${rHeroB.top}px`;
+      cloneB.style.margin = "0";
+      cloneB.style.transformOrigin = "0 0";
+      cloneB.style.willChange = "transform";
+      cloneB.style.visibility = "visible";
+      cloneB.style.opacity = "1";
+
+      wrapper.appendChild(cloneA);
+      wrapper.appendChild(cloneB);
+      overlay.appendChild(wrapper);
+      document.body.appendChild(overlay);
+
+      lineA.style.visibility = "hidden";
+      lineB.style.visibility = "hidden";
+      gsap.set(navText, { opacity: 0 });
+
+      tl?.kill();
+      tl = gsap.timeline({
+        paused: true,
         onComplete: () => {
-          if (to === 1) {
-            gsap.set(navText, { opacity: 1 });
-            gsap.set(lines, { opacity: 0 });
-          } else {
-            gsap.set(lines, { clearProps: "transform" });
-          }
+          state = "docked";
+          isDocked = true;
+          gsap.set(navText, { opacity: 1 });
+          cleanupOverlay();
+          tl = null;
+          onScroll();
+        },
+        onReverseComplete: () => {
+          state = "undocked";
+          isDocked = false;
+          lineA.style.visibility = "visible";
+          lineB.style.visibility = "visible";
+          gsap.set(navText, { opacity: 0 });
+          cleanupOverlay();
+          tl = null;
           onScroll();
         },
       });
+
+      tl.fromTo(
+        cloneA,
+        { x: 0, y: 0, scale: 1, force3D: true },
+        { x: targetXA, y: targetYA, scale: scaleA, duration: 0.58, ease: "expo.out", force3D: true },
+        0
+      );
+
+      tl.fromTo(
+        cloneB,
+        { x: 0, y: 0, scale: 1, force3D: true },
+        { x: targetXB, y: targetYB, scale: scaleB, duration: 0.58, ease: "expo.out", force3D: true },
+        0.05
+      );
+
+      return tl;
     };
+
+    const dock = () => {
+      if (state === "docked") return;
+      if (state === "docking") {
+        if (tl?.reversed()) tl.play();
+        return;
+      }
+      if (state === "undocking") {
+        state = "docking";
+        tl?.play();
+        return;
+      }
+      state = "docking";
+      const timeline = setupFlight();
+      timeline.play();
+    };
+
+    const undock = () => {
+      if (state === "undocked") return;
+      if (state === "undocking") {
+        if (tl && !tl.reversed()) tl.reverse();
+        return;
+      }
+      if (state === "docking") {
+        state = "undocking";
+        tl?.reverse();
+        return;
+      }
+      state = "undocking";
+      isDocked = false;
+      onScroll();
+      const timeline = setupFlight();
+      timeline.progress(1);
+      timeline.reverse();
+    };
+
     phoneDock = {
-      docked: () => goal === 1 && state.p === 1,
+      docked: () => isDocked,
       onScroll: (y) => {
-        if (y > 24) go(1);
-        else if (y < 8) go(0);
+        if (y > 4) dock();
+        else undock();
       },
     };
-    if (window.scrollY > 24) go(1);
+
+    if (window.scrollY > 4) {
+      isDocked = true;
+      state = "docked";
+      gsap.set(navText, { opacity: 1 });
+      lineA.style.visibility = "hidden";
+      lineB.style.visibility = "hidden";
+    } else {
+      isDocked = false;
+      state = "undocked";
+      gsap.set(navText, { opacity: 0 });
+      lineA.style.visibility = "visible";
+      lineB.style.visibility = "visible";
+    }
+
+    let moreCleanup: (() => void) | null = null;
+    if (moreBtn) {
+      const onMore = () => dock();
+      moreBtn.addEventListener("click", onMore);
+      moreCleanup = () => moreBtn.removeEventListener("click", onMore);
+    }
+
     return () => {
-      tween?.kill();
+      tl?.kill();
+      tl = null;
+      cleanupOverlay();
       phoneDock = null;
-      gsap.set(lines, { clearProps: "transform,opacity" });
+      moreCleanup?.();
+      lineA.style.visibility = "";
+      lineB.style.visibility = "";
+      gsap.set(lines, { clearProps: "transform,opacity,visibility" });
       gsap.set(navText, { clearProps: "opacity" });
     };
   }
