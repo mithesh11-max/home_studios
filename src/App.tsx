@@ -295,8 +295,17 @@ function Statement() {
             <p key={l} className="statement-line" data-statement-line>{l}</p>
           ))}
         </div>
-        <div className="st-dots" aria-hidden="true">
-          {STATEMENT.map((l) => <span key={l} data-st-dot />)}
+        <div className="st-dots" role="tablist" aria-label="Statement lines">
+          {STATEMENT.map((l, i) => (
+            <button key={l} type="button" className="st-dot-btn" data-st-dot={i} aria-label={`Go to line ${i + 1}`}>
+              <span className="st-dot-bar" />
+            </button>
+          ))}
+        </div>
+        <div className="st-hint" aria-hidden="true">
+          <span className="st-hint-arrow">‹</span>
+          <span>Swipe or tap</span>
+          <span className="st-hint-arrow">›</span>
         </div>
       </div>
     </section>

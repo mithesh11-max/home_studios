@@ -521,31 +521,204 @@ export function createMotion(): () => void {
     };
   }
 
-  // Phones: the four lines play on their own while the section is on screen, word by
-  // word, each word rising out of its own mask. Transforms only — smooth on any phone.
+  // Phones: swipe left or right (or tap) to read through the four statement lines.
+  // Smooth slide-fade transitions, responsive dots, tap left/right zones, and gentle auto-advance.
   function statementPhone() {
     const st = q("[data-statement]");
     if (!st) return;
+    const stage = (q(".statement-stage", st) as HTMLElement | null) ?? st;
     const lines = qa("[data-statement-line]", st);
     const dots = qa("[data-st-dot]", st);
-    const parts = lines.map((l) => new SplitText(l, { type: "words", mask: "words" }));
-    const words = parts.map((p) => p.words);
-    words.forEach((w) => gsap.set(w, { yPercent: 110 }));
-    const mark = (i: number) => dots.forEach((d, k) => d.classList.toggle("is-on", k === i));
-    const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.4 });
-    words.forEach((w, i) => {
-      tl.call(() => mark(i))
-        .to(w, { yPercent: 0, duration: 0.8, stagger: 0.06, ease: "expo.out" })
-        .to(w, { yPercent: -110, duration: 0.55, stagger: 0.035, ease: "power3.in" }, i === words.length - 1 ? "+=2.6" : "+=1.7");
+    if (!lines.length) return;
+
+    let currentIndex = 0;
+    let autoTimer: ReturnType<typeof setTimeout> | null = null;
+    let isVisible = false;
+    let lastTouchTime = 0;
+
+    // Initial state: first line visible, others hidden
+    lines.forEach((line, i) => {
+      if (i === 0) {
+        gsap.set(line, { opacity: 1, xPercent: 0, visibility: "visible", pointerEvents: "auto" });
+      } else {
+        gsap.set(line, { opacity: 0, xPercent: 45, visibility: "hidden", pointerEvents: "none" });
+      }
     });
+
+    const markDots = (idx: number) => {
+      dots.forEach((d, k) => {
+        d.classList.toggle("is-on", k === idx);
+        d.setAttribute("aria-selected", k === idx ? "true" : "false");
+      });
+    };
+    markDots(0);
+
+    function goTo(nextIndex: number, direction?: number) {
+      if (lines.length <= 1) return;
+      const targetIndex = (nextIndex + lines.length) % lines.length;
+      if (targetIndex === currentIndex) return;
+
+      const currentLine = lines[currentIndex]!;
+      const nextLine = lines[targetIndex]!;
+      const dir = direction !== undefined
+        ? direction
+        : targetIndex > currentIndex ? 1 : -1;
+
+      // Hide any inactive lines immediately so rapid clicks don't stack
+      lines.forEach((l, i) => {
+        if (i !== currentIndex && i !== targetIndex) {
+          gsap.killTweensOf(l);
+          gsap.set(l, { visibility: "hidden", opacity: 0, pointerEvents: "none" });
+        }
+      });
+
+      // Animate out current line
+      gsap.killTweensOf(currentLine);
+      gsap.to(currentLine, {
+        xPercent: -45 * dir,
+        opacity: 0,
+        duration: 0.45,
+        ease: "power2.inOut",
+        onComplete: () => {
+          gsap.set(currentLine, { visibility: "hidden", pointerEvents: "none" });
+        },
+      });
+
+      // Animate in next line
+      gsap.killTweensOf(nextLine);
+      gsap.set(nextLine, {
+        visibility: "visible",
+        pointerEvents: "auto",
+        opacity: 0,
+        xPercent: 45 * dir,
+      });
+
+      gsap.to(nextLine, {
+        xPercent: 0,
+        opacity: 1,
+        duration: 0.55,
+        ease: "expo.out",
+      });
+
+      currentIndex = targetIndex;
+      markDots(currentIndex);
+    }
+
+    const AUTO_DELAY = 6000;
+    function resetAuto() {
+      if (autoTimer) clearTimeout(autoTimer);
+      if (reduce) return;
+      if (isVisible) {
+        autoTimer = setTimeout(() => {
+          goTo(currentIndex + 1, 1);
+          resetAuto();
+        }, AUTO_DELAY);
+      }
+    }
+
     const st0 = ScrollTrigger.create({
-      trigger: st, start: "top 65%", end: "bottom 35%",
-      onToggle: (self) => (self.isActive ? tl.play() : tl.pause()),
+      trigger: st,
+      start: "top 75%",
+      end: "bottom 25%",
+      onToggle: (self) => {
+        isVisible = self.isActive;
+        if (isVisible) {
+          resetAuto();
+        } else if (autoTimer) {
+          clearTimeout(autoTimer);
+          autoTimer = null;
+        }
+      },
     });
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (!e.touches[0]) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
+      if (autoTimer) clearTimeout(autoTimer);
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!e.changedTouches[0]) return;
+      lastTouchTime = Date.now();
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const dx = touchEndX - touchStartX;
+      const dy = touchEndY - touchStartY;
+      const dt = lastTouchTime - touchStartTime;
+
+      const target = e.target as HTMLElement | null;
+      if (target?.closest(".st-dots")) {
+        resetAuto();
+        return;
+      }
+
+      // Swipe threshold: at least 32px horizontally and clearly horizontal
+      if (Math.abs(dx) > 32 && Math.abs(dx) > Math.abs(dy) * 0.75) {
+        if (dx < 0) {
+          goTo(currentIndex + 1, 1);
+        } else {
+          goTo(currentIndex - 1, -1);
+        }
+      } else if (Math.abs(dx) < 16 && Math.abs(dy) < 16 && dt < 450) {
+        // Tap gesture: tap left 32% goes prev, rest goes next
+        const rect = stage.getBoundingClientRect();
+        const tapX = touchEndX - rect.left;
+        if (tapX < rect.width * 0.32) {
+          goTo(currentIndex - 1, -1);
+        } else {
+          goTo(currentIndex + 1, 1);
+        }
+      }
+
+      resetAuto();
+    };
+
+    stage.addEventListener("touchstart", onTouchStart, { passive: true });
+    stage.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    const onClick = (e: MouseEvent) => {
+      if (Date.now() - lastTouchTime < 500) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest(".st-dots")) return;
+
+      const rect = stage.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      if (clickX < rect.width * 0.32) {
+        goTo(currentIndex - 1, -1);
+      } else {
+        goTo(currentIndex + 1, 1);
+      }
+      resetAuto();
+    };
+    stage.addEventListener("click", onClick);
+
+    const dotCleanups: Array<() => void> = [];
+    dots.forEach((dot, idx) => {
+      const handler = (e: Event) => {
+        e.stopPropagation();
+        const dir = idx > currentIndex ? 1 : -1;
+        goTo(idx, dir);
+        resetAuto();
+      };
+      dot.addEventListener("click", handler);
+      dotCleanups.push(() => dot.removeEventListener("click", handler));
+    });
+
     return () => {
       st0.kill();
-      tl.kill();
-      parts.forEach((p) => p.revert());
+      if (autoTimer) clearTimeout(autoTimer);
+      stage.removeEventListener("touchstart", onTouchStart);
+      stage.removeEventListener("touchend", onTouchEnd);
+      stage.removeEventListener("click", onClick);
+      dotCleanups.forEach((c) => c());
+      lines.forEach((l) => gsap.killTweensOf(l));
+      gsap.set(lines, { clearProps: "transform,opacity,visibility,pointerEvents" });
     };
   }
 

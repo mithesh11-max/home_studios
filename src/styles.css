@@ -567,10 +567,77 @@ main, .footer { position: relative; z-index: 1; }
   /* Statement: shorter scroll, larger type. */
   /* Statement plays by itself: one screen, no long scroll. */
   .motion .statement { height: auto; }
-  .motion .statement-stage { position: relative; height: 88svh; min-height: 460px; }
-  .st-dots { display: flex; gap: 8px; position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); }
-  .st-dots span { width: 18px; height: 2px; border-radius: 2px; background: rgba(238, 236, 231, 0.2); transition: background-color 0.5s var(--ease), width 0.6s var(--ease); }
-  .st-dots span.is-on { width: 34px; background: var(--bone); }
+  .motion .statement-stage {
+    position: relative;
+    height: 88svh;
+    min-height: 460px;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .st-dots {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: absolute;
+    left: 50%;
+    bottom: 13%;
+    transform: translateX(-50%);
+    z-index: 5;
+  }
+  .st-dot-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 4px;
+    margin: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .st-dot-btn:focus-visible {
+    outline: 2px solid var(--bone);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  .st-dot-bar {
+    display: block;
+    width: 18px;
+    height: 2.5px;
+    border-radius: 2px;
+    background: rgba(238, 236, 231, 0.25);
+    transition: background-color 0.4s var(--ease), width 0.45s var(--ease);
+  }
+  .st-dot-btn.is-on .st-dot-bar {
+    width: 34px;
+    background: var(--bone);
+  }
+  .st-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    position: absolute;
+    left: 50%;
+    bottom: 7.5%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--stone);
+    opacity: 0.65;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+    z-index: 4;
+  }
+  .st-hint-arrow {
+    font-size: 13px;
+    color: var(--bone-dim);
+  }
   .motion .track { will-change: auto; }
   /* Hero: the wordmark docks by itself, so the hero is a single screen. */
   .motion .hero { height: auto; }
@@ -615,7 +682,7 @@ main, .footer { position: relative; z-index: 1; }
 
 
 /* ── Phone-only pieces (hidden on larger screens) ───────────────── */
-.g-mobile, .mbar, .nav-progress, .svc-thumb { display: none; }
+.g-mobile, .mbar, .nav-progress, .svc-thumb, .st-dots, .st-hint { display: none; }
 
 @media (max-width: 760px) {
   :root { --section: clamp(88px, 13vh, 128px); }
