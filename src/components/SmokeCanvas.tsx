@@ -1,17 +1,17 @@
 import { useEffect, useRef } from "react";
-import { FOCUS_X, FRAME_COUNT, PORTRAIT_SET, frames, type Drawable } from "@/lib/frames";
-
-const size = (d: Drawable) =>
-  d instanceof HTMLImageElement ? [d.naturalWidth, d.naturalHeight] : [d.width, d.height];
+import { FOCUS_X, FRAME_COUNT, FRAME_H, FRAME_W, PORTRAIT_SET, frames, type Drawable } from "@/lib/frames";
 
 /**
  * Fixed, full-viewport canvas that plays the smoke sequence against scroll
  * position for the whole page. Adjacent frames are cross-faded so slow scrolls
  * stay fluid, and nothing is redrawn while the page is still.
  *
- * Phones: frames are decoded off the main thread a little ahead of the scroll
- * (see frames.focus), and the canvas renders at a lower pixel ratio — the smoke
- * is soft, so it looks the same and costs half the pixels per frame.
+ * Phones: frames are decoded off the main thread a little ahead of the scroll, at
+ * exactly the size they are drawn (see frames.setSize), and the canvas renders at a
+ * lower pixel ratio — the smoke is soft, so it looks the same for far fewer pixels.
+ *
+ * The easing is measured in time, not frames, so it feels the same on 60, 90 and 120 Hz
+ * screens, and the loop sleeps whenever there is nothing new to draw.
  */
 export function SmokeCanvas() {
   const ref = useRef<HTMLCanvasElement | null>(null);
@@ -26,8 +26,10 @@ export function SmokeCanvas() {
     let drawn = -1;
     let dirty = true;
     let raf = 0;
+    let last = 0;
     let maxScroll = 1;
     let focused = -1;
+    // Share of the remaining distance covered per 60 Hz frame.
     const ease = PORTRAIT_SET ? 0.22 : 0.16;
 
     const resize = () => {
@@ -44,13 +46,19 @@ export function SmokeCanvas() {
       canvas.height = h;
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = PORTRAIT_SET ? "low" : "high";
+      // Phones: have frames decoded at the size they cover the canvas at, so drawing is a
+      // straight copy with no scaling.
+      const cover = Math.max(w / FRAME_W, h / FRAME_H);
+      frames.setSize(Math.round(FRAME_W * cover), Math.round(FRAME_H * cover));
       dirty = true;
+      wake();
     };
 
     const draw = (img: Drawable, alpha: number) => {
       const cw = canvas.width;
       const ch = canvas.height;
-      const [iw, ih] = size(img);
+      const iw = img instanceof HTMLImageElement ? img.naturalWidth : img.width;
+      const ih = img instanceof HTMLImageElement ? img.naturalHeight : img.height;
       if (!iw || !ih) return;
       const s = Math.max(cw / iw, ch / ih);
       const w = iw * s;
@@ -65,7 +73,7 @@ export function SmokeCanvas() {
       const base = Math.floor(f);
       const frac = f - base;
       const a = frames.nearest(base);
-      if (!a) return;
+      if (!a) return false;
       draw(a, 1);
       // Blend in the next frame only when it can be seen: on phones, skip it while the page
       // is moving quickly (frames change faster than a blend could be noticed).
@@ -77,6 +85,7 @@ export function SmokeCanvas() {
       ctx.globalAlpha = 1;
       drawn = f;
       dirty = false;
+      return true;
     };
 
     // Page height is measured only when it changes, never inside the scroll handler.
@@ -87,22 +96,35 @@ export function SmokeCanvas() {
     const readScroll = () => {
       const p = Math.min(1, Math.max(0, window.scrollY / maxScroll));
       target = p * (FRAME_COUNT - 1);
+      wake();
     };
 
-    const loop = () => {
+    const loop = (t: number) => {
+      raf = 0;
+      const dt = last ? Math.min(64, t - last) : 1000 / 60;
+      last = t;
       const d = target - current;
-      current = Math.abs(d) < 0.01 ? target : current + d * ease;
+      current = Math.abs(d) < 0.01 ? target : current + d * (1 - Math.pow(1 - ease, dt / (1000 / 60)));
       const idx = Math.round(current);
       if (idx !== focused) {
         focused = idx;
         frames.focus(current);
       }
-      if (dirty || Math.abs(current - drawn) > 0.01) render(current);
-      raf = requestAnimationFrame(loop);
+      const drew = dirty || Math.abs(current - drawn) > 0.01 ? render(current) : true;
+      // Keep going while the smoke is still catching up with the scroll; otherwise sleep
+      // until the page scrolls or a needed frame arrives.
+      if (current !== target || (dirty && drew)) raf = requestAnimationFrame(loop);
+      else last = 0;
     };
+    function wake() {
+      if (!raf) raf = requestAnimationFrame(loop);
+    }
 
     const offFrame = frames.onFrame((i) => {
-      if (Math.abs(i - current) < 3 || drawn < 0) dirty = true;
+      if (Math.abs(i - current) < 3 || drawn < 0) {
+        dirty = true;
+        wake();
+      }
     });
 
     const ro = new ResizeObserver(measure);
@@ -118,7 +140,7 @@ export function SmokeCanvas() {
     };
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", readScroll, { passive: true });
-    raf = requestAnimationFrame(loop);
+    wake();
 
     return () => {
       cancelAnimationFrame(raf);

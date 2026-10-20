@@ -260,11 +260,9 @@ export function createMotion(): () => void {
       cleanups.push(() => mm.revert());
       // Each layout reveals only its own gallery grid (the other one is display:none).
       const revealGallery = (sel: string) =>
-        qa(`${sel} [data-g-reveal]`).forEach((el) => {
-          const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: "top 92%", once: true } });
-          tl.fromTo(el, { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5, ease: "expo.out" })
-            .fromTo(q("img", el), { scale: 1.35 }, { scale: 1, duration: 1.8, ease: "expo.out" }, 0);
-        });
+        qa(`${sel} [data-g-reveal]`).forEach((el) =>
+          wipeUp(el, el.closest(".g-item") ?? el, { duration: 1.5, imgFrom: 1.35, imgDuration: 1.8 }),
+        );
       mm.add("(min-width: 769px)", () => revealGallery(".g-desktop"));
       mm.add("(max-width: 768px)", () => revealGallery(".g-mobile"));
       mm.add("(min-width: 769px) and (min-height: 501px)", () => {
@@ -275,11 +273,12 @@ export function createMotion(): () => void {
       mm.add("(max-width: 768px), (max-height: 500px)", () => {
         const undoDock = heroDockPhone();
         const undoStatement = statementPhone();
-        processPhone();
+        const undoProcess = processPhone();
         servicesPhone();
         return () => {
           undoDock?.();
           undoStatement?.();
+          undoProcess?.();
         };
       });
 
@@ -334,16 +333,7 @@ export function createMotion(): () => void {
 
       // Studio band: opens from a framed card to full bleed.
       const band = q("[data-band-inner]");
-      if (band) {
-        gsap.fromTo(band, { clipPath: "inset(10% 12% 10% 12% round 10px)" }, {
-          clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "none",
-          scrollTrigger: { trigger: band, start: "top 92%", end: "center 55%", scrub: true },
-        });
-        gsap.fromTo(q("img", band), { scale: 1.3 }, {
-          scale: 1, ease: "none",
-          scrollTrigger: { trigger: band, start: "top bottom", end: "bottom top", scrub: true },
-        });
-      }
+      if (band) openFrame(band, { insetX: 0.12, insetY: 0.1, r0: 10, r1: 0, start: 0.92, end: 0.55, imgFrom: 1.3 });
 
       // Gallery: title rises letter by letter; photos unmask upward; columns drift at different speeds.
       gsap.fromTo("[data-gallery-ch]", { yPercent: 118, rotate: 7 }, {
@@ -447,16 +437,16 @@ export function createMotion(): () => void {
   // Phones: the wordmark flies into the menu bar by itself once you start scrolling, and
   // flies back into the hero when you come back up to it.
   //
-  // The landing never chases the scrolling page:
-  //  - Going up, the two lines are lifted into a position:fixed layer, the same as the
-  //    menu bar they land in, so the landing is rock-still however fast you scroll.
-  //  - Coming back, the layer switches to position:absolute in page coordinates, so the
-  //    landing spot (the lines' own place in the hero) scrolls natively with the page,
-  //    momentum and iOS bounce included, and they settle exactly in place.
-  // The take-off point follows the scroll and lets go as the flight progresses, so the
-  // words peel away from where they were instead of being left behind.
-  // Everything is measured once when a flight starts; each frame only writes transforms.
-  // If the direction flips mid-flight, the new flight starts from wherever the words are.
+  // Smoothness rules:
+  //  - Nothing is measured or built when a flight starts. Both ends of the flight and the
+  //    flying copies are prepared in advance (and again only after a resize), so the first
+  //    frame of a flight costs the same as every other: two transform writes.
+  //  - The copies fly in two ready-made layers: one anchored to the page, one to the
+  //    screen. Near the hero they fly in the page layer, so they move with the page's own
+  //    native scrolling; near the menu bar they fly in the screen layer, so they sit as
+  //    still as the bar. They switch layers mid-air, where they move fastest.
+  //  - Each end of the flight is pixel-exact with the real text it hands over to.
+  //  - If the direction flips mid-flight, the new flight starts from wherever the words are.
   function heroDockPhone() {
     const mark = q("[data-hero-mark]");
     const lineA = q("[data-hm-a]");
@@ -470,36 +460,76 @@ export function createMotion(): () => void {
     const words = [navA, navB];
     const moreBtn = q("[data-more]");
 
+    type Space = "page" | "screen";
     type Pose = { x: number; y: number; s: number };
-    type Mode = "screen" | "page";
+    type End = { pose: Pose; space: Space };
     type State = "undocked" | "docking" | "docked" | "undocking";
 
     let state: State = "undocked";
-    let mode: Mode = "screen";
-    let overlay: HTMLElement | null = null;
-    let clones: HTMLElement[] = [];
     let flight: gsap.core.Timeline | null = null;
     const prog = [{ p: 0 }, { p: 0 }];
-    let from: Pose[] = [];
-    let fromSpace: Mode = "page";
-    let liveY = window.scrollY;
-    let to: Pose[] = [];
-    let cur: Pose[] = [];
-    const frac = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
-    const off = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
+    let from: End[] = [];
+    let to: End[] = [];
     let heroIsTarget = false;
+    let liveY = window.scrollY;
 
-    // Where the wordmark sits on the page, for deciding when to bring it back.
+    // Prepared ends: each line's spot in the hero (page coordinates) and in the menu bar
+    // (screen coordinates, the bar is fixed), plus where the copies were last drawn.
+    let hero: Pose[] = [];
+    let bar: Pose[] = [];
+    let cur: End[] = [];
+    let frac: { x: number; y: number }[] = [];
     let homeTop = 0;
     let homeH = 0;
+
+    // Two layers of copies. The page layer's copies carry the sub-pixel part of the
+    // line's page position as layout, so the browser snaps them exactly like the real
+    // lines; the screen layer's copies sit on whole pixels, like the menu text.
+    type Layer = { el: HTMLElement; clones: HTMLElement[]; gpu: boolean[] };
+    let layers: Record<Space, Layer> | null = null;
+    let shown: Space | null = null;
 
     const showLines = (on: boolean) => lines.forEach((l) => (l.style.visibility = on ? "" : "hidden"));
     const showNav = (on: boolean) => (navText.style.opacity = on ? "1" : "0");
 
-    // Reads the two ends of the flight, in one layout pass. Screen coordinates.
-    // `hero`: each line's box at size 1. `bar`: each line shrunk to the menu font size
-    // with its baseline on the menu word's baseline, so the swap is pixel-exact.
-    const measure = () => {
+    const buildLayer = (space: Space): Layer => {
+      const el = document.createElement("div");
+      el.className = space === "page" ? "hero-dock-overlay is-page" : "hero-dock-overlay";
+      el.setAttribute("aria-hidden", "true");
+      const cs = getComputedStyle(mark);
+      const ctx = document.createElement("div");
+      ctx.className = mark.className;
+      ctx.style.cssText = `position:absolute;left:0;top:0;margin:0;font-size:${cs.fontSize};color:${cs.color}`;
+      const clones = lines.map((line, i) => {
+        const c = line.cloneNode(true) as HTMLElement;
+        [c, ...Array.from(c.querySelectorAll<HTMLElement>("*"))].forEach((n) => {
+          Array.from(n.attributes).forEach((a) => a.name.startsWith("data-") && n.removeAttribute(a.name));
+        });
+        // Letters at rest whatever the intro was doing, written the way GSAP leaves the
+        // real ones (an identity translate), so both are painted identically.
+        c.querySelectorAll<HTMLElement>(".ch").forEach((ch) => (ch.style.transform = "translate(0px, 0px)"));
+        // Painted crisp at every size, rather than one cached bitmap stretched up or down.
+        const o = space === "page" ? frac[i]! : { x: 0, y: 0 };
+        c.style.cssText = `position:absolute;left:${o.x}px;top:${o.y}px;margin:0;transform-origin:0 0;will-change:auto`;
+        ctx.appendChild(c);
+        return c;
+      });
+      el.appendChild(ctx);
+      document.body.appendChild(el);
+      return { el, clones, gpu: [false, false] };
+    };
+
+    const dropLayers = () => {
+      if (!layers) return;
+      layers.page.el.remove();
+      layers.screen.el.remove();
+      layers = null;
+      shown = null;
+    };
+
+    // Measures both ends and rebuilds the copies. Runs at start-up and after a resize or a
+    // font change, never during a flight.
+    const prepare = () => {
       const probes = [...lines, ...words].map((el) => {
         const p = document.createElement("span");
         p.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
@@ -511,149 +541,113 @@ export function createMotion(): () => void {
       const k = barSize / heroSize;
       const sx = window.scrollX;
       const sy = window.scrollY;
-      const hero: Pose[] = [];
-      const bar: Pose[] = [];
+      hero = [];
+      bar = [];
+      frac = [];
       lines.forEach((line, i) => {
         const r = line.getBoundingClientRect();
         const lineBase = probes[i]!.getBoundingClientRect().top - r.top;
         const w = words[i]!.getBoundingClientRect();
         const wordBase = probes[i + 2]!.getBoundingClientRect().top;
-        hero.push({ x: r.left, y: r.top, s: 1 });
-        // The browser snaps laid-out text to the pixel grid but draws transformed text
-        // exactly where the transform puts it. Near the hero, the clone carries the
-        // fractional part of the line's page position as layout (left/top), so it is
-        // snapped exactly like the real line and the transform only adds whole pixels.
         const px = r.left + sx;
         const py = r.top + sy;
-        frac[i] = { x: px - Math.floor(px), y: py - Math.floor(py) };
+        hero.push({ x: px, y: py, s: 1 });
+        frac.push({ x: px - Math.floor(px), y: py - Math.floor(py) });
+        // Shrunk to the menu font size, with its baseline on the menu word's baseline.
         bar.push({ x: w.left, y: wordBase - lineBase * k, s: k });
       });
       probes.forEach((p) => p.remove());
-      homeTop = hero[0]!.y + sy;
+      homeTop = hero[0]!.y;
       homeH = lineA.offsetHeight;
-      return { hero, bar, sy };
+      dropLayers();
+      layers = { page: buildLayer("page"), screen: buildLayer("screen") };
     };
 
-    // Take-off point of a line in this layer's coordinates, at the current scroll position.
-    const takeOff = (i: number) => {
-      const f = from[i]!;
-      return fromSpace === mode ? f : { ...f, y: f.y + (mode === "page" ? liveY : -liveY) };
+    const heroEnd = (i: number): End => ({ pose: hero[i]!, space: "page" });
+    const barEnd = (i: number): End => ({ pose: bar[i]!, space: "screen" });
+    const inSpace = (e: End, space: Space, y: number): Pose =>
+      e.space === space ? e.pose : { ...e.pose, y: e.pose.y + (space === "page" ? y : -y) };
+
+    const show = (space: Space | null) => {
+      if (!layers || space === shown) return;
+      layers.page.el.classList.toggle("is-on", space === "page");
+      layers.screen.el.classList.toggle("is-on", space === "screen");
+      shown = space;
     };
 
     const render = () => {
-      // On a hard fling the page can outrun the flight: the words rise with it only until
-      // HOME reaches the menu bar, never off the top. Both lines move together, so STUDIOS
-      // stays a line below HOME until it slides in beside it.
-      const lift = mode === "screen" ? Math.max(0, to[0]!.y - takeOff(0).y) : 0;
-      clones.forEach((c, i) => {
+      if (!layers) return;
+      const y = liveY;
+      // Which layer: the one belonging to the end the words are closer to.
+      const q = (prog[0]!.p + prog[1]!.p) / 2;
+      const space: Space = (heroIsTarget ? q >= 0.5 : q < 0.5) ? "page" : "screen";
+      show(space);
+      // On a hard fling the page can outrun the flight up to the bar: the words rise with
+      // it only until HOME reaches the bar, never off the top. Both lines move together, so
+      // STUDIOS stays a line below HOME until it slides in beside it.
+      const lift = heroIsTarget ? 0 : Math.max(0, to[0]!.pose.y - inSpace(from[0]!, "screen", y).y);
+      layers[space].clones.forEach((c, i) => {
         const p = prog[i]!.p;
-        const a = takeOff(i);
-        const b = to[i]!;
+        const a = inSpace(from[i]!, space, y);
+        const b = inSpace(to[i]!, space, y);
         const ay = a.y + lift;
         // STUDIOS joins HOME's row only once it has slid clear of it, and leaves the row
         // first on the way back, so the two words never brush past each other.
         const py = i === 0 ? p : heroIsTarget ? 1 - Math.pow(1 - p, 1.8) : Math.pow(p, 1.8);
         const pose = { x: a.x + (b.x - a.x) * p, y: ay + (b.y - ay) * py, s: a.s + (b.s - a.s) * p };
-        cur[i] = pose;
-        // Hero half of the flight: snap like the real line. Menu-bar half: no offset, like
-        // the menu text. The switch happens mid-air, where a sub-pixel change can't be seen.
-        const nearHero = (heroIsTarget ? p : 1 - p) >= 0.5;
-        const o = nearHero ? frac[i]! : { x: 0, y: 0 };
-        if (o.x !== off[i]!.x || o.y !== off[i]!.y) {
-          off[i] = o;
-          c.style.left = `${o.x}px`;
-          c.style.top = `${o.y}px`;
-        }
+        cur[i] = { pose, space };
+        const o = space === "page" ? frac[i]! : { x: 0, y: 0 };
         c.style.transform = `translate(${pose.x - o.x}px, ${pose.y - o.y}px) scale(${pose.s})`;
+        // On the way up the words only ever shrink, so mid-flight they can ride on their own
+        // GPU layer (moved without repainting) and stay sharp. The first and last frames are
+        // drawn normally, so both hand-overs stay pixel-exact. Growing on the way back would
+        // blur a GPU layer, so that flight is always drawn normally.
+        const gpu = !heroIsTarget && p > 0.04 && p < 0.9;
+        if (gpu !== layers![space].gpu[i]) {
+          layers![space].gpu[i] = gpu;
+          c.style.willChange = gpu ? "transform" : "auto";
+        }
       });
-    };
-
-    const ensureOverlay = () => {
-      if (overlay) return;
-      overlay = document.createElement("div");
-      overlay.className = "hero-dock-overlay";
-      overlay.setAttribute("aria-hidden", "true");
-      // Same type context as the hero heading, so each clone has exactly the line's box.
-      const cs = getComputedStyle(mark);
-      const ctx = document.createElement("div");
-      ctx.className = mark.className;
-      ctx.style.cssText = `position:absolute;left:0;top:0;margin:0;font-size:${cs.fontSize};color:${cs.color}`;
-      clones = lines.map((line) => {
-        const c = line.cloneNode(true) as HTMLElement;
-        [c, ...Array.from(c.querySelectorAll<HTMLElement>("*"))].forEach((el) => {
-          Array.from(el.attributes).forEach((a) => a.name.startsWith("data-") && el.removeAttribute(a.name));
-        });
-        // Letters at rest whatever the intro was doing, written the way GSAP leaves the
-        // real ones (an identity translate), so both are painted identically.
-        c.querySelectorAll<HTMLElement>(".ch").forEach((ch) => (ch.style.transform = "translate(0px, 0px)"));
-        // Repainted crisp at every size rather than one cached bitmap stretched up or down.
-        c.style.cssText = "position:absolute;left:0;top:0;margin:0;transform-origin:0 0;will-change:auto";
-        ctx.appendChild(c);
-        return c;
-      });
-      overlay.appendChild(ctx);
-      document.body.appendChild(overlay);
-    };
-
-    const setMode = (m: Mode) => {
-      mode = m;
-      overlay?.classList.toggle("is-page", m === "page");
-    };
-
-    const removeOverlay = () => {
-      overlay?.remove();
-      overlay = null;
-      clones = [];
-      off.forEach((o) => ((o.x = 0), (o.y = 0)));
     };
 
     const land = (s: "docked" | "undocked") => {
       flight?.kill();
       flight = null;
       state = s;
-      // Show the real text and drop the clones in the same frame: no gap, no double.
+      // Show the real text and hide the copies in the same frame: no gap, no double.
       showNav(s === "docked");
       showLines(s === "undocked");
-      removeOverlay();
+      show(null);
       onScroll();
     };
 
     // One flight towards the bar ("docking") or back into the hero ("undocking").
     const fly = (dir: "docking" | "undocking") => {
-      const { hero, bar, sy } = measure();
-      liveY = sy;
-      // The hero end lives on the page; the menu-bar end lives on the screen.
-      const heroOnPage = hero.map((p) => ({ ...p, y: p.y + sy }));
-
-      // Take off from wherever the words are right now.
+      if (!layers) prepare();
+      liveY = window.scrollY;
       let share = 1;
-      if (flight && overlay) {
+      if (flight) {
+        // Turn around from wherever the words are.
         flight.kill();
         from = cur.slice();
-        fromSpace = mode;
         share = Math.max(0.45, (prog[0]!.p + prog[1]!.p) / 2);
       } else {
-        from = dir === "docking" ? heroOnPage : bar;
-        fromSpace = dir === "docking" ? "page" : "screen";
+        from = lines.map((_, i) => (dir === "docking" ? heroEnd(i) : barEnd(i)));
       }
-
-      state = dir;
-      ensureOverlay();
-      setMode(dir === "docking" ? "screen" : "page");
+      to = lines.map((_, i) => (dir === "docking" ? barEnd(i) : heroEnd(i)));
       heroIsTarget = dir === "undocking";
-      to = dir === "docking" ? bar : heroOnPage;
+      state = dir;
       prog.forEach((o) => (o.p = 0));
+      render();
       showLines(false);
       showNav(false);
-      render();
       onScroll();
 
       const d = (dir === "docking" ? 0.62 : 0.72) * share;
-      const ease = "power3.out";
       flight = gsap.timeline({ onUpdate: render, onComplete: () => land(dir === "docking" ? "docked" : "undocked") });
       // STUDIOS trails HOME a beat, so it tucks in beside it instead of crossing it.
       const lag = dir === "docking" ? [0, 0.05] : [0.05, 0];
-      prog.forEach((o, i) => flight!.to(o, { p: 1, duration: d, ease }, lag[i]! * share));
+      prog.forEach((o, i) => flight!.to(o, { p: 1, duration: d, ease: "power3.out" }, lag[i]! * share));
     };
 
     const dock = () => {
@@ -693,32 +687,30 @@ export function createMotion(): () => void {
       },
     };
 
-    // Starting state.
-    measure();
-    if (window.scrollY > 4) land("docked");
-    else land("undocked");
+    prepare();
+    land(window.scrollY > 4 ? "docked" : "undocked");
 
     // "Know more about us": dock straight away, while the page glides down.
     const onMore = () => dock();
     moreBtn?.addEventListener("click", onMore);
 
-    // A width change re-fits the wordmark: finish any flight where it was heading.
+    // A width change re-fits the wordmark: finish any flight where it was heading, then
+    // re-measure and rebuild the copies once the new layout is in.
     const settle = () => {
       if (state === "docking") land("docked");
       else if (state === "undocking") land("undocked");
     };
-    const remeasure = () => void measure();
     ScrollTrigger.addEventListener("refreshInit", settle);
-    ScrollTrigger.addEventListener("refresh", remeasure);
+    ScrollTrigger.addEventListener("refresh", prepare);
 
     return () => {
       flight?.kill();
       flight = null;
-      removeOverlay();
+      dropLayers();
       phoneDock = null;
       moreBtn?.removeEventListener("click", onMore);
       ScrollTrigger.removeEventListener("refreshInit", settle);
-      ScrollTrigger.removeEventListener("refresh", remeasure);
+      ScrollTrigger.removeEventListener("refresh", prepare);
       lines.forEach((l) => (l.style.visibility = ""));
       navText.style.opacity = "";
       gsap.set(lines, { clearProps: "transform,opacity" });
@@ -928,16 +920,88 @@ export function createMotion(): () => void {
 
   // Phones: each service photo opens upward a beat after its row slides in.
   function servicesPhone() {
-    qa("[data-svc-thumb]").forEach((t) => {
-      gsap.fromTo(t, { clipPath: "inset(100% 0% 0% 0% round 10px)" }, {
-        clipPath: "inset(0% 0% 0% 0% round 10px)", duration: 1.2, ease: "expo.out", delay: 0.15,
-        scrollTrigger: { trigger: t, start: "top 92%", once: true },
+    qa("[data-svc-thumb]").forEach((t) =>
+      wipeUp(t, t.parentElement ?? t, { duration: 1.2, imgFrom: 1.4, imgDuration: 1.6, delay: 0.15 }),
+    );
+  }
+
+  // Reveals a photo with an upward wipe using transforms only: the frame slides up into
+  // place while the photo inside slides down by the same amount, so the photo stays put
+  // and is uncovered from the bottom. It looks like an animated clip-path, but the browser
+  // never repaints the photo while it plays, which keeps fast scrolls smooth on phones.
+  // `trigger` is an untransformed element at the same spot, so the start point is exact.
+  function wipeUp(box: HTMLElement, trigger: Element, o: { duration: number; imgFrom: number; imgDuration: number; delay?: number }) {
+    const img = q("img", box);
+    const at = o.delay ?? 0;
+    const tl = gsap.timeline({ scrollTrigger: { trigger, start: "top 92%", once: true } });
+    tl.fromTo(box, { yPercent: 100 }, { yPercent: 0, duration: o.duration, ease: "expo.out" }, at);
+    if (img) {
+      tl.fromTo(img, { yPercent: -100 }, { yPercent: 0, duration: o.duration, ease: "expo.out" }, at)
+        .fromTo(img, { scale: o.imgFrom }, { scale: 1, duration: o.imgDuration, ease: "expo.out" }, at);
+    }
+  }
+
+  // A framed photo that opens out to full size as it scrolls into view, with the photo
+  // easing from zoomed-in to normal. It looks like an animated clip-path inset, but it is
+  // done by scaling the frame and counter-scaling everything inside it around the frame's
+  // centre (so the photo and caption stay still), with the corner radius corrected for the
+  // scale. Nothing is repainted while you scroll. Scroll ranges match the old clip version:
+  // the frame opens from its top at `start` of the screen to its centre at `end`; the
+  // photo zooms while the frame crosses the screen.
+  function openFrame(box: HTMLElement, o: { insetX: number; insetY: number; r0: number; r1: number; start: number; end: number; imgFrom: number }) {
+    const img = q("img", box);
+    const kids = Array.from(box.children) as HTMLElement[];
+    let t = 0;
+    let u = 0;
+    const pageTop = (el: HTMLElement) => {
+      let y = 0;
+      for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
+      return y;
+    };
+    const place = () => {
+      // Each child scales around the frame's centre, wherever it sits inside the frame.
+      const cx = box.offsetWidth / 2;
+      const cy = box.offsetHeight / 2;
+      kids.forEach((c) => (c.style.transformOrigin = `${cx - c.offsetLeft}px ${cy - c.offsetTop}px`));
+    };
+    const apply = () => {
+      const sx = 1 - 2 * o.insetX * (1 - t);
+      const sy = 1 - 2 * o.insetY * (1 - t);
+      const r = o.r0 + (o.r1 - o.r0) * t;
+      const k = o.imgFrom + (1 - o.imgFrom) * u;
+      box.style.transform = `scale(${sx}, ${sy})`;
+      box.style.borderRadius = r > 0 ? `${r / sx}px / ${r / sy}px` : "";
+      kids.forEach((c) => {
+        const z = c === img ? k : 1;
+        c.style.transform = `scale(${z / sx}, ${z / sy})`;
       });
-      gsap.fromTo(q("img", t), { scale: 1.4 }, {
-        scale: 1, duration: 1.6, ease: "expo.out", delay: 0.15,
-        scrollTrigger: { trigger: t, start: "top 92%", once: true },
-      });
+    };
+    // GPU layers only while the frame is on screen.
+    const layer = (on: boolean) => [box, ...kids].forEach((el) => (el.style.willChange = on ? "transform" : ""));
+    const vh = () => window.innerHeight;
+    const frame = ScrollTrigger.create({
+      start: () => pageTop(box) - o.start * vh(),
+      end: () => pageTop(box) + box.offsetHeight / 2 - o.end * vh(),
+      onUpdate: (s) => ((t = s.progress), apply()),
+      onRefresh: (s) => (place(), (t = s.progress), apply()),
     });
+    const zoom = ScrollTrigger.create({
+      start: () => pageTop(box) - vh(),
+      end: () => pageTop(box) + box.offsetHeight,
+      onUpdate: (s) => ((u = s.progress), apply()),
+      onRefresh: (s) => ((u = s.progress), apply(), layer(s.isActive)),
+      onToggle: (s) => layer(s.isActive),
+    });
+    return () => {
+      frame.kill();
+      zoom.kill();
+      [box, ...kids].forEach((el) => {
+        el.style.transform = "";
+        el.style.transformOrigin = "";
+        el.style.willChange = "";
+      });
+      box.style.borderRadius = "";
+    };
   }
 
   // Computers: steps travel sideways inside a sticky stage; numbers light up mid-screen.
@@ -983,16 +1047,7 @@ export function createMotion(): () => void {
     const sec = q("[data-process]");
     if (!sec) return;
     const pic = q(".panel-img", sec);
-    if (pic) {
-      gsap.fromTo(pic, { clipPath: "inset(12% 8% 12% 8% round 10px)" }, {
-        clipPath: "inset(0% 0% 0% 0% round 6px)", ease: "none",
-        scrollTrigger: { trigger: pic, start: "top 95%", end: "center 60%", scrub: true },
-      });
-      gsap.fromTo(q("img", pic), { scale: 1.25 }, {
-        scale: 1, ease: "none",
-        scrollTrigger: { trigger: pic, start: "top bottom", end: "bottom top", scrub: true },
-      });
-    }
+    const undoPic = pic ? openFrame(pic, { insetX: 0.08, insetY: 0.12, r0: 10, r1: 6, start: 0.95, end: 0.6, imgFrom: 1.25 }) : undefined;
     qa("[data-panel]", sec).forEach((p) => {
       gsap.fromTo(q("[data-panel-n]", p), { opacity: 0.15 }, {
         opacity: 1, ease: "none",
@@ -1007,6 +1062,7 @@ export function createMotion(): () => void {
         scrollTrigger: { trigger: p, start: "top 90%", once: true },
       });
     });
+    return undoPic;
   }
 
   function pointerFx() {

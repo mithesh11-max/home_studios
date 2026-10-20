@@ -3,10 +3,12 @@
 // so the full scroll range is usable almost immediately and fills in with detail.
 //
 // Desktop: each frame is an <img>, decoded once as it arrives.
-// Phones:  every frame is downloaded as compressed bytes (about 2 MB in all), but only the
-//          frames around the current scroll position are decoded, off the main thread,
-//          with createImageBitmap. Drawing a ready bitmap costs almost nothing, so scrolling
-//          never waits on a decode, and memory stays flat (about 30 frames at a time).
+// Phones:  a background worker downloads every frame as compressed bytes (about 2 MB in
+//          all) and decodes only the frames around the current scroll position, straight
+//          to the size they are drawn at. The page just draws ready bitmaps, so scrolling
+//          never waits on a decode and the main thread never pays for one. Memory stays flat
+//          (about 25 screen-sized frames at a time). Without worker support, the same
+//          happens on the main thread.
 
 // Phones in portrait get their own sequence, composed vertically for a tall screen
 // (720×1280, every other frame of the 1080×1920 portrait render).
@@ -14,6 +16,9 @@ export const PORTRAIT_SET =
   typeof window !== "undefined" &&
   window.matchMedia("(max-width: 760px) and (orientation: portrait)").matches;
 export const FRAME_COUNT = PORTRAIT_SET ? 250 : 500;
+/** Pixel size of the source frames. */
+export const FRAME_W = PORTRAIT_SET ? 720 : 1280;
+export const FRAME_H = PORTRAIT_SET ? 1280 : 720;
 const CONCURRENCY = 6;
 /** Horizontal point of the frame kept in the centre of the screen. */
 export const FOCUS_X = PORTRAIT_SET ? 0.5 : 0.6;
@@ -32,9 +37,15 @@ class FrameStore {
   /** Phones: compressed bytes for every frame, plus a small window of decoded bitmaps. */
   private readonly blobs: (Blob | null)[] = new Array(FRAME_COUNT).fill(null);
   private readonly bitmaps = new Map<number, ImageBitmap>();
+  private readonly bitmapGen = new Map<number, number>();
   private readonly decoding = new Set<number>();
   private centre = 0;
-  private readonly radius = 14;
+  private readonly radius = 10;
+  /** Phones: size the frames are drawn at; `gen` counts changes, so stale bitmaps are dropped. */
+  private size = { w: 0, h: 0 };
+  private gen = 0;
+  private worker: Worker | null = null;
+  private readonly arrived: boolean[] = new Array(FRAME_COUNT).fill(false);
 
   private readonly order: number[] = [];
   private readonly criticalCount: number;
@@ -78,6 +89,7 @@ class FrameStore {
   }
 
   private has(i: number) {
+    if (this.worker) return this.arrived[i]!;
     return this.phoneMode ? !!this.blobs[i] : !!this.images[i];
   }
 
@@ -98,6 +110,76 @@ class FrameStore {
   start() {
     if (this.started) return;
     this.started = true;
+    if (this.phoneMode && this.startWorker()) return;
+    this.startHere();
+  }
+
+  /** Phones: hand downloading and decoding to a worker. False if workers aren't available. */
+  private startWorker() {
+    let w: Worker;
+    try {
+      w = new Worker(new URL("./frameWorker.ts", import.meta.url), { type: "module" });
+    } catch {
+      return false;
+    }
+    this.worker = w;
+    const fail = () => {
+      // Worker unusable here: do the same work on the main thread instead.
+      w.terminate();
+      if (this.worker !== w) return;
+      this.worker = null;
+      this.startHere();
+    };
+    w.onerror = fail;
+    w.onmessage = (e: MessageEvent) => {
+      const m = e.data as
+        | { type: "ready"; ok: boolean }
+        | { type: "loaded"; idx: number; ok: boolean }
+        | { type: "bitmap"; idx: number; bitmap: ImageBitmap; gen: number };
+      if (m.type === "ready") {
+        if (!m.ok) return fail();
+        const urls = Array.from({ length: FRAME_COUNT }, (_, i) => new URL(frameUrl(i), location.href).href);
+        w.postMessage({ type: "init", urls, order: this.order, concurrency: CONCURRENCY });
+        if (this.size.w) w.postMessage({ type: "size", ...this.size });
+        w.postMessage({ type: "focus", centre: this.centre, radius: this.radius });
+      } else if (m.type === "loaded") {
+        if (m.ok) this.arrived[m.idx] = true;
+        this.settle(m.idx, m.ok);
+      } else if (m.type === "bitmap") {
+        if (m.gen !== this.gen || this.bitmaps.has(m.idx) || Math.abs(m.idx - this.centre) > this.radius + 4) {
+          w.postMessage({ type: "free", idx: m.idx, gen: m.gen, bitmap: m.bitmap }, [m.bitmap]);
+          return;
+        }
+        this.bitmaps.set(m.idx, m.bitmap);
+        this.bitmapGen.set(m.idx, m.gen);
+        this.onFrameListeners.forEach((f) => f(m.idx));
+      }
+    };
+    return true;
+  }
+
+  /** Drop a decoded frame: handed back to the worker to free, or closed here. */
+  private release(k: number) {
+    const bmp = this.bitmaps.get(k);
+    if (!bmp) return;
+    this.bitmaps.delete(k);
+    const gen = this.bitmapGen.get(k) ?? 0;
+    this.bitmapGen.delete(k);
+    if (this.worker) this.worker.postMessage({ type: "free", idx: k, gen, bitmap: bmp }, [bmp]);
+    else bmp.close();
+  }
+
+  /** Phones: the size frames are drawn at, so they can be decoded at exactly that size. */
+  setSize(w: number, h: number) {
+    if (!this.phoneMode || (w === this.size.w && h === this.size.h)) return;
+    this.size = { w, h };
+    this.gen++;
+    for (const k of Array.from(this.bitmaps.keys())) this.release(k);
+    if (this.worker) this.worker.postMessage({ type: "size", w, h });
+    else this.pump();
+  }
+
+  private startHere() {
     let cursor = 0;
     const next = () => {
       if (cursor >= this.order.length) return;
@@ -133,13 +215,11 @@ class FrameStore {
     const c = Math.round(i);
     if (c === this.centre) return;
     this.centre = c;
-    for (const [k, bmp] of this.bitmaps) {
-      if (Math.abs(k - c) > this.radius + 4) {
-        bmp.close();
-        this.bitmaps.delete(k);
-      }
+    for (const k of Array.from(this.bitmaps.keys())) {
+      if (Math.abs(k - c) > this.radius + 4) this.release(k);
     }
-    this.pump();
+    if (this.worker) this.worker.postMessage({ type: "focus", centre: c, radius: this.radius });
+    else this.pump();
   }
 
   private pump() {
@@ -152,11 +232,16 @@ class FrameStore {
         const blob = this.blobs[k];
         if (!blob) continue;
         this.decoding.add(k);
-        createImageBitmap(blob)
+        const gen = this.gen;
+        const opts: ImageBitmapOptions = this.size.w
+          ? { resizeWidth: this.size.w, resizeHeight: this.size.h, resizeQuality: "medium" }
+          : {};
+        createImageBitmap(blob, opts)
           .then((bmp) => {
-            if (Math.abs(k - this.centre) > this.radius + 4) bmp.close();
+            if (gen !== this.gen || this.bitmaps.has(k) || Math.abs(k - this.centre) > this.radius + 4) bmp.close();
             else {
               this.bitmaps.set(k, bmp);
+              this.bitmapGen.set(k, gen);
               this.onFrameListeners.forEach((f) => f(k));
             }
           })
