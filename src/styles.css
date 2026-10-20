@@ -615,28 +615,56 @@ main, .footer { position: relative; z-index: 1; }
     width: 34px;
     background: var(--bone);
   }
-  .st-hint {
+  .st-swipe-sign {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 9px;
     position: absolute;
     left: 50%;
-    bottom: 7.5%;
+    bottom: 6%;
     transform: translateX(-50%);
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(238, 236, 231, 0.05);
+    border: 1px solid rgba(238, 236, 231, 0.12);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--stone);
-    opacity: 0.65;
+    color: var(--bone);
     pointer-events: none;
     user-select: none;
     white-space: nowrap;
-    z-index: 4;
+    z-index: 5;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
-  .st-hint-arrow {
-    font-size: 13px;
+  .st-swipe-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: var(--bone-dim);
+    line-height: 1;
+  }
+  .st-swipe-arrow.is-left {
+    animation: swipeLeftMotion 2s ease-in-out infinite;
+  }
+  .st-swipe-arrow.is-right {
+    animation: swipeRightMotion 2s ease-in-out infinite;
+  }
+  @keyframes swipeLeftMotion {
+    0%, 100% { transform: translateX(0); opacity: 0.45; }
+    50% { transform: translateX(-4px); opacity: 1; }
+  }
+  @keyframes swipeRightMotion {
+    0%, 100% { transform: translateX(0); opacity: 0.45; }
+    50% { transform: translateX(4px); opacity: 1; }
+  }
+  .st-swipe-text {
+    color: var(--bone);
+    font-size: 11px;
+    font-weight: 500;
   }
   .motion .track { will-change: auto; }
   /* Hero: the wordmark docks by itself, so the hero is a single screen. */
@@ -682,7 +710,7 @@ main, .footer { position: relative; z-index: 1; }
 
 
 /* ── Phone-only pieces (hidden on larger screens) ───────────────── */
-.g-mobile, .mbar, .nav-progress, .svc-thumb, .st-dots, .st-hint { display: none; }
+.g-mobile, .mbar, .nav-progress, .svc-thumb, .st-dots, .st-hint, .st-swipe-sign { display: none; }
 
 @media (max-width: 760px) {
   :root { --section: clamp(88px, 13vh, 128px); }
