@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { FRAME_COUNT, frames } from "@/lib/frames";
+import { FOCUS_X, FRAME_COUNT, frames } from "@/lib/frames";
 
 /**
  * Fixed, full-viewport canvas that plays the smoke sequence against scroll
@@ -20,13 +20,16 @@ export function SmokeCanvas() {
     let dirty = true;
     let raf = 0;
 
-    // Focal point: the smoke lives right of centre, so keep it in frame on tall screens.
-    const FOCUS_X = 0.6;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
-      canvas.width = Math.round(window.innerWidth * dpr);
-      canvas.height = Math.round(window.innerHeight * dpr);
+      // Size from the element (100lvh tall), not innerHeight, so a phone's address bar
+      // sliding in and out never resizes or clears the canvas mid-scroll.
+      const w = Math.round(canvas.clientWidth * dpr);
+      const h = Math.round(canvas.clientHeight * dpr);
+      if (w === canvas.width && h === canvas.height) return;
+      canvas.width = w;
+      canvas.height = h;
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       dirty = true;

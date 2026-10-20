@@ -101,13 +101,19 @@ export function createMotion(): () => void {
 
   // ── Nav state ───────────────────────────────────────────────────
   const nav = q("[data-nav]");
+  const heroEl = q("[data-hero]");
   // While the wordmark is travelling up into the menu bar, keep the bar fully clear
   // (no frosted backdrop), so the letters never pass behind a blur.
-  const onScroll = () => {
-    const clearUntil = reduce ? 40 : window.innerHeight * 1.1 - 2;
-    nav?.classList.toggle("is-scrolled", window.scrollY > clearUntil);
+  let clearUntil = 40;
+  const measureNav = () => {
+    clearUntil = reduce || !heroEl ? 40 : Math.max(40, heroEl.offsetHeight - window.innerHeight - 2);
   };
+  measureNav();
+  ScrollTrigger.addEventListener("refresh", measureNav);
+  cleanups.push(() => ScrollTrigger.removeEventListener("refresh", measureNav));
+  const onScroll = () => nav?.classList.toggle("is-scrolled", window.scrollY > clearUntil);
   on("scroll", onScroll, { passive: true });
+  const isPhone = () => window.matchMedia("(max-width: 760px)").matches;
 
   const links = qa<HTMLAnchorElement>("[data-navlink]");
   const io = new IntersectionObserver(
@@ -207,7 +213,11 @@ export function createMotion(): () => void {
           start: "top 60%",
           end: "bottom 60%",
           onToggle: (s) => {
-            if (s.isActive) gsap.to(veil, { opacity: Number(sec.dataset["veil"] ?? 0), duration: 1, ease: "power2.out", overwrite: true });
+            if (!s.isActive) return;
+            const v = Number(sec.dataset["veil"] ?? 0);
+            // Phones put text closer to the bright smoke; darken reading-heavy sections a little more.
+            const val = isPhone() && v >= 0.7 ? Math.min(0.95, v + 0.07) : v;
+            gsap.to(veil, { opacity: val, duration: 1, ease: "power2.out", overwrite: true });
           },
         });
       });
@@ -215,7 +225,16 @@ export function createMotion(): () => void {
       if (reduce) return;
 
       heroDock();
-      statementScene();
+      const mm = gsap.matchMedia();
+      cleanups.push(() => mm.revert());
+      mm.add("(min-width: 761px) and (min-height: 501px)", () => {
+        statementScene(false);
+        return processDesktop();
+      });
+      mm.add("(max-width: 760px), (max-height: 500px)", () => {
+        statementScene(true);
+        processPhone();
+      });
 
       qa("[data-split]").forEach((el) => {
         const s = new SplitText(el, { type: "lines", mask: "lines", linesClass: "split-line" });
@@ -230,7 +249,6 @@ export function createMotion(): () => void {
         gsap.from(el, { opacity: 0, y: 28, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 88%", once: true } });
       });
 
-      processScene();
 
       // Numbers: rules draw, figures count.
       const stats = qa("[data-stat]");
@@ -321,60 +339,84 @@ export function createMotion(): () => void {
     on("load", refresh);
   }
 
-  // The big wordmark shrinks into the menu bar as you scroll out of the hero.
+  // The big wordmark shrinks into the menu bar as you scroll out of the hero. Each word
+  // flies to its own word in the bar, so it works whether the hero sets it on one line
+  // (desktop) or two (phones). The stage is CSS-sticky, so the browser holds it in place
+  // natively: no pin swapping, no jitter on iOS.
   function heroDock() {
     const hero = q("[data-hero]");
-    const mark = q("[data-hero-mark]");
+    const lineA = q("[data-hm-a]");
+    const lineB = q("[data-hm-b]");
+    const navA = q("[data-brand-a]");
+    const navB = q("[data-brand-b]");
     const navText = q("[data-brand-text]");
-    if (!hero || !mark || !navText) return;
-    const scale = () => navText.offsetWidth / mark.offsetWidth;
-    const dx = () => navText.getBoundingClientRect().left - mark.offsetLeft;
-    const dy = () => navText.getBoundingClientRect().top - mark.offsetTop;
+    if (!hero || !lineA || !lineB || !navA || !navB || !navText) return;
+    // Layout position inside the sticky stage, ignoring any transform currently applied.
+    const pos = (el: HTMLElement) => {
+      let x = 0;
+      let y = 0;
+      let n: HTMLElement | null = el;
+      while (n && !n.classList.contains("hero-stage")) {
+        x += n.offsetLeft;
+        y += n.offsetTop;
+        n = n.offsetParent as HTMLElement | null;
+      }
+      return { x, y };
+    };
+    const scale = () => navA.offsetWidth / lineA.offsetWidth;
+    const dx = (line: HTMLElement, word: HTMLElement) => () => word.getBoundingClientRect().left - pos(line).x;
+    const dy = (line: HTMLElement, word: HTMLElement) => () => word.getBoundingClientRect().top - pos(line).y;
 
     const tl = gsap.timeline({
       defaults: { ease: "none" },
-      scrollTrigger: {
-        trigger: hero, start: "top top", end: "+=110%", pin: true, scrub: 1.1,
-        anticipatePin: 1, invalidateOnRefresh: true,
-      },
+      scrollTrigger: { trigger: hero, start: "top top", end: "bottom bottom", scrub: 1, invalidateOnRefresh: true },
     });
-    tl.to(".hero-top, .hero-base", { opacity: 0, y: -40, duration: 0.35 }, 0)
-      .fromTo(mark, { x: 0, y: 0, scale: 1 }, { x: dx, y: dy, scale, duration: 1, ease: "power2.inOut" }, 0)
+    tl.to("[data-hero-out]", { opacity: 0, y: -40, duration: 0.35 }, 0)
+      .fromTo(lineA, { x: 0, y: 0, scale: 1 }, { x: dx(lineA, navA), y: dy(lineA, navA), scale, duration: 1, ease: "power2.inOut" }, 0)
+      // On phones the second word starts on its own line; it rises a little later than it
+      // shrinks and slides, so it tucks in beside the first word instead of crossing it.
+      .fromTo(lineB, { x: 0, scale: 1 }, { x: dx(lineB, navB), scale, duration: 1, ease: "power2.inOut" }, 0)
+      .fromTo(lineB, { y: 0 }, { y: dy(lineB, navB), duration: 1, ease: isPhone() ? "power3.in" : "power2.inOut" }, 0)
       .fromTo(navText, { opacity: 0 }, { opacity: 1, duration: 0.1 }, 0.9)
-      .to(mark, { opacity: 0, duration: 0.1 }, 0.9);
+      .to([lineA, lineB], { opacity: 0, duration: 0.1 }, 0.9);
   }
 
-  // Four lines, one at a time, each lifting out as the next arrives.
-  function statementScene() {
+  // Four lines, one at a time, each lifting out as the next arrives. Phones skip the
+  // blur (expensive on mobile GPUs) and use a shorter scroll.
+  function statementScene(phone: boolean) {
     const st = q("[data-statement]");
     if (!st) return;
     const lines = qa("[data-statement-line]", st);
-    gsap.set(lines.slice(1), { yPercent: 70, opacity: 0, filter: "blur(10px)" });
+    const out = phone ? { yPercent: -50, opacity: 0 } : { yPercent: -70, opacity: 0, filter: "blur(10px)" };
+    const inn = phone ? { yPercent: 0, opacity: 1 } : { yPercent: 0, opacity: 1, filter: "blur(0px)" };
+    gsap.set(lines.slice(1), phone ? { yPercent: 50, opacity: 0 } : { yPercent: 70, opacity: 0, filter: "blur(10px)" });
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: st, start: "top top", end: `+=${lines.length * 90}%`, pin: true, scrub: 0.8, anticipatePin: 1 },
+      scrollTrigger: { trigger: st, start: "top top", end: "bottom bottom", scrub: 0.8 },
     });
-    tl.to({}, { duration: 0.5 });
+    tl.to({}, { duration: 0.4 });
     lines.forEach((l, i) => {
       if (i === 0) return;
-      tl.to(lines[i - 1]!, { yPercent: -70, opacity: 0, filter: "blur(10px)", duration: 1, ease: "power2.in" })
-        .to(l, { yPercent: 0, opacity: 1, filter: "blur(0px)", duration: 1, ease: "power2.out" }, "<0.45")
+      tl.to(lines[i - 1]!, { ...out, duration: 1, ease: "power2.in" })
+        .to(l, { ...inn, duration: 1, ease: "power2.out" }, "<0.45")
         .to({}, { duration: 0.6 });
     });
   }
 
-  // Steps travel sideways; each number lights up as it reaches the middle.
-  function processScene() {
+  // Computers: steps travel sideways inside a sticky stage; numbers light up mid-screen.
+  function processDesktop() {
     const sec = q("[data-process]");
     const track = q("[data-track]");
     if (!sec || !track) return;
     const barEl = q("[data-track-bar]");
     const dist = () => Math.max(0, track.scrollWidth - window.innerWidth);
+    const setHeight = () => (sec.style.height = `${window.innerHeight + dist()}px`);
+    setHeight();
+    ScrollTrigger.addEventListener("refreshInit", setHeight);
     const move = gsap.to(track, {
       x: () => -dist(),
       ease: "none",
       scrollTrigger: {
-        trigger: sec, start: "top top", end: () => `+=${dist()}`, pin: true, scrub: 0.8,
-        anticipatePin: 1, invalidateOnRefresh: true,
+        trigger: sec, start: "top top", end: "bottom bottom", scrub: 0.8, invalidateOnRefresh: true,
         onUpdate: (s) => barEl && (barEl.style.transform = `scaleX(${s.progress})`),
       },
     });
@@ -391,6 +433,42 @@ export function createMotion(): () => void {
         scrollTrigger: { trigger: img.parentElement!, containerAnimation: move, start: "left right", end: "right left", scrub: true },
       });
     }
+    return () => {
+      ScrollTrigger.removeEventListener("refreshInit", setHeight);
+      sec.style.height = "";
+    };
+  }
+
+  // Phones: a plain vertical list that scrolls naturally. Each number brightens as its
+  // step reaches the middle of the screen, and the words rise in once.
+  function processPhone() {
+    const sec = q("[data-process]");
+    if (!sec) return;
+    const pic = q(".panel-img", sec);
+    if (pic) {
+      gsap.fromTo(pic, { clipPath: "inset(12% 8% 12% 8% round 10px)" }, {
+        clipPath: "inset(0% 0% 0% 0% round 6px)", ease: "none",
+        scrollTrigger: { trigger: pic, start: "top 95%", end: "center 60%", scrub: true },
+      });
+      gsap.fromTo(q("img", pic), { scale: 1.25 }, {
+        scale: 1, ease: "none",
+        scrollTrigger: { trigger: pic, start: "top bottom", end: "bottom top", scrub: true },
+      });
+    }
+    qa("[data-panel]", sec).forEach((p) => {
+      gsap.fromTo(q("[data-panel-n]", p), { opacity: 0.15 }, {
+        opacity: 1, ease: "none",
+        scrollTrigger: { trigger: p, start: "top 82%", end: "top 52%", scrub: true },
+      });
+      gsap.from(qa("h3, p", p), {
+        y: 24, opacity: 0, duration: 1, ease: "power3.out", stagger: 0.08,
+        scrollTrigger: { trigger: p, start: "top 86%", once: true },
+      });
+      gsap.fromTo(p, { "--draw": 0 }, {
+        "--draw": 1, duration: 1.2, ease: "expo.out",
+        scrollTrigger: { trigger: p, start: "top 90%", once: true },
+      });
+    });
   }
 
   function pointerFx() {

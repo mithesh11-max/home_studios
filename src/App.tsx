@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import React, { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { createMotion, lockScroll, scrollToTarget } from "@/lib/motion";
 import { SmokeCanvas } from "@/components/SmokeCanvas";
@@ -186,7 +186,7 @@ function Nav() {
         <div className="wrap nav-inner">
           <a href="#top" className="brand" aria-label="Home Studios, back to top">
             <img src={`${import.meta.env.BASE_URL}mark.png`} alt="" width="28" height="28" />
-            <span className="brand-text wordmark-type" data-brand-text>{BRAND}</span>
+            <span className="brand-text wordmark-type" data-brand-text><span data-brand-a>HOME</span> <span data-brand-b>STUDIOS</span></span>
           </a>
           <nav className="nav-links" aria-label="Primary">
             {NAV.map(([l, h]) => <a key={h} href={h} data-navlink>{l}</a>)}
@@ -220,22 +220,30 @@ function Nav() {
 function Hero() {
   return (
     <section id="top" className="hero" data-veil="0" data-hero>
-      <div className="wrap hero-top">
-        <p className="hero-kicker" data-hero-fade>A real-size walkthrough studio<br />in Bengaluru</p>
-        <div className="hero-intro" data-hero-fade>
-          <p>Walk through your home at true 1:1 scale, room by room, before a single brick is laid.</p>
-          <a href="#contact" className="btn btn-bone" data-magnetic>Book a walkthrough</a>
+      <div className="hero-stage">
+        <div className="wrap hero-top">
+          <div className="hk-wrap" data-hero-out>
+            <p className="hero-kicker" data-hero-fade>A real-size walkthrough studio<br />in Bengaluru</p>
+          </div>
+          <div className="hi-wrap" data-hero-out>
+            <div className="hero-intro" data-hero-fade>
+              <p>Walk through your home at true 1:1 scale, room by room, before a single brick is laid.</p>
+              <a href="#contact" className="btn btn-bone" data-magnetic>Book a walkthrough</a>
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="wrap hero-mark-wrap">
-        <h1 className="hero-mark wordmark-type" data-hero-mark aria-label="Home Studios">
-          <Letters text={BRAND} attr="data-hero-ch" />
-        </h1>
-      </div>
-      <div className="wrap hero-base">
-        <span className="scroll-cue" data-hero-fade><span className="scroll-cue-line" />Scroll</span>
-        <span data-hero-fade>Rajarajeshwari Nagar</span>
-        <span data-hero-fade>Est. 2022</span>
+        <div className="wrap hero-mark-wrap">
+          <h1 className="hero-mark wordmark-type" data-hero-mark aria-label="Home Studios">
+            <span className="hm-line" data-hm-a><Letters text="HOME" attr="data-hero-ch" /></span>
+            <span className="hm-gap" aria-hidden="true">{" "}</span>
+            <span className="hm-line" data-hm-b><Letters text="STUDIOS" attr="data-hero-ch" /></span>
+          </h1>
+        </div>
+        <div className="wrap hero-base" data-hero-out>
+          <span className="scroll-cue" data-hero-fade><span className="scroll-cue-line" />Scroll</span>
+          <span data-hero-fade>Rajarajeshwari Nagar</span>
+          <span data-hero-fade>Est. 2022</span>
+        </div>
       </div>
     </section>
   );
@@ -244,10 +252,12 @@ function Hero() {
 function Statement() {
   return (
     <section className="statement" data-veil="0.2" data-statement aria-label="Why walk it first">
-      <div className="wrap statement-inner">
-        {STATEMENT.map((l) => (
-          <p key={l} className="statement-line" data-statement-line>{l}</p>
-        ))}
+      <div className="statement-stage">
+        <div className="wrap statement-inner">
+          {STATEMENT.map((l) => (
+            <p key={l} className="statement-line" data-statement-line>{l}</p>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -256,6 +266,7 @@ function Statement() {
 function Process() {
   return (
     <section id="process" className="process" data-veil="0.55" data-process>
+      <div className="process-stage">
       <div className="wrap process-head">
         <h2 className="h2" data-split>How a walkthrough works</h2>
         <p className="process-meta">Two to three hours, one floor at a time</p>
@@ -277,6 +288,7 @@ function Process() {
       </div>
       <div className="wrap track-meter" aria-hidden="true">
         <span className="track-bar"><span data-track-bar /></span>
+      </div>
       </div>
     </section>
   );
@@ -351,6 +363,22 @@ function Gallery() {
     lastFocus.current?.focus({ preventScroll: true });
   }, []);
   const step = useCallback((d: number) => setOpen((i) => (i === null ? i : (i + d + total) % total)), [total]);
+  // Swipe left/right to change photo, swipe down to close (phones).
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (t) touch.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const t = e.changedTouches[0];
+    const s0 = touch.current;
+    touch.current = null;
+    if (!t || !s0) return;
+    const dx = t.clientX - s0.x;
+    const dy = t.clientY - s0.y;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) close();
+  };
 
   useEffect(() => {
     lockScroll(open !== null);
@@ -396,7 +424,7 @@ function Gallery() {
       </div>
 
       {current && createPortal(
-        <div className="lightbox" role="dialog" aria-modal="true" aria-label={`Photo ${open! + 1} of ${total}: ${current.t}`} data-lenis-prevent onClick={close}>
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label={`Photo ${open! + 1} of ${total}: ${current.t}`} data-lenis-prevent onClick={close} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <figure className="lb-figure" onClick={(e) => e.stopPropagation()}>
             <img key={current.img + open} src={current.img} alt={current.alt} />
             <figcaption>{String(open! + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</figcaption>

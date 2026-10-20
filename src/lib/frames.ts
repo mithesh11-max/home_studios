@@ -5,8 +5,16 @@
 export const FRAME_COUNT = 500;
 const CONCURRENCY = 6;
 
+// Phones in portrait only ever see a narrow vertical slice of the wide frames, so they get
+// a pre-cropped portrait set (405×720): about a third of the download and the memory.
+export const PORTRAIT_SET =
+  typeof window !== "undefined" &&
+  window.matchMedia("(max-width: 760px) and (orientation: portrait)").matches;
+/** Horizontal point of the frame kept in the centre of the screen. */
+export const FOCUS_X = PORTRAIT_SET ? 0.5 : 0.6;
+
 const frameUrl = (i: number) =>
-  `${import.meta.env.BASE_URL}frames/${String(i + 1).padStart(4, "0")}.webp`;
+  `${import.meta.env.BASE_URL}${PORTRAIT_SET ? "frames-m" : "frames"}/${String(i + 1).padStart(4, "0")}.webp`;
 
 type ProgressFn = (critical: number, all: number) => void;
 
@@ -76,7 +84,14 @@ class FrameStore {
         this.listeners.forEach((f) => f(c, a));
         next();
       };
-      img.decode().then(() => done(true), () => done(img.complete && img.naturalWidth > 0));
+      if (PORTRAIT_SET) {
+        // On phones, let the browser decode on first draw and evict freely; forcing
+        // 500 decoded frames into memory can get a tab reloaded on iOS.
+        img.onload = () => done(true);
+        img.onerror = () => done(false);
+      } else {
+        img.decode().then(() => done(true), () => done(img.complete && img.naturalWidth > 0));
+      }
     };
     for (let k = 0; k < CONCURRENCY; k++) next();
   }
