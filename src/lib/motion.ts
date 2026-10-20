@@ -265,14 +265,14 @@ export function createMotion(): () => void {
           tl.fromTo(el, { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5, ease: "expo.out" })
             .fromTo(q("img", el), { scale: 1.35 }, { scale: 1, duration: 1.8, ease: "expo.out" }, 0);
         });
-      mm.add("(min-width: 761px)", () => revealGallery(".g-desktop"));
-      mm.add("(max-width: 760px)", () => revealGallery(".g-mobile"));
-      mm.add("(min-width: 761px) and (min-height: 501px)", () => {
+      mm.add("(min-width: 769px)", () => revealGallery(".g-desktop"));
+      mm.add("(max-width: 768px)", () => revealGallery(".g-mobile"));
+      mm.add("(min-width: 769px) and (min-height: 501px)", () => {
         heroDock();
         statementScene(false);
         return processDesktop();
       });
-      mm.add("(max-width: 760px), (max-height: 500px)", () => {
+      mm.add("(max-width: 768px), (max-height: 500px)", () => {
         const undoDock = heroDockPhone();
         const undoStatement = statementPhone();
         processPhone();
