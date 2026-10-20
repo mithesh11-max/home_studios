@@ -23,7 +23,8 @@ export function scrollToTarget(href: string) {
     lenis.scrollTo(target, { duration: 1.8, easing: expo, force: true });
   } else {
     const top = typeof target === "number" ? 0 : target.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
   }
 }
 
@@ -74,7 +75,9 @@ export function createMotion(): () => void {
   cleanups.push(() => ScrollTrigger.removeEventListener("refreshInit", fitAll));
 
   // ── Smooth scroll ────────────────────────────────────────────────
-  if (!reduce) {
+  // Smooth wheel scrolling for mouse and trackpad only. Phones and tablets keep their own
+  // native momentum scrolling, which is the smoothest thing a touch screen can do.
+  if (!reduce && finePointer) {
     lenis = new Lenis({ lerp: 0.08, smoothWheel: true, wheelMultiplier: 0.9 });
     lenis.on("scroll", ScrollTrigger.update);
     const raf = (t: number) => lenis?.raf(t * 1000);
@@ -121,11 +124,16 @@ export function createMotion(): () => void {
   ScrollTrigger.addEventListener("refresh", measureMax);
   cleanups.push(() => ScrollTrigger.removeEventListener("refresh", measureMax));
   let contactInView = false;
+  // Phones: the menu bar background and the action bar wait until the wordmark has landed
+  // in the menu bar, so nothing slides over it mid-flight.
+  let phoneDock: { docked: () => boolean; onScroll: (y: number) => void } | null = null;
   const onScroll = () => {
     const y = window.scrollY;
-    nav?.classList.toggle("is-scrolled", y > clearUntil);
+    phoneDock?.onScroll(y);
+    const ready = phoneDock ? phoneDock.docked() : y > clearUntil;
+    nav?.classList.toggle("is-scrolled", ready && y > 4);
     if (progress) progress.style.transform = `scaleX(${Math.min(1, y / maxScroll)})`;
-    mbar?.classList.toggle("is-on", !loading && y > clearUntil && !contactInView);
+    mbar?.classList.toggle("is-on", !loading && ready && y > 40 && !contactInView);
   };
   on("scroll", onScroll, { passive: true });
   const barIO = new IntersectionObserver(
@@ -248,7 +256,6 @@ export function createMotion(): () => void {
 
       if (reduce) return;
 
-      heroDock();
       const mm = gsap.matchMedia();
       cleanups.push(() => mm.revert());
       // Each layout reveals only its own gallery grid (the other one is display:none).
@@ -261,14 +268,19 @@ export function createMotion(): () => void {
       mm.add("(min-width: 761px)", () => revealGallery(".g-desktop"));
       mm.add("(max-width: 760px)", () => revealGallery(".g-mobile"));
       mm.add("(min-width: 761px) and (min-height: 501px)", () => {
+        heroDock();
         statementScene(false);
         return processDesktop();
       });
       mm.add("(max-width: 760px), (max-height: 500px)", () => {
-        const undo = statementPhone();
+        const undoDock = heroDockPhone();
+        const undoStatement = statementPhone();
         processPhone();
         servicesPhone();
-        return undo;
+        return () => {
+          undoDock?.();
+          undoStatement?.();
+        };
       });
 
       qa("[data-split]").forEach((el) => {
@@ -432,26 +444,109 @@ export function createMotion(): () => void {
     });
   }
 
-  // Phones: the four lines change word by word, each word rising out of its own mask.
-  // No blur, no opacity: only transforms, which stay smooth on any phone.
+  // Phones: the wordmark flies into the menu bar on its own as soon as you start
+  // scrolling (time-based, ~0.8s) and flies back when you return to the top. Each word
+  // is re-aimed every frame at its word in the bar, so it lands exactly even while the
+  // page keeps moving underneath; the swap to the real menu-bar text happens only once
+  // the two overlap perfectly, so there is no visible cross-fade.
+  function heroDockPhone() {
+    const lineA = q("[data-hm-a]");
+    const lineB = q("[data-hm-b]");
+    const navA = q("[data-brand-a]");
+    const navB = q("[data-brand-b]");
+    const navText = q("[data-brand-text]");
+    if (!lineA || !lineB || !navA || !navB || !navText) return;
+    const lines = [lineA, lineB];
+    const words = [navA, navB];
+    const state = { p: 0 };
+    let goal = 0;
+    let tween: gsap.core.Tween | null = null;
+    gsap.set(navText, { opacity: 0 });
+
+    // Untransformed layout position of a line on screen right now.
+    const base = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      const m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
+      return { x: r.left - m.e, y: r.top - m.f, w: el.offsetWidth };
+    };
+    const easeX = gsap.parseEase("expo.inOut");
+    const easeYLate = gsap.parseEase("power3.in");
+    const render = () => {
+      const p = state.p;
+      lines.forEach((line, i) => {
+        const b = base(line);
+        const w = words[i]!.getBoundingClientRect();
+        const s = words[i]!.offsetWidth / b.w;
+        const e = easeX(p);
+        // The second word rises a touch later, so it tucks in beside the first.
+        const ey = i === 1 ? easeYLate(p) * 0.35 + e * 0.65 : e;
+        gsap.set(line, { x: (w.left - b.x) * e, y: (w.top - b.y) * ey, scale: 1 + (s - 1) * e });
+      });
+    };
+    const go = (to: number) => {
+      if (goal === to) return;
+      goal = to;
+      tween?.kill();
+      if (to === 0) {
+        // Leaving the bar: show the flying words exactly over the menu-bar text, then swap.
+        gsap.set(lines, { opacity: 1 });
+        gsap.set(navText, { opacity: 0 });
+      }
+      tween = gsap.to(state, {
+        p: to, duration: 0.85, ease: "none", onUpdate: render,
+        onComplete: () => {
+          if (to === 1) {
+            gsap.set(navText, { opacity: 1 });
+            gsap.set(lines, { opacity: 0 });
+          } else {
+            gsap.set(lines, { clearProps: "transform" });
+          }
+          onScroll();
+        },
+      });
+    };
+    phoneDock = {
+      docked: () => goal === 1 && state.p === 1,
+      onScroll: (y) => {
+        if (y > 24) go(1);
+        else if (y < 8) go(0);
+      },
+    };
+    if (window.scrollY > 24) go(1);
+    return () => {
+      tween?.kill();
+      phoneDock = null;
+      gsap.set(lines, { clearProps: "transform,opacity" });
+      gsap.set(navText, { clearProps: "opacity" });
+    };
+  }
+
+  // Phones: the four lines play on their own while the section is on screen, word by
+  // word, each word rising out of its own mask. Transforms only — smooth on any phone.
   function statementPhone() {
     const st = q("[data-statement]");
     if (!st) return;
     const lines = qa("[data-statement-line]", st);
+    const dots = qa("[data-st-dot]", st);
     const parts = lines.map((l) => new SplitText(l, { type: "words", mask: "words" }));
     const words = parts.map((p) => p.words);
-    words.slice(1).forEach((w) => gsap.set(w, { yPercent: 110 }));
-    const tl = gsap.timeline({
-      scrollTrigger: { trigger: st, start: "top top", end: "bottom bottom", scrub: 0.6 },
-    });
-    tl.to({}, { duration: 0.3 });
+    words.forEach((w) => gsap.set(w, { yPercent: 110 }));
+    const mark = (i: number) => dots.forEach((d, k) => d.classList.toggle("is-on", k === i));
+    const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.4 });
     words.forEach((w, i) => {
-      if (i === 0) return;
-      tl.to(words[i - 1]!, { yPercent: -110, duration: 0.6, stagger: 0.04, ease: "power2.in" })
-        .to(w, { yPercent: 0, duration: 0.7, stagger: 0.05, ease: "power3.out" }, ">-0.1")
-        .to({}, { duration: 0.5 });
+      tl.call(() => mark(i))
+        .to(w, { yPercent: 0, duration: 0.8, stagger: 0.06, ease: "expo.out" })
+        .to(w, { yPercent: -110, duration: 0.55, stagger: 0.035, ease: "power3.in" }, i === words.length - 1 ? "+=2.6" : "+=1.7");
     });
-    return () => parts.forEach((p) => p.revert());
+    const st0 = ScrollTrigger.create({
+      trigger: st, start: "top 65%", end: "bottom 35%",
+      onToggle: (self) => (self.isActive ? tl.play() : tl.pause()),
+    });
+    return () => {
+      st0.kill();
+      tl.kill();
+      parts.forEach((p) => p.revert());
+    };
   }
 
   // Phones: each service photo opens upward a beat after its row slides in.

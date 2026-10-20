@@ -259,7 +259,13 @@ function Hero() {
           <div className="hi-wrap" data-hero-out>
             <div className="hero-intro" data-hero-fade>
               <p>Walk through your home at true 1:1 scale, room by room, before a single brick is laid.</p>
-              <a href="#contact" className="btn btn-bone" data-magnetic>Book a walkthrough</a>
+              <div className="hero-actions">
+                <a href="#why" className="btn btn-bone hero-more" data-more>
+                  Know more about us
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2v10M3 8l4 4 4-4" stroke="currentColor" strokeWidth="1.5" /></svg>
+                </a>
+                <a href="#contact" className="btn btn-bone hero-book" data-magnetic>Book a walkthrough</a>
+              </div>
             </div>
           </div>
         </div>
@@ -282,12 +288,15 @@ function Hero() {
 
 function Statement() {
   return (
-    <section className="statement" data-veil="0.2" data-statement aria-label="Why walk it first">
+    <section id="why" className="statement" data-veil="0.2" data-statement aria-label="Why walk it first">
       <div className="statement-stage">
         <div className="wrap statement-inner">
           {STATEMENT.map((l) => (
             <p key={l} className="statement-line" data-statement-line>{l}</p>
           ))}
+        </div>
+        <div className="st-dots" aria-hidden="true">
+          {STATEMENT.map((l) => <span key={l} data-st-dot />)}
         </div>
       </div>
     </section>

@@ -152,7 +152,8 @@ main, .footer { position: relative; z-index: 1; }
 
 /* ── Masked letters (hero + footer wordmarks) ───────────────────── */
 .mask { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.06em 0 0.08em; margin: -0.06em 0 -0.08em; }
-.ch { display: inline-block; transform-origin: 0% 100%; will-change: transform; }
+/* No will-change here: dozens of letters each on their own GPU layer cost more than they save. */
+.ch { display: inline-block; transform-origin: 0% 100%; }
 
 /* ── Hero ───────────────────────────────────────────────────────── */
 .hero { position: relative; }
@@ -166,6 +167,9 @@ main, .footer { position: relative; z-index: 1; }
 }
 .hero-kicker { margin: 0; color: var(--stone); font-size: 15px; line-height: 1.5; }
 .hero-intro { max-width: 380px; display: flex; flex-direction: column; align-items: flex-start; gap: 22px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.hero-more, .st-dots { display: none; }
+.hero-more svg { transition: transform 0.6s var(--ease); }
 .hero-intro p { margin: 0; font-size: clamp(1.05rem, 1.35vw, 1.25rem); line-height: 1.45; color: var(--bone-dim); }
 .hero-mark-wrap { margin-top: auto; }
 .hero-mark { margin: 0; width: max-content; font-size: 11vw; }
@@ -561,7 +565,16 @@ main, .footer { position: relative; z-index: 1; }
 /* Phones, and phones held sideways (short screens): statement and steps scroll naturally. */
 @media (max-width: 760px), (max-height: 500px) {
   /* Statement: shorter scroll, larger type. */
-  .motion .statement { height: 300svh; }
+  /* Statement plays by itself: one screen, no long scroll. */
+  .motion .statement { height: auto; }
+  .motion .statement-stage { position: relative; height: 88svh; min-height: 460px; }
+  .st-dots { display: flex; gap: 8px; position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); }
+  .st-dots span { width: 18px; height: 2px; border-radius: 2px; background: rgba(238, 236, 231, 0.2); transition: background-color 0.5s var(--ease), width 0.6s var(--ease); }
+  .st-dots span.is-on { width: 34px; background: var(--bone); }
+  .motion .track { will-change: auto; }
+  /* Hero: the wordmark docks by itself, so the hero is a single screen. */
+  .motion .hero { height: auto; }
+  .motion .hero-stage { position: relative; }
   .statement-line { font-size: clamp(2.2rem, 9.6vw, 2.9rem); }
 
   /* How it works: a vertical list on phones. */
@@ -607,7 +620,6 @@ main, .footer { position: relative; z-index: 1; }
 @media (max-width: 760px) {
   :root { --section: clamp(88px, 13vh, 128px); }
   .h2 { font-size: 2.4rem; line-height: 1.02; }
-  .motion .hero { height: 145svh; }
 
   /* Reading progress under the menu bar */
   .nav-progress { display: block; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: transparent; }
@@ -615,13 +627,22 @@ main, .footer { position: relative; z-index: 1; }
 
   /* Bottom action bar */
   .wa { display: none; }
+  .nav.is-scrolled { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(15, 15, 15, 0.94); }
+  /* Hero buttons: "Know more" leads, booking sits beside it (and lives in the bottom bar later). */
+  .hero-more { display: inline-flex; }
+  .hero-more:active svg { transform: translateY(3px); }
+  .hero-actions { gap: 8px; flex-wrap: nowrap; }
+  .hero-actions .btn { min-height: 46px; padding: 0 15px; font-size: 14px; gap: 8px; }
+  @media (max-width: 370px) { .hero-actions { flex-wrap: wrap; } }
+  .hero-book { background: transparent; color: var(--bone); border-color: rgba(238, 236, 231, 0.3); }
   .mbar {
     display: flex; align-items: center; gap: 8px; position: fixed; z-index: 45;
     left: calc(12px + env(safe-area-inset-left, 0px)); right: calc(12px + env(safe-area-inset-right, 0px));
     bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     padding: 6px; border-radius: 999px;
-    background: rgba(20, 20, 20, 0.72); border: 1px solid rgba(238, 236, 231, 0.12);
-    -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%);
+    /* Solid glass tone instead of a live blur: blurring the moving smoke every frame is
+       one of the most expensive things a phone can be asked to do while scrolling. */
+    background: rgba(22, 22, 22, 0.94); border: 1px solid rgba(238, 236, 231, 0.12);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
     transform: translateY(calc(100% + 40px)); transition: transform 0.8s var(--ease);
   }
@@ -656,7 +677,7 @@ main, .footer { position: relative; z-index: 1; }
 }
 
 @media (hover: none) {
-  .grain { animation: none; inset: 0; opacity: 0.045; }
+  .grain { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
