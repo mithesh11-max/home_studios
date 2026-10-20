@@ -87,6 +87,20 @@ const GALLERY: Photo[][] = [
   ],
 ];
 const GALLERY_FLAT = GALLERY.flat();
+const DESKTOP_ORDER = GALLERY_FLAT.map((_, i) => i);
+// Phones: an editorial rhythm of one full-width photo, then a pair, so the two columns
+// never leave gaps. Numbers refer to GALLERY_FLAT; "wide" spans both columns.
+const MOBILE_LAYOUT: { i: number; wide?: boolean; ratio: string }[] = [
+  { i: 0, wide: true, ratio: "4 / 5" },
+  { i: 4, ratio: "3 / 4" }, { i: 8, ratio: "3 / 4" },
+  { i: 9, wide: true, ratio: "16 / 7" },
+  { i: 1, ratio: "3 / 4" }, { i: 11, ratio: "3 / 4" },
+  { i: 5, wide: true, ratio: "4 / 5" },
+  { i: 2, ratio: "3 / 4" }, { i: 3, ratio: "3 / 4" },
+  { i: 6, wide: true, ratio: "16 / 7" },
+  { i: 10, ratio: "3 / 4" }, { i: 7, ratio: "3 / 4" },
+];
+const MOBILE_ORDER = MOBILE_LAYOUT.map((m) => m.i);
 
 const FAQS = [
   { q: "What happens in a walkthrough session?", a: "Laser projectors cast your floor plan onto the studio floor at true 1:1 scale. You walk every room, check corridors and clearances, and our team moves full-height walls and furniture as you ask for changes." },
@@ -143,10 +157,26 @@ export default function App() {
         <Contact need={need} setNeed={setNeed} />
       </main>
       <Footer />
+      <MobileBar />
       <a href={WA} target="_blank" rel="noopener" className="wa" aria-label="Chat with Home Studios on WhatsApp" data-magnetic>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z" /></svg>
       </a>
     </>
+  );
+}
+
+/** Phones: a slim glass bar with the two actions people want, shown once past the hero. */
+function MobileBar() {
+  return (
+    <div className="mbar" data-mbar>
+      <a href="#contact" className="mbar-cta">
+        <span>Book a walkthrough</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" /></svg>
+      </a>
+      <a href={WA} target="_blank" rel="noopener" className="mbar-wa" aria-label="Chat with Home Studios on WhatsApp">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z" /></svg>
+      </a>
+    </div>
   );
 }
 
@@ -194,6 +224,7 @@ function Nav() {
           <a href="#contact" className="btn btn-bone nav-cta" data-magnetic>Book a walkthrough</a>
           <button className="nav-toggle" onClick={() => setOpen(true)} aria-expanded={open} aria-controls="menu">Menu</button>
         </div>
+        <span className="nav-progress" aria-hidden="true"><span data-nav-progress /></span>
       </header>
       <div id="menu" className={`menu ${open ? "is-open" : ""}`} role="dialog" aria-modal="true" aria-label="Menu" hidden={!open} data-lenis-prevent>
         <div className="wrap nav-inner">
@@ -338,6 +369,7 @@ function Services({ onPick }: { onPick: (need: string) => void }) {
               <button className="svc" onClick={() => onPick(s.need)} data-preview={s.img}>
                 <span className="svc-t">{s.t}</span>
                 <span className="svc-d">{s.d}</span>
+                <span className="svc-thumb" aria-hidden="true" data-svc-thumb><img src={s.img} alt="" loading="lazy" /></span>
                 <span className="svc-arrow" aria-hidden="true">
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 14L14 4M14 4H6M14 4v8" stroke="currentColor" strokeWidth="1.4" /></svg>
                 </span>
@@ -352,11 +384,13 @@ function Services({ onPick }: { onPick: (need: string) => void }) {
 
 function Gallery() {
   const [open, setOpen] = useState<number | null>(null);
+  const [order, setOrder] = useState<number[]>(DESKTOP_ORDER);
   const lastFocus = useRef<HTMLElement | null>(null);
   const total = GALLERY_FLAT.length;
-  const show = useCallback((i: number) => {
+  const show = useCallback((list: number[], pos: number) => {
     lastFocus.current = document.activeElement as HTMLElement;
-    setOpen(i);
+    setOrder(list);
+    setOpen(pos);
   }, []);
   const close = useCallback(() => {
     setOpen(null);
@@ -393,7 +427,7 @@ function Gallery() {
   }, [open, close, step]);
 
   let n = 0;
-  const current = open === null ? null : GALLERY_FLAT[open]!;
+  const current = open === null ? null : GALLERY_FLAT[order[open]!]!;
   return (
     <section id="gallery" className="gallery" data-veil="0.62">
       <div className="wrap gallery-head">
@@ -405,13 +439,13 @@ function Gallery() {
           <span className="gallery-count">{String(total).padStart(2, "0")} photos</span>
         </div>
       </div>
-      <div className="wrap gallery-grid">
+      <div className="wrap gallery-grid g-desktop">
         {GALLERY.map((col, c) => (
           <div className="g-col" key={c} data-g-col={c}>
             {col.map((p) => {
               const idx = n++;
               return (
-                <button key={p.t} className="g-item" onClick={() => show(idx)} aria-label={`Open photo: ${p.t}`}>
+                <button key={p.t} className="g-item" onClick={() => show(DESKTOP_ORDER, idx)} aria-label={`Open photo: ${p.t}`}>
                   <span className="g-img" data-g-reveal style={{ aspectRatio: `${p.w} / ${p.h}` }}>
                     <img src={p.img} alt={p.alt} width={p.w} height={p.h} loading="lazy" />
                   </span>
@@ -421,6 +455,19 @@ function Gallery() {
             })}
           </div>
         ))}
+      </div>
+      <div className="wrap g-mobile">
+        {MOBILE_LAYOUT.map((m, pos) => {
+          const p = GALLERY_FLAT[m.i]!;
+          return (
+            <button key={p.t} className={`g-item ${m.wide ? "is-wide" : ""}`} onClick={() => show(MOBILE_ORDER, pos)} aria-label={`Open photo: ${p.t}`}>
+              <span className="g-img" data-g-reveal style={{ aspectRatio: m.ratio }}>
+                <img src={p.img} alt={p.alt} width={p.w} height={p.h} loading="lazy" />
+              </span>
+              <span className="g-cap" aria-hidden="true">{String(pos + 1).padStart(2, "0")}</span>
+            </button>
+          );
+        })}
       </div>
 
       {current && createPortal(

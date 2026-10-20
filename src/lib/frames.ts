@@ -2,14 +2,14 @@
 // Frames are requested coarse-to-fine (every 25th, then 12th, 6th, 3rd, 1st),
 // so the full scroll range is usable almost immediately and fills in with detail.
 
-export const FRAME_COUNT = 500;
-const CONCURRENCY = 6;
-
-// Phones in portrait only ever see a narrow vertical slice of the wide frames, so they get
-// a pre-cropped portrait set (405×720): about a third of the download and the memory.
+// Phones in portrait get their own sequence, composed vertically for a tall screen
+// (720×1280, every other frame of the 1080×1920 portrait render): sharper and better framed
+// than cropping the wide frames, and about 2 MB in total.
 export const PORTRAIT_SET =
   typeof window !== "undefined" &&
   window.matchMedia("(max-width: 760px) and (orientation: portrait)").matches;
+export const FRAME_COUNT = PORTRAIT_SET ? 250 : 500;
+const CONCURRENCY = 6;
 /** Horizontal point of the frame kept in the centre of the screen. */
 export const FOCUS_X = PORTRAIT_SET ? 0.5 : 0.6;
 

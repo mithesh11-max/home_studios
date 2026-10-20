@@ -111,8 +111,32 @@ export function createMotion(): () => void {
   measureNav();
   ScrollTrigger.addEventListener("refresh", measureNav);
   cleanups.push(() => ScrollTrigger.removeEventListener("refresh", measureNav));
-  const onScroll = () => nav?.classList.toggle("is-scrolled", window.scrollY > clearUntil);
+  // Phones: thin reading-progress line under the menu bar, and a bottom action bar that
+  // appears once the hero is done and steps aside when the contact form is on screen.
+  const progress = q("[data-nav-progress]");
+  const mbar = q("[data-mbar]");
+  let maxScroll = 1;
+  const measureMax = () => (maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight));
+  measureMax();
+  ScrollTrigger.addEventListener("refresh", measureMax);
+  cleanups.push(() => ScrollTrigger.removeEventListener("refresh", measureMax));
+  let contactInView = false;
+  const onScroll = () => {
+    const y = window.scrollY;
+    nav?.classList.toggle("is-scrolled", y > clearUntil);
+    if (progress) progress.style.transform = `scaleX(${Math.min(1, y / maxScroll)})`;
+    mbar?.classList.toggle("is-on", !loading && y > clearUntil && !contactInView);
+  };
   on("scroll", onScroll, { passive: true });
+  const barIO = new IntersectionObserver(
+    (es) => {
+      contactInView = es.some((e) => e.isIntersecting);
+      onScroll();
+    },
+    { rootMargin: "0px 0px -20% 0px" },
+  );
+  qa("#contact, .footer").forEach((el) => barIO.observe(el));
+  cleanups.push(() => barIO.disconnect());
   const isPhone = () => window.matchMedia("(max-width: 760px)").matches;
 
   const links = qa<HTMLAnchorElement>("[data-navlink]");
@@ -227,13 +251,24 @@ export function createMotion(): () => void {
       heroDock();
       const mm = gsap.matchMedia();
       cleanups.push(() => mm.revert());
+      // Each layout reveals only its own gallery grid (the other one is display:none).
+      const revealGallery = (sel: string) =>
+        qa(`${sel} [data-g-reveal]`).forEach((el) => {
+          const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: "top 92%", once: true } });
+          tl.fromTo(el, { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5, ease: "expo.out" })
+            .fromTo(q("img", el), { scale: 1.35 }, { scale: 1, duration: 1.8, ease: "expo.out" }, 0);
+        });
+      mm.add("(min-width: 761px)", () => revealGallery(".g-desktop"));
+      mm.add("(max-width: 760px)", () => revealGallery(".g-mobile"));
       mm.add("(min-width: 761px) and (min-height: 501px)", () => {
         statementScene(false);
         return processDesktop();
       });
       mm.add("(max-width: 760px), (max-height: 500px)", () => {
-        statementScene(true);
+        const undo = statementPhone();
         processPhone();
+        servicesPhone();
+        return undo;
       });
 
       qa("[data-split]").forEach((el) => {
@@ -302,11 +337,6 @@ export function createMotion(): () => void {
       gsap.fromTo("[data-gallery-ch]", { yPercent: 118, rotate: 7 }, {
         yPercent: 0, rotate: 0, duration: 1.5, ease: "expo.out", stagger: 0.06,
         scrollTrigger: { trigger: "[data-gallery-title]", start: "top 90%", toggleActions: "play none none reverse" },
-      });
-      qa("[data-g-reveal]").forEach((el) => {
-        const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: "top 92%", once: true } });
-        tl.fromTo(el, { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5, ease: "expo.out" })
-          .fromTo(q("img", el), { scale: 1.35 }, { scale: 1, duration: 1.8, ease: "expo.out" }, 0);
       });
       ScrollTrigger.matchMedia({
         "(min-width: 761px)": () => {
@@ -399,6 +429,42 @@ export function createMotion(): () => void {
       tl.to(lines[i - 1]!, { ...out, duration: 1, ease: "power2.in" })
         .to(l, { ...inn, duration: 1, ease: "power2.out" }, "<0.45")
         .to({}, { duration: 0.6 });
+    });
+  }
+
+  // Phones: the four lines change word by word, each word rising out of its own mask.
+  // No blur, no opacity: only transforms, which stay smooth on any phone.
+  function statementPhone() {
+    const st = q("[data-statement]");
+    if (!st) return;
+    const lines = qa("[data-statement-line]", st);
+    const parts = lines.map((l) => new SplitText(l, { type: "words", mask: "words" }));
+    const words = parts.map((p) => p.words);
+    words.slice(1).forEach((w) => gsap.set(w, { yPercent: 110 }));
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: st, start: "top top", end: "bottom bottom", scrub: 0.6 },
+    });
+    tl.to({}, { duration: 0.3 });
+    words.forEach((w, i) => {
+      if (i === 0) return;
+      tl.to(words[i - 1]!, { yPercent: -110, duration: 0.6, stagger: 0.04, ease: "power2.in" })
+        .to(w, { yPercent: 0, duration: 0.7, stagger: 0.05, ease: "power3.out" }, ">-0.1")
+        .to({}, { duration: 0.5 });
+    });
+    return () => parts.forEach((p) => p.revert());
+  }
+
+  // Phones: each service photo opens upward a beat after its row slides in.
+  function servicesPhone() {
+    qa("[data-svc-thumb]").forEach((t) => {
+      gsap.fromTo(t, { clipPath: "inset(100% 0% 0% 0% round 10px)" }, {
+        clipPath: "inset(0% 0% 0% 0% round 10px)", duration: 1.2, ease: "expo.out", delay: 0.15,
+        scrollTrigger: { trigger: t, start: "top 92%", once: true },
+      });
+      gsap.fromTo(q("img", t), { scale: 1.4 }, {
+        scale: 1, duration: 1.6, ease: "expo.out", delay: 0.15,
+        scrollTrigger: { trigger: t, start: "top 92%", once: true },
+      });
     });
   }
 
