@@ -175,6 +175,8 @@ main, .footer { position: relative; z-index: 1; }
 .hero-mark { margin: 0; width: max-content; font-size: 11vw; }
 .hm-line { display: inline-block; transform-origin: 0 0; will-change: transform; }
 .hero-dock-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: visible; }
+/* Flying back into the hero: anchored to the page, so it scrolls natively with it. */
+.hero-dock-overlay.is-page { position: absolute; }
 .hero-base {
   display: flex; justify-content: space-between; gap: 16px; padding-top: clamp(16px, 3vh, 28px);
   padding-right: calc(var(--gutter) + 64px);
@@ -687,6 +689,8 @@ main, .footer { position: relative; z-index: 1; }
   /* Hero: the wordmark docks by itself, compact natural height on phones. */
   .motion .hero { height: auto !important; }
   .motion .hero-stage { position: relative !important; height: auto !important; min-height: 0 !important; }
+  /* The phone wordmark is never transformed in place (it flies as a clone), so it needs no GPU layer. */
+  .hm-line { will-change: auto; }
   .statement-line { font-size: clamp(2.2rem, 9.6vw, 2.9rem); }
 
   /* How it works: a vertical list on phones. */

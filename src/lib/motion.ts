@@ -444,379 +444,284 @@ export function createMotion(): () => void {
     });
   }
 
-  // Phones: the wordmark flies into the menu bar on its own as soon as you start
-  // scrolling (time-based, ~0.8s) and flies back when you return to the top. Each word
-  // is re-aimed every frame at its word in the bar, so it lands exactly even while the
-  // Phones: the wordmark flies into the menu bar on its own as you scroll away from the hero,
-  // and glides smoothly back into place when returning.
-  // Measures document positions once, tracks live scroll passively with zero forced reflows,
-  // and clamps against iOS overscroll bounce.
+  // Phones: the wordmark flies into the menu bar by itself once you start scrolling, and
+  // flies back into the hero when you come back up to it.
+  //
+  // The landing never chases the scrolling page:
+  //  - Going up, the two lines are lifted into a position:fixed layer, the same as the
+  //    menu bar they land in, so the landing is rock-still however fast you scroll.
+  //  - Coming back, the layer switches to position:absolute in page coordinates, so the
+  //    landing spot (the lines' own place in the hero) scrolls natively with the page,
+  //    momentum and iOS bounce included, and they settle exactly in place.
+  // The take-off point follows the scroll and lets go as the flight progresses, so the
+  // words peel away from where they were instead of being left behind.
+  // Everything is measured once when a flight starts; each frame only writes transforms.
+  // If the direction flips mid-flight, the new flight starts from wherever the words are.
   function heroDockPhone() {
-    const lineA = q<HTMLElement>("[data-hm-a]");
-    const lineB = q<HTMLElement>("[data-hm-b]");
-    const navA = q<HTMLElement>("[data-brand-a]");
-    const navB = q<HTMLElement>("[data-brand-b]");
-    const navText = q<HTMLElement>("[data-brand-text]");
-    if (!lineA || !lineB || !navA || !navB || !navText) return;
+    const mark = q("[data-hero-mark]");
+    const lineA = q("[data-hm-a]");
+    const lineB = q("[data-hm-b]");
+    const navA = q("[data-brand-a]");
+    const navB = q("[data-brand-b]");
+    const navText = q("[data-brand-text]");
+    if (!mark || !lineA || !lineB || !navA || !navB || !navText) return;
 
     const lines = [lineA, lineB];
-    const moreBtn = q<HTMLElement>("[data-more]");
+    const words = [navA, navB];
+    const moreBtn = q("[data-more]");
 
-    let isDocked = false;
-    let state: "undocked" | "docking" | "docked" | "undocking" = "undocked";
-    let tl: gsap.core.Timeline | null = null;
+    type Pose = { x: number; y: number; s: number };
+    type Mode = "screen" | "page";
+    type State = "undocked" | "docking" | "docked" | "undocking";
+
+    let state: State = "undocked";
+    let mode: Mode = "screen";
     let overlay: HTMLElement | null = null;
-    let cloneA: HTMLElement | null = null;
-    let cloneB: HTMLElement | null = null;
+    let clones: HTMLElement[] = [];
+    let flight: gsap.core.Timeline | null = null;
+    const prog = [{ p: 0 }, { p: 0 }];
+    let from: Pose[] = [];
+    let fromSpace: Mode = "page";
+    let liveY = window.scrollY;
+    let to: Pose[] = [];
+    let cur: Pose[] = [];
+    const frac = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
+    const off = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
+    let heroIsTarget = false;
 
-    let cachedScrollY = Math.max(0, window.scrollY);
-    let lastScrollY = cachedScrollY;
+    // Where the wordmark sits on the page, for deciding when to bring it back.
+    let homeTop = 0;
+    let homeH = 0;
 
-    // Document positions (independent of scroll)
-    const docA = { x: 0, y: 0, w: 0, h: 0 };
-    const docB = { x: 0, y: 0, w: 0, h: 0 };
-    const navBoxA = { x: 0, y: 0, w: 0, h: 0 };
-    const navBoxB = { x: 0, y: 0, w: 0, h: 0 };
+    const showLines = (on: boolean) => lines.forEach((l) => (l.style.visibility = on ? "" : "hidden"));
+    const showNav = (on: boolean) => (navText.style.opacity = on ? "1" : "0");
 
-    let scaleA = 1;
-    let scaleB = 1;
-    let maskPadA = 0;
-    let maskPadB = 0;
-    let heroFontSize = 70;
-    let heroLineHeight = 60;
-    let heroColor = "var(--bone)";
-    let csLineHeight = "0.86";
-    let csLetterSpacing = "-0.025em";
-    let csFontWeight = "700";
-    let csFontStretch = "125%";
-
-    const anim = { pA: 0, pB: 0 };
-
-    const measureHome = () => {
-      if (state === "docking" || state === "undocking") return;
-
-      const curY = Math.max(0, window.scrollY);
-      const prevTransformA = lineA.style.transform;
-      const prevTransformB = lineB.style.transform;
-      lineA.style.transform = "none";
-      lineB.style.transform = "none";
-
-      const rA = lineA.getBoundingClientRect();
-      const rB = lineB.getBoundingClientRect();
-      const rNavA = navA.getBoundingClientRect();
-      const rNavB = navB.getBoundingClientRect();
-
-      lineA.style.transform = prevTransformA;
-      lineB.style.transform = prevTransformB;
-
-      docA.x = rA.left;
-      docA.y = rA.top + curY;
-      docA.w = rA.width;
-      docA.h = rA.height;
-
-      docB.x = rB.left;
-      docB.y = rB.top + curY;
-      docB.w = rB.width;
-      docB.h = rB.height;
-
-      navBoxA.x = rNavA.left;
-      navBoxA.y = rNavA.top;
-      navBoxA.w = rNavA.width;
-      navBoxA.h = rNavA.height;
-
-      navBoxB.x = rNavB.left;
-      navBoxB.y = rNavB.top;
-      navBoxB.w = rNavB.width;
-      navBoxB.h = rNavB.height;
-
-      const heroMark = lineA.closest<HTMLElement>("[data-hero-mark]");
-      const cs = heroMark ? getComputedStyle(heroMark) : getComputedStyle(lineA);
-      heroFontSize = parseFloat(cs.fontSize) || 70;
-      heroLineHeight = parseFloat(cs.lineHeight) || heroFontSize * 0.86;
-      heroColor = cs.color || "var(--bone)";
-      csLineHeight = cs.lineHeight;
-      csLetterSpacing = cs.letterSpacing;
-      csFontWeight = cs.fontWeight;
-      csFontStretch = cs.fontStretch;
-
-      scaleA = docA.w > 0 ? navBoxA.w / docA.w : 0.15;
-      scaleB = docB.w > 0 ? navBoxB.w / docB.w : 0.15;
-
-      // Account for .mask vertical padding (0.06em)
-      maskPadA = 0.06 * heroFontSize * scaleA;
-      maskPadB = 0.06 * heroFontSize * scaleB;
+    // Reads the two ends of the flight, in one layout pass. Screen coordinates.
+    // `hero`: each line's box at size 1. `bar`: each line shrunk to the menu font size
+    // with its baseline on the menu word's baseline, so the swap is pixel-exact.
+    const measure = () => {
+      const probes = [...lines, ...words].map((el) => {
+        const p = document.createElement("span");
+        p.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
+        el.appendChild(p);
+        return p;
+      });
+      const heroSize = parseFloat(getComputedStyle(mark).fontSize) || 1;
+      const barSize = parseFloat(getComputedStyle(navText).fontSize) || 1;
+      const k = barSize / heroSize;
+      const sx = window.scrollX;
+      const sy = window.scrollY;
+      const hero: Pose[] = [];
+      const bar: Pose[] = [];
+      lines.forEach((line, i) => {
+        const r = line.getBoundingClientRect();
+        const lineBase = probes[i]!.getBoundingClientRect().top - r.top;
+        const w = words[i]!.getBoundingClientRect();
+        const wordBase = probes[i + 2]!.getBoundingClientRect().top;
+        hero.push({ x: r.left, y: r.top, s: 1 });
+        // The browser snaps laid-out text to the pixel grid but draws transformed text
+        // exactly where the transform puts it. Near the hero, the clone carries the
+        // fractional part of the line's page position as layout (left/top), so it is
+        // snapped exactly like the real line and the transform only adds whole pixels.
+        const px = r.left + sx;
+        const py = r.top + sy;
+        frac[i] = { x: px - Math.floor(px), y: py - Math.floor(py) };
+        bar.push({ x: w.left, y: wordBase - lineBase * k, s: k });
+      });
+      probes.forEach((p) => p.remove());
+      homeTop = hero[0]!.y + sy;
+      homeH = lineA.offsetHeight;
+      return { hero, bar, sy };
     };
 
-    measureHome();
-
-    const onResize = () => {
-      measureHome();
-      if (overlay) render();
+    // Take-off point of a line in this layer's coordinates, at the current scroll position.
+    const takeOff = (i: number) => {
+      const f = from[i]!;
+      return fromSpace === mode ? f : { ...f, y: f.y + (mode === "page" ? liveY : -liveY) };
     };
-    window.addEventListener("resize", onResize, { passive: true });
-    window.addEventListener("orientationchange", onResize, { passive: true });
-    if ("fonts" in document) {
-      document.fonts.ready.then(onResize).catch(() => {});
-    }
-
-    const cleanupOverlay = () => {
-      overlay?.remove();
-      overlay = null;
-      cloneA = null;
-      cloneB = null;
-    };
-
-    if (reduce) {
-      const onReduceScroll = (y: number) => {
-        const docked = y > 4;
-        isDocked = docked;
-        gsap.set(navText, { opacity: docked ? 1 : 0 });
-        lineA.style.visibility = docked ? "hidden" : "visible";
-        lineB.style.visibility = docked ? "hidden" : "visible";
-      };
-      phoneDock = {
-        docked: () => isDocked,
-        onScroll: onReduceScroll,
-      };
-      onReduceScroll(window.scrollY);
-      let moreCleanup: (() => void) | null = null;
-      if (moreBtn) {
-        const onMore = () => onReduceScroll(100);
-        moreBtn.addEventListener("click", onMore);
-        moreCleanup = () => moreBtn.removeEventListener("click", onMore);
-      }
-      return () => {
-        phoneDock = null;
-        window.removeEventListener("resize", onResize);
-        window.removeEventListener("orientationchange", onResize);
-        moreCleanup?.();
-        lineA.style.visibility = "";
-        lineB.style.visibility = "";
-        gsap.set(lines, { clearProps: "transform,opacity,visibility" });
-        gsap.set(navText, { clearProps: "opacity" });
-      };
-    }
 
     const render = () => {
-      if (!cloneA || !cloneB) return;
-      const scrollY = cachedScrollY;
-
-      const heroX_A = docA.x;
-      const heroY_A = docA.y - scrollY;
-      const heroX_B = docB.x;
-      const heroY_B = docB.y - scrollY;
-
-      const navX_A = navBoxA.x;
-      const navY_A = navBoxA.y - maskPadA;
-      const navX_B = navBoxB.x;
-      const navY_B = navBoxB.y - maskPadB;
-
-      const tA = anim.pA;
-      const tB = anim.pB;
-
-      const curX_A = heroX_A + (navX_A - heroX_A) * tA;
-      const curY_A = heroY_A + (navY_A - heroY_A) * tA;
-      const curScale_A = 1 + (scaleA - 1) * tA;
-
-      const curX_B = heroX_B + (navX_B - heroX_B) * tB;
-      const curY_B = heroY_B + (navY_B - heroY_B) * tB;
-      const curScale_B = 1 + (scaleB - 1) * tB;
-
-      gsap.set(cloneA, { x: curX_A, y: curY_A, scale: curScale_A, force3D: true });
-      gsap.set(cloneB, { x: curX_B, y: curY_B, scale: curScale_B, force3D: true });
+      // On a hard fling the page can outrun the flight: the words rise with it only until
+      // HOME reaches the menu bar, never off the top. Both lines move together, so STUDIOS
+      // stays a line below HOME until it slides in beside it.
+      const lift = mode === "screen" ? Math.max(0, to[0]!.y - takeOff(0).y) : 0;
+      clones.forEach((c, i) => {
+        const p = prog[i]!.p;
+        const a = takeOff(i);
+        const b = to[i]!;
+        const ay = a.y + lift;
+        // STUDIOS joins HOME's row only once it has slid clear of it, and leaves the row
+        // first on the way back, so the two words never brush past each other.
+        const py = i === 0 ? p : heroIsTarget ? 1 - Math.pow(1 - p, 1.8) : Math.pow(p, 1.8);
+        const pose = { x: a.x + (b.x - a.x) * p, y: ay + (b.y - ay) * py, s: a.s + (b.s - a.s) * p };
+        cur[i] = pose;
+        // Hero half of the flight: snap like the real line. Menu-bar half: no offset, like
+        // the menu text. The switch happens mid-air, where a sub-pixel change can't be seen.
+        const nearHero = (heroIsTarget ? p : 1 - p) >= 0.5;
+        const o = nearHero ? frac[i]! : { x: 0, y: 0 };
+        if (o.x !== off[i]!.x || o.y !== off[i]!.y) {
+          off[i] = o;
+          c.style.left = `${o.x}px`;
+          c.style.top = `${o.y}px`;
+        }
+        c.style.transform = `translate(${pose.x - o.x}px, ${pose.y - o.y}px) scale(${pose.s})`;
+      });
     };
 
     const ensureOverlay = () => {
       if (overlay) return;
-
       overlay = document.createElement("div");
       overlay.className = "hero-dock-overlay";
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "hero-mark wordmark-type";
-      wrapper.style.cssText = `position:absolute;top:0;left:0;margin:0;padding:0;pointer-events:none;font-size:${heroFontSize}px;line-height:${csLineHeight};letter-spacing:${csLetterSpacing};font-weight:${csFontWeight};font-stretch:${csFontStretch};color:${heroColor};`;
-
-      cloneA = lineA.cloneNode(true) as HTMLElement;
-      cloneB = lineB.cloneNode(true) as HTMLElement;
-
-      cloneA.removeAttribute("id");
-      cloneB.removeAttribute("id");
-
-      cloneA.style.position = "absolute";
-      cloneA.style.left = "0px";
-      cloneA.style.top = "0px";
-      cloneA.style.margin = "0";
-      cloneA.style.transformOrigin = "0 0";
-      cloneA.style.willChange = "transform";
-      cloneA.style.visibility = "visible";
-      cloneA.style.opacity = "1";
-
-      cloneB.style.position = "absolute";
-      cloneB.style.left = "0px";
-      cloneB.style.top = "0px";
-      cloneB.style.margin = "0";
-      cloneB.style.transformOrigin = "0 0";
-      cloneB.style.willChange = "transform";
-      cloneB.style.visibility = "visible";
-      cloneB.style.opacity = "1";
-
-      wrapper.appendChild(cloneA);
-      wrapper.appendChild(cloneB);
-      overlay.appendChild(wrapper);
+      overlay.setAttribute("aria-hidden", "true");
+      // Same type context as the hero heading, so each clone has exactly the line's box.
+      const cs = getComputedStyle(mark);
+      const ctx = document.createElement("div");
+      ctx.className = mark.className;
+      ctx.style.cssText = `position:absolute;left:0;top:0;margin:0;font-size:${cs.fontSize};color:${cs.color}`;
+      clones = lines.map((line) => {
+        const c = line.cloneNode(true) as HTMLElement;
+        [c, ...Array.from(c.querySelectorAll<HTMLElement>("*"))].forEach((el) => {
+          Array.from(el.attributes).forEach((a) => a.name.startsWith("data-") && el.removeAttribute(a.name));
+        });
+        // Letters at rest whatever the intro was doing, written the way GSAP leaves the
+        // real ones (an identity translate), so both are painted identically.
+        c.querySelectorAll<HTMLElement>(".ch").forEach((ch) => (ch.style.transform = "translate(0px, 0px)"));
+        // Repainted crisp at every size rather than one cached bitmap stretched up or down.
+        c.style.cssText = "position:absolute;left:0;top:0;margin:0;transform-origin:0 0;will-change:auto";
+        ctx.appendChild(c);
+        return c;
+      });
+      overlay.appendChild(ctx);
       document.body.appendChild(overlay);
-
-      lineA.style.visibility = "hidden";
-      lineB.style.visibility = "hidden";
-      gsap.set(navText, { opacity: 0 });
     };
 
-    const buildTimeline = () => {
-      tl?.kill();
-      tl = gsap.timeline({
-        paused: true,
-        onUpdate: render,
-        onComplete: () => {
-          state = "docked";
-          isDocked = true;
-          gsap.set(navText, { opacity: 1 });
-          lineA.style.visibility = "hidden";
-          lineB.style.visibility = "hidden";
-          cleanupOverlay();
-          onScroll();
-        },
-        onReverseComplete: () => {
-          state = "undocked";
-          isDocked = false;
-          lineA.style.visibility = "visible";
-          lineB.style.visibility = "visible";
-          gsap.set(navText, { opacity: 0 });
-          cleanupOverlay();
-          onScroll();
-        },
-      });
+    const setMode = (m: Mode) => {
+      mode = m;
+      overlay?.classList.toggle("is-page", m === "page");
+    };
 
-      // Quick flight: ~0.56s with expo.out, STUDIOS lagging HOME by 0.045s
-      tl.to(anim, { pA: 1, duration: 0.56, ease: "expo.out" }, 0);
-      tl.to(anim, { pB: 1, duration: 0.56, ease: "expo.out" }, 0.045);
+    const removeOverlay = () => {
+      overlay?.remove();
+      overlay = null;
+      clones = [];
+      off.forEach((o) => ((o.x = 0), (o.y = 0)));
+    };
 
-      return tl;
+    const land = (s: "docked" | "undocked") => {
+      flight?.kill();
+      flight = null;
+      state = s;
+      // Show the real text and drop the clones in the same frame: no gap, no double.
+      showNav(s === "docked");
+      showLines(s === "undocked");
+      removeOverlay();
+      onScroll();
+    };
+
+    // One flight towards the bar ("docking") or back into the hero ("undocking").
+    const fly = (dir: "docking" | "undocking") => {
+      const { hero, bar, sy } = measure();
+      liveY = sy;
+      // The hero end lives on the page; the menu-bar end lives on the screen.
+      const heroOnPage = hero.map((p) => ({ ...p, y: p.y + sy }));
+
+      // Take off from wherever the words are right now.
+      let share = 1;
+      if (flight && overlay) {
+        flight.kill();
+        from = cur.slice();
+        fromSpace = mode;
+        share = Math.max(0.45, (prog[0]!.p + prog[1]!.p) / 2);
+      } else {
+        from = dir === "docking" ? heroOnPage : bar;
+        fromSpace = dir === "docking" ? "page" : "screen";
+      }
+
+      state = dir;
+      ensureOverlay();
+      setMode(dir === "docking" ? "screen" : "page");
+      heroIsTarget = dir === "undocking";
+      to = dir === "docking" ? bar : heroOnPage;
+      prog.forEach((o) => (o.p = 0));
+      showLines(false);
+      showNav(false);
+      render();
+      onScroll();
+
+      const d = (dir === "docking" ? 0.62 : 0.72) * share;
+      const ease = "power3.out";
+      flight = gsap.timeline({ onUpdate: render, onComplete: () => land(dir === "docking" ? "docked" : "undocked") });
+      // STUDIOS trails HOME a beat, so it tucks in beside it instead of crossing it.
+      const lag = dir === "docking" ? [0, 0.05] : [0.05, 0];
+      prog.forEach((o, i) => flight!.to(o, { p: 1, duration: d, ease }, lag[i]! * share));
     };
 
     const dock = () => {
-      if (state === "docked") return;
-      if (state === "docking") {
-        if (tl?.reversed()) tl.play();
-        return;
-      }
-      if (state === "undocking") {
-        state = "docking";
-        tl?.play();
-        return;
-      }
-      state = "docking";
-      ensureOverlay();
-      const timeline = buildTimeline();
-      timeline.progress(0);
-      render();
-      timeline.play();
+      if (state === "docked" || state === "docking") return;
+      if (reduce) return land("docked");
+      fly("docking");
     };
-
     const undock = () => {
-      if (state === "undocked") return;
-      if (state === "undocking") {
-        if (tl && !tl.reversed()) tl.reverse();
-        return;
-      }
-      if (state === "docking") {
-        state = "undocking";
-        tl?.reverse();
-        return;
-      }
-      state = "undocking";
-      isDocked = false;
-      onScroll();
-      ensureOverlay();
-      const timeline = buildTimeline();
-      timeline.progress(1);
-      render();
-      timeline.reverse();
+      if (state === "undocked" || state === "undocking") return;
+      if (reduce) return land("undocked");
+      fly("undocking");
     };
 
+    // Direction is judged over a few pixels, so a finger wobble never flips it.
+    let lastY = Math.max(0, window.scrollY);
+    let down = 0;
+    let up = 0;
     phoneDock = {
-      docked: () => isDocked,
-      onScroll: (y) => {
-        cachedScrollY = Math.max(0, y);
-        const dy = cachedScrollY - lastScrollY;
-        const curY = cachedScrollY;
-
-        // If overlay is in flight, update its live position synchronously on scroll
-        if (overlay) render();
-
-        // Check if hero wordmark's home position is coming on screen
-        const heroOnScreen = docA.y - curY > -heroLineHeight * 1.5;
-
-        if (state === "docked") {
-          // Trigger return earlier: when scrolling up and hero position is approaching, or near top
-          if ((dy < -1 && heroOnScreen) || curY < 8) {
-            undock();
-          }
-        } else if (state === "undocked") {
-          if (curY > 4) {
-            dock();
-          }
-        } else if (state === "docking") {
-          // Mid-flight going up: flip to reverse if user clearly scrolls up
-          if (dy < -2 && (heroOnScreen || curY < 8)) {
-            undock();
-          }
-        } else if (state === "undocking") {
-          // Mid-flight returning: flip back to docking if user clearly scrolls down past 16
-          if (dy > 2 && curY > 16) {
-            dock();
-          }
+      docked: () => state === "docked",
+      onScroll: (raw) => {
+        liveY = raw;
+        const y = Math.max(0, raw);
+        const dy = y - lastY;
+        lastY = y;
+        if (dy > 0) {
+          down += dy;
+          up = 0;
+        } else if (dy < 0) {
+          up -= dy;
+          down = 0;
         }
-
-        lastScrollY = curY;
+        // The wordmark's spot in the hero is (nearly) back on screen.
+        const homeNear = y < homeTop + homeH;
+        if (y <= 4) undock();
+        else if (down >= Math.min(10, y)) dock();
+        else if (up >= 10 && homeNear) undock();
       },
     };
 
-    if (window.scrollY > 4) {
-      isDocked = true;
-      state = "docked";
-      anim.pA = 1;
-      anim.pB = 1;
-      gsap.set(navText, { opacity: 1 });
-      lineA.style.visibility = "hidden";
-      lineB.style.visibility = "hidden";
-    } else {
-      isDocked = false;
-      state = "undocked";
-      anim.pA = 0;
-      anim.pB = 0;
-      gsap.set(navText, { opacity: 0 });
-      lineA.style.visibility = "visible";
-      lineB.style.visibility = "visible";
-    }
+    // Starting state.
+    measure();
+    if (window.scrollY > 4) land("docked");
+    else land("undocked");
 
-    let moreCleanup: (() => void) | null = null;
-    if (moreBtn) {
-      const onMore = () => dock();
-      moreBtn.addEventListener("click", onMore);
-      moreCleanup = () => moreBtn.removeEventListener("click", onMore);
-    }
+    // "Know more about us": dock straight away, while the page glides down.
+    const onMore = () => dock();
+    moreBtn?.addEventListener("click", onMore);
+
+    // A width change re-fits the wordmark: finish any flight where it was heading.
+    const settle = () => {
+      if (state === "docking") land("docked");
+      else if (state === "undocking") land("undocked");
+    };
+    const remeasure = () => void measure();
+    ScrollTrigger.addEventListener("refreshInit", settle);
+    ScrollTrigger.addEventListener("refresh", remeasure);
 
     return () => {
-      tl?.kill();
-      tl = null;
-      cleanupOverlay();
+      flight?.kill();
+      flight = null;
+      removeOverlay();
       phoneDock = null;
-      window.removeEventListener("resize", onResize);
-      window.removeEventListener("orientationchange", onResize);
-      moreCleanup?.();
-      lineA.style.visibility = "";
-      lineB.style.visibility = "";
-      gsap.set(lines, { clearProps: "transform,opacity,visibility" });
-      gsap.set(navText, { clearProps: "opacity" });
+      moreBtn?.removeEventListener("click", onMore);
+      ScrollTrigger.removeEventListener("refreshInit", settle);
+      ScrollTrigger.removeEventListener("refresh", remeasure);
+      lines.forEach((l) => (l.style.visibility = ""));
+      navText.style.opacity = "";
+      gsap.set(lines, { clearProps: "transform,opacity" });
     };
   }
 
