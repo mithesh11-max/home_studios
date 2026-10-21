@@ -931,13 +931,13 @@ export function createMotion(): () => void {
   // never repaints the photo while it plays, which keeps fast scrolls smooth on phones.
   // `trigger` is an untransformed element at the same spot, so the start point is exact.
   function wipeUp(box: HTMLElement, trigger: Element, o: { duration: number; imgFrom: number; imgDuration: number; delay?: number }) {
-    const img = q("img", box);
+    const media = q("img, video", box);
     const at = o.delay ?? 0;
     const tl = gsap.timeline({ scrollTrigger: { trigger, start: "top 92%", once: true } });
     tl.fromTo(box, { yPercent: 100 }, { yPercent: 0, duration: o.duration, ease: "expo.out" }, at);
-    if (img) {
-      tl.fromTo(img, { yPercent: -100 }, { yPercent: 0, duration: o.duration, ease: "expo.out" }, at)
-        .fromTo(img, { scale: o.imgFrom }, { scale: 1, duration: o.imgDuration, ease: "expo.out" }, at);
+    if (media) {
+      tl.fromTo(media, { yPercent: -100 }, { yPercent: 0, duration: o.duration, ease: "expo.out" }, at)
+        .fromTo(media, { scale: o.imgFrom }, { scale: 1, duration: o.imgDuration, ease: "expo.out" }, at);
     }
   }
 

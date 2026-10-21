@@ -17,6 +17,10 @@ import lanternImg from "@/assets/details/lantern.webp";
 import familyImg from "@/assets/details/family-walk.webp";
 import planLinesImg from "@/assets/details/plan-lines.webp";
 import planEntryImg from "@/assets/details/plan-entry.webp";
+import video01 from "@/assets/details/01.mp4";
+import video06 from "@/assets/details/06.mp4";
+import video08 from "@/assets/details/08.mp4";
+import video11 from "@/assets/details/11.mp4";
 
 const PHONE = "+91 866 082 3337";
 const TEL = "+918660823337";
@@ -63,42 +67,50 @@ const SERVICES = [
   { t: "Turnkey", d: "One team from first sketch through to snag list and handover.", need: "New home end-to-end", img: livingImg },
 ];
 
-type Photo = { img: string; t: string; alt: string; w: number; h: number };
+type Photo = {
+  img?: string;
+  video?: string;
+  poster?: string;
+  t: string;
+  alt: string;
+  w: number;
+  h: number;
+};
 
-// Three columns, read top to bottom. Swap in real project photos here.
+// Three columns, read top to bottom. Real project photos and videos.
 const GALLERY: Photo[][] = [
   [
-    { img: livingImg, t: "Double-height living", alt: "A double-height living room with tall glass walls opening onto trees", w: 1200, h: 1504 },
+    { video: video01, poster: livingImg, t: "Double-height living", alt: "A double-height living room with tall glass walls opening onto trees", w: 2560, h: 1440 },
     { img: pendantImg, t: "Pendant over the island", alt: "A linear pendant light above a stone kitchen island", w: 900, h: 755 },
     { img: lanternImg, t: "Lantern and timber screens", alt: "A lit wall lantern beside timber screens at dusk", w: 900, h: 736 },
     { img: planLinesImg, t: "Bedroom and bath at 1:1", alt: "Bedroom and bath outlines projected at full size on the studio floor", w: 853, h: 900 },
   ],
   [
     { img: staircaseImg, t: "Timber stair", alt: "A timber staircase rising beside a concrete column", w: 720, h: 900 },
-    { img: exteriorImg, t: "Terrace home at dusk", alt: "A three-storey home with timber screens and a cantilevered terrace at dusk", w: 1200, h: 1504 },
+    { video: video06, poster: exteriorImg, t: "Terrace home at dusk", alt: "A three-storey home with timber screens and a cantilevered terrace at dusk", w: 2560, h: 1440 },
     { img: sofaImg, t: "Living room seating", alt: "A low cream sofa around a timber coffee table", w: 900, h: 386 },
-    { img: familyImg, t: "Walking the plan", alt: "A family walking through a projected floor plan", w: 900, h: 900 },
+    { video: video08, poster: familyImg, t: "Walking the plan", alt: "A family walking through a projected floor plan", w: 2560, h: 1440 },
   ],
   [
     { img: forestImg, t: "Forest-facing glazing", alt: "Floor-to-ceiling windows looking onto trees", w: 663, h: 900 },
     { img: terraceImg, t: "Cantilevered terrace", alt: "A glass-railed terrace under a timber soffit", w: 930, h: 320 },
-    { img: kitchenImg, t: "Island kitchen", alt: "A pale kitchen with a stone island and timber cabinetry", w: 1200, h: 1504 },
+    { video: video11, poster: kitchenImg, t: "Island kitchen", alt: "A pale kitchen with a stone island and timber cabinetry", w: 2560, h: 1440 },
     { img: stoolsImg, t: "Bar stools", alt: "Black timber bar stools at a stone island", w: 717, h: 900 },
   ],
 ];
 const GALLERY_FLAT = GALLERY.flat();
 const DESKTOP_ORDER = GALLERY_FLAT.map((_, i) => i);
-// Phones: an editorial rhythm of one full-width photo, then a pair, so the two columns
-// never leave gaps. Numbers refer to GALLERY_FLAT; "wide" spans both columns.
+// Phones: an editorial rhythm of wide banners and pairs, with videos at 01, 06, 08, 11
+// without leaving gaps in the two-column grid. Numbers refer to GALLERY_FLAT.
 const MOBILE_LAYOUT: { i: number; wide?: boolean; ratio: string }[] = [
-  { i: 0, wide: true, ratio: "4 / 5" },
+  { i: 0, wide: true, ratio: "16 / 9" },
   { i: 4, ratio: "3 / 4" }, { i: 8, ratio: "3 / 4" },
-  { i: 9, wide: true, ratio: "16 / 7" },
   { i: 1, ratio: "3 / 4" }, { i: 11, ratio: "3 / 4" },
-  { i: 5, wide: true, ratio: "4 / 5" },
-  { i: 2, ratio: "3 / 4" }, { i: 3, ratio: "3 / 4" },
+  { i: 5, wide: true, ratio: "16 / 9" },
+  { i: 2, ratio: "3 / 4" }, { i: 7, ratio: "3 / 4" },
+  { i: 9, wide: true, ratio: "16 / 7" },
+  { i: 3, ratio: "3 / 4" }, { i: 10, ratio: "3 / 4" },
   { i: 6, wide: true, ratio: "16 / 7" },
-  { i: 10, ratio: "3 / 4" }, { i: 7, ratio: "3 / 4" },
 ];
 const MOBILE_ORDER = MOBILE_LAYOUT.map((m) => m.i);
 
@@ -492,8 +504,8 @@ function Gallery() {
           <Letters text="GALLERY" attr="data-gallery-ch" />
         </h2>
         <div className="gallery-meta" data-fade>
-          <p className="lede">Light, proportion and the details that make a room. Select any photo to see it full size.</p>
-          <span className="gallery-count">{String(total).padStart(2, "0")} photos</span>
+          <p className="lede">Light, proportion and the details that make a room. Select any frame to see it full size.</p>
+          <span className="gallery-count">{String(total).padStart(2, "0")} photos & videos</span>
         </div>
       </div>
       <div className="wrap gallery-grid g-desktop">
@@ -502,11 +514,31 @@ function Gallery() {
             {col.map((p) => {
               const idx = n++;
               return (
-                <button key={p.t} className="g-item" onClick={() => show(DESKTOP_ORDER, idx)} aria-label={`Open photo: ${p.t}`}>
+                <button key={p.t} className="g-item" onClick={() => show(DESKTOP_ORDER, idx)} aria-label={`Open ${p.video ? "video" : "photo"}: ${p.t}`}>
                   <span className="g-img" data-g-reveal style={{ aspectRatio: `${p.w} / ${p.h}` }}>
-                    <img src={p.img} alt={p.alt} width={p.w} height={p.h} loading="lazy" />
+                    {p.video ? (
+                      <>
+                        <video
+                          src={p.video}
+                          poster={p.poster || p.img}
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                        />
+                        <span className="g-vid-badge" aria-hidden="true">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M3.5 2.5L9.5 6L3.5 9.5V2.5Z" /></svg>
+                        </span>
+                      </>
+                    ) : (
+                      <img src={p.img} alt={p.alt} width={p.w} height={p.h} loading="lazy" />
+                    )}
                   </span>
-                  <span className="g-cap" aria-hidden="true">{String(idx + 1).padStart(2, "0")}</span>
+                  <span className="g-cap" aria-hidden="true">
+                    {String(idx + 1).padStart(2, "0")}
+                    {p.video && <span className="g-cap-tag">VIDEO</span>}
+                  </span>
                 </button>
               );
             })}
@@ -517,26 +549,58 @@ function Gallery() {
         {MOBILE_LAYOUT.map((m, pos) => {
           const p = GALLERY_FLAT[m.i]!;
           return (
-            <button key={p.t} className={`g-item ${m.wide ? "is-wide" : ""}`} onClick={() => show(MOBILE_ORDER, pos)} aria-label={`Open photo: ${p.t}`}>
+            <button key={p.t} className={`g-item ${m.wide ? "is-wide" : ""}`} onClick={() => show(MOBILE_ORDER, pos)} aria-label={`Open ${p.video ? "video" : "photo"}: ${p.t}`}>
               <span className="g-img" data-g-reveal style={{ aspectRatio: m.ratio }}>
-                <img src={p.img} alt={p.alt} width={p.w} height={p.h} loading="lazy" />
+                {p.video ? (
+                  <>
+                    <video
+                      src={p.video}
+                      poster={p.poster || p.img}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                    />
+                    <span className="g-vid-badge" aria-hidden="true">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M3.5 2.5L9.5 6L3.5 9.5V2.5Z" /></svg>
+                    </span>
+                  </>
+                ) : (
+                  <img src={p.img} alt={p.alt} width={p.w} height={p.h} loading="lazy" />
+                )}
               </span>
-              <span className="g-cap" aria-hidden="true">{String(pos + 1).padStart(2, "0")}</span>
+              <span className="g-cap" aria-hidden="true">
+                {String(pos + 1).padStart(2, "0")}
+                {p.video && <span className="g-cap-tag">VIDEO</span>}
+              </span>
             </button>
           );
         })}
       </div>
 
       {current && createPortal(
-        <div className="lightbox" role="dialog" aria-modal="true" aria-label={`Photo ${open! + 1} of ${total}: ${current.t}`} data-lenis-prevent onClick={close} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label={`${current.video ? "Video" : "Photo"} ${open! + 1} of ${total}: ${current.t}`} data-lenis-prevent onClick={close} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <figure className="lb-figure" onClick={(e) => e.stopPropagation()}>
-            <img key={current.img + open} src={current.img} alt={current.alt} />
-            <figcaption>{String(open! + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</figcaption>
+            {current.video ? (
+              <video
+                key={current.video + open}
+                src={current.video}
+                poster={current.poster || current.img}
+                autoPlay
+                controls
+                playsInline
+                loop
+              />
+            ) : (
+              <img key={(current.img || "") + open} src={current.img} alt={current.alt} />
+            )}
+            <figcaption>{String(open! + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}{current.video ? " · VIDEO" : ""}</figcaption>
           </figure>
-          <button className="lb-btn lb-prev" onClick={(e) => { e.stopPropagation(); step(-1); }} aria-label="Previous photo">
+          <button className="lb-btn lb-prev" onClick={(e) => { e.stopPropagation(); step(-1); }} aria-label="Previous item">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M12.5 4l-6 6 6 6" stroke="currentColor" strokeWidth="1.5" /></svg>
           </button>
-          <button className="lb-btn lb-next" onClick={(e) => { e.stopPropagation(); step(1); }} aria-label="Next photo">
+          <button className="lb-btn lb-next" onClick={(e) => { e.stopPropagation(); step(1); }} aria-label="Next item">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7.5 4l6 6-6 6" stroke="currentColor" strokeWidth="1.5" /></svg>
           </button>
           <button className="lb-close" onClick={close} autoFocus>Close</button>
