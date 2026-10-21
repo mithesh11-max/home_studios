@@ -426,6 +426,10 @@ export function createMotion(): () => void {
       scrollTrigger: { trigger: st, start: "top top", end: "bottom bottom", scrub: 0.8 },
     });
     tl.to({}, { duration: 0.4 });
+    const videoEl = q<HTMLVideoElement>(".statement-media video", st);
+    if (videoEl && !phone) {
+      tl.fromTo(videoEl, { scale: 1.04 }, { scale: 1.15, ease: "none" }, 0);
+    }
     lines.forEach((l, i) => {
       if (i === 0) return;
       tl.to(lines[i - 1]!, { ...out, duration: 1, ease: "power2.in" })

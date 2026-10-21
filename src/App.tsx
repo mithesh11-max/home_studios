@@ -21,6 +21,7 @@ import video01 from "@/assets/details/01.mp4";
 import video06 from "@/assets/details/06.mp4";
 import video08 from "@/assets/details/08.mp4";
 import video11 from "@/assets/details/11.mp4";
+import homeVideo from "@/assets/details/Home.mp4";
 
 const PHONE = "+91 866 082 3337";
 const TEL = "+918660823337";
@@ -302,6 +303,17 @@ function Statement() {
   return (
     <section id="why" className="statement" data-veil="0.2" data-statement aria-label="Why walk it first">
       <div className="statement-stage">
+        <div className="statement-media" aria-hidden="true">
+          <video
+            src={homeVideo}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+          />
+          <div className="statement-media-scrim" />
+        </div>
         <div className="wrap statement-inner">
           {STATEMENT.map((l) => (
             <p key={l} className="statement-line" data-statement-line>{l}</p>

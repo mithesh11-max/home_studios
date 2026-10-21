@@ -206,15 +206,43 @@ main, .footer { position: relative; z-index: 1; }
 
 /* ── Statement ──────────────────────────────────────────────────── */
 .statement { position: relative; }
-.statement-inner { padding-block: var(--section); display: grid; gap: 0.5em; }
+.statement-inner { position: relative; z-index: 2; padding-block: var(--section); display: grid; gap: 0.5em; }
 .statement-line {
   margin: 0; font-size: clamp(2.1rem, 5.6vw, 5.6rem); line-height: 1.04; font-weight: 400;
   letter-spacing: -0.045em; text-wrap: balance; max-width: 18ch;
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.75), 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 .motion .statement { height: 460svh; }
-.motion .statement-stage { position: sticky; top: 0; height: 100svh; }
+.motion .statement-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
 .motion .statement-inner { height: 100%; padding-block: 0; place-items: center; text-align: center; gap: 0; }
 .motion .statement-line { grid-area: 1 / 1; max-width: 16ch; will-change: transform, opacity, filter; }
+
+.statement-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+.statement-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0.56;
+  filter: contrast(1.08) brightness(0.74);
+  transform: scale(1.04);
+}
+.statement-media-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(10, 10, 10, 0.3) 0%, rgba(10, 10, 10, 0.78) 85%),
+    linear-gradient(to bottom, rgba(10, 10, 10, 0.85) 0%, rgba(10, 10, 10, 0.15) 25%, rgba(10, 10, 10, 0.15) 75%, rgba(10, 10, 10, 0.9) 100%);
+  pointer-events: none;
+}
 
 /* ── Process ──────────────────────────────────────────────────────── */
 .process { position: relative; padding-block: var(--section); }
