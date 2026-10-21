@@ -698,9 +698,13 @@ main, .footer { position: relative; z-index: 1; }
   .motion .statement-stage {
     position: relative;
     height: auto !important;
-    min-height: 280px !important;
-    padding-top: clamp(16px, 2.5vh, 24px) !important;
-    padding-bottom: clamp(84px, 14vh, 108px) !important;
+    min-height: clamp(360px, 54vh, 460px) !important;
+    padding-top: clamp(48px, 8vh, 68px) !important;
+    padding-bottom: clamp(92px, 15vh, 116px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
     touch-action: pan-y;
     user-select: none;
     -webkit-user-select: none;
@@ -708,10 +712,12 @@ main, .footer { position: relative; z-index: 1; }
     overflow: hidden;
   }
   .motion .statement-inner {
+    width: 100%;
     height: auto !important;
     min-height: 120px !important;
     padding-block: 0 !important;
-    place-items: center;
+    display: grid !important;
+    place-items: center !important;
     text-align: center;
     gap: 0;
   }
@@ -722,7 +728,7 @@ main, .footer { position: relative; z-index: 1; }
     gap: 6px;
     position: absolute;
     left: 50%;
-    bottom: clamp(48px, 8vh, 62px) !important;
+    bottom: clamp(44px, 7.5vh, 58px) !important;
     transform: translateX(-50%);
     z-index: 25;
   }
@@ -761,28 +767,32 @@ main, .footer { position: relative; z-index: 1; }
     gap: 8px;
     position: absolute;
     left: 50%;
-    bottom: clamp(14px, 2.5vh, 22px) !important;
+    bottom: clamp(14px, 2.4vh, 20px) !important;
     transform: translateX(-50%);
-    padding: 0;
-    background: none !important;
+    padding: 0 !important;
+    background: transparent !important;
     border: none !important;
     box-shadow: none !important;
+    outline: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    filter: none !important;
     pointer-events: none;
     user-select: none;
     -webkit-user-select: none;
     white-space: nowrap;
     z-index: 25;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85));
   }
   .st-swipe-arrow {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: rgba(238, 236, 231, 0.7);
+    color: rgba(238, 236, 231, 0.52);
     line-height: 1;
-    font-size: 12px;
+    font-size: 11px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
   .st-swipe-arrow.is-left {
     animation: swipeLeftMotion 2.2s ease-in-out infinite;
@@ -791,19 +801,23 @@ main, .footer { position: relative; z-index: 1; }
     animation: swipeRightMotion 2.2s ease-in-out infinite;
   }
   @keyframes swipeLeftMotion {
-    0%, 100% { transform: translateX(0); opacity: 0.4; }
-    50% { transform: translateX(-3px); opacity: 0.85; }
+    0%, 100% { transform: translateX(0); opacity: 0.35; }
+    50% { transform: translateX(-3px); opacity: 0.75; }
   }
   @keyframes swipeRightMotion {
-    0%, 100% { transform: translateX(0); opacity: 0.4; }
-    50% { transform: translateX(3px); opacity: 0.85; }
+    0%, 100% { transform: translateX(0); opacity: 0.35; }
+    50% { transform: translateX(3px); opacity: 0.75; }
   }
   .st-swipe-text {
-    color: rgba(238, 236, 231, 0.7);
-    font-size: 11px;
-    font-weight: 500;
+    color: rgba(238, 236, 231, 0.52);
+    font-size: 10.5px;
+    font-weight: 400;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
   }
   /* Hero: the wordmark docks by itself, compact natural height on phones. */
   .motion .hero { height: auto !important; }
