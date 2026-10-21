@@ -231,8 +231,8 @@ main, .footer { position: relative; z-index: 1; }
   height: 100%;
   object-fit: cover;
   display: block;
-  opacity: 0.56;
-  filter: contrast(1.08) brightness(0.74);
+  opacity: 0.38;
+  filter: contrast(1.08) brightness(0.72);
   transform: scale(1.04);
 }
 .statement-media-scrim {
