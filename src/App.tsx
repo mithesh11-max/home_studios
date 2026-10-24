@@ -463,7 +463,7 @@ function Services({ onPick }: { onPick: (need: string) => void }) {
         <ul className="svc-list">
           {SERVICES.map((s) => (
             <li key={s.t} data-row>
-              <button className="svc" onClick={() => onPick(s.need)} data-preview={s.img}>
+              <button className="svc" onClick={() => onPick(s.need)}>
                 <span className="svc-t">{s.t}</span>
                 <span className="svc-d">{s.d}</span>
                 <span className="svc-thumb" aria-hidden="true" data-svc-thumb><img src={s.img} alt="" loading="lazy" /></span>
