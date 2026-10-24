@@ -444,7 +444,7 @@ function Numbers() {
       </dl>
       <figure className="band" data-band>
         <div className="band-inner" data-band-inner>
-          <img src={livingWideImg} alt="A double-height living room opening onto a forest through full-height glass" width={1200} height={720} loading="lazy" />
+          <img src={livingWideImg} alt="Founder seated in the full-scale 1:1 walkthrough studio at Home Studios" width={1200} height={720} loading="lazy" />
         </div>
         <figcaption className="wrap">Every room is walked at full size before it's built.</figcaption>
       </figure>

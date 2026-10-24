@@ -333,7 +333,18 @@ export function createMotion(): () => void {
 
       // Studio band: opens from a framed card to full bleed.
       const band = q("[data-band-inner]");
-      if (band) openFrame(band, { insetX: 0.12, insetY: 0.1, r0: 10, r1: 0, start: 0.92, end: 0.55, imgFrom: 1.3 });
+      if (band) {
+        const phone = isPhone();
+        openFrame(band, {
+          insetX: phone ? 0.04 : 0.12,
+          insetY: phone ? 0.04 : 0.1,
+          r0: 10,
+          r1: 0,
+          start: 0.92,
+          end: 0.55,
+          imgFrom: phone ? 1.08 : 1.3,
+        });
+      }
 
       // Gallery: title rises letter by letter; photos unmask upward; columns drift at different speeds.
       gsap.fromTo("[data-gallery-ch]", { yPercent: 118, rotate: 7 }, {
