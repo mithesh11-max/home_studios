@@ -391,7 +391,38 @@ main, .footer { position: relative; z-index: 1; }
 .band { margin: clamp(64px, 12vh, 140px) 0 0; }
 .band-inner { height: clamp(320px, 82vh, 860px); overflow: hidden; }
 .band-inner img { width: 100%; height: 100%; object-fit: cover; object-position: 67% 28%; }
-.band figcaption { margin-top: 16px; color: var(--stone); font-size: 15px; }
+.shivaraj-wrap {
+  margin-top: clamp(28px, 4.5vh, 52px);
+  padding-bottom: clamp(24px, 4vh, 48px);
+  display: block;
+}
+.shivaraj-mark-wrap {
+  display: flex;
+  flex-direction: column;
+}
+.shivaraj-mark {
+  margin: 0;
+  width: max-content;
+  font-size: clamp(3.2rem, 13vw, 12.5rem);
+  line-height: 0.82;
+  color: var(--bone);
+}
+.shivaraj-mark .ch {
+  transition: translate 0.7s var(--ease);
+}
+@media (hover: hover) {
+  .shivaraj-mark .mask:hover .ch {
+    translate: 0 -10%;
+  }
+}
+.shivaraj-sub {
+  margin: clamp(14px, 2vh, 24px) 0 0;
+  font-size: clamp(14px, 1.35vw, 18px);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stone);
+}
 
 /* ── Gallery ────────────────────────────────────────────────────── */
 .gallery { padding-block: var(--section); }
@@ -689,6 +720,10 @@ main, .footer { position: relative; z-index: 1; }
   .band { margin-top: clamp(40px, 7vh, 64px); }
   .band-inner { height: clamp(380px, 62vh, 520px); border-radius: 6px; }
   .band-inner img { object-position: 68% 22%; }
+  /* Shivaraj title on mobile */
+  .shivaraj-wrap { margin-top: clamp(20px, 4vh, 32px); padding-bottom: clamp(16px, 3vh, 32px); }
+  .shivaraj-mark { line-height: 0.86; font-size: clamp(2.4rem, 13.5vw, 4.8rem); }
+  .shivaraj-sub { font-size: 13px; letter-spacing: 0.1em; margin-top: 10px; }
   /* Footer wordmark stacks to two lines on phones so it can be bigger. */
   .footer-mark .is-space { display: block; height: 0; padding: 0; margin: 0; }
   .footer-mark { line-height: 0.86; }

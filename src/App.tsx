@@ -444,9 +444,16 @@ function Numbers() {
       </dl>
       <figure className="band" data-band>
         <div className="band-inner" data-band-inner>
-          <img src={livingWideImg} alt="Founder seated in the full-scale 1:1 walkthrough studio at Home Studios" width={1200} height={720} loading="lazy" />
+          <img src={livingWideImg} alt="Shivaraj, Owner of Home Studios India, in the full-scale 1:1 walkthrough studio" width={1200} height={720} loading="lazy" />
         </div>
-        <figcaption className="wrap">Every room is walked at full size before it's built.</figcaption>
+        <figcaption className="wrap shivaraj-wrap">
+          <div className="shivaraj-mark-wrap">
+            <h3 className="shivaraj-mark wordmark-type" data-shivaraj-mark aria-label="Shivaraj">
+              <Letters text="SHIVARAJ" attr="data-shivaraj-ch" />
+            </h3>
+            <p className="shivaraj-sub" data-shivaraj-sub>Owner - Home Studios India</p>
+          </div>
+        </figcaption>
       </figure>
     </section>
   );
