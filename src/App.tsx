@@ -47,12 +47,10 @@ const STATEMENT = [
 ];
 
 const STEPS = [
-  { t: "Share your plans", d: "Send your floor plan as a PDF or CAD file, with your plot size and timeline.", img: planEntryImg, alt: "The entrance of a floor plan drawn in light on the studio floor" },
-  { t: "We set it out at 1:1", d: "Laser projectors draw every wall, doorway and column on the studio floor, exactly where it will stand on site.", img: planLinesImg, alt: "Bedroom and bath outlines projected at full size on the studio floor" },
-  { t: "Walk it with your family", d: "Bring everyone. Check whether two people can pass in the corridor, or the island blocks the window.", img: familyImg, alt: "A family walking through a projected floor plan" },
-  { t: "Change it on the spot", d: "Full-height walls and furniture on wheels move while you watch. Try another layout before you leave.", img: sofaImg, alt: "A living room seating arrangement" },
-  { t: "Sign off together", d: "You, your architect and your builder agree on the same home, standing inside it.", img: staircaseImg, alt: "A timber staircase beside a double-height living room" },
-  { t: "We build what you walked", d: "Structure, approvals and construction follow the plan you approved on foot.", img: lanternImg, alt: "A lit wall lantern beside timber screens on a finished home" },
+  { t: "Book Your Experience", d: "Reserve your exclusive session at Home Studios and take the first step towards visualising your future home.", img: planEntryImg, alt: "The entrance of a floor plan drawn in light on the studio floor" },
+  { t: "Share Your Floor Plan", d: "Send us your architectural drawings. We'll prepare your layout for a life-size, immersive experience.", img: planLinesImg, alt: "Bedroom and bath outlines projected at full size on the studio floor" },
+  { t: "Walk Through Your Future Home", d: "Experience your floor plan at <strong>1:1 scale</strong>. Explore every room, understand every dimension, and feel the space before a single brick is laid.", img: familyImg, alt: "A family walking through a projected floor plan" },
+  { t: "Make Real-Time Changes. Save Lakhs.", d: "Reconfigure layouts in real time, identify potential design flaws, and make confident decisions before costly construction changes begin.", img: sofaImg, alt: "A living room seating arrangement" },
 ];
 
 
@@ -404,8 +402,8 @@ function Process() {
   return (
     <section id="process" className="process" data-veil="0.55" data-process>
       <div className="wrap process-head">
-        <h2 className="h2" data-split>How a walkthrough works</h2>
-        <p className="process-meta">Two to three hours, one floor at a time</p>
+        <h2 className="h2" data-split>How it works</h2>
+        <p className="process-meta">Four steps to experience your home before it's built</p>
       </div>
       {/* Phones: one photo, then the steps as a list. */}
       <div className="track process-phone" data-track>
@@ -418,7 +416,7 @@ function Process() {
             <span className="panel-n" data-panel-n>{n(i)}</span>
             <div>
               <h3>{s.t}</h3>
-              <p>{s.d}</p>
+              <p dangerouslySetInnerHTML={{ __html: s.d }} />
             </div>
           </article>
         ))}
@@ -451,7 +449,7 @@ function Process() {
               <span className="pd-num">{n(i)}</span>
               <div>
                 <h3>{s.t}</h3>
-                <p>{s.d}</p>
+                <p dangerouslySetInnerHTML={{ __html: s.d }} />
               </div>
             </li>
           ))}
