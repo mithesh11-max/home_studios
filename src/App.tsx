@@ -8,7 +8,6 @@ import kitchenImg from "@/assets/project-kitchen.webp";
 import exteriorImg from "@/assets/project-exterior.webp";
 import staircaseImg from "@/assets/details/staircase.webp";
 import forestImg from "@/assets/details/forest-window.webp";
-import livingWideImg from "@/assets/details/living-wide.webp";
 import sofaImg from "@/assets/details/living-sofa.webp";
 import pendantImg from "@/assets/details/pendant.webp";
 import stoolsImg from "@/assets/details/stools.webp";
@@ -442,19 +441,6 @@ function Numbers() {
           </div>
         ))}
       </dl>
-      <figure className="band" data-band>
-        <div className="band-inner" data-band-inner>
-          <img src={livingWideImg} alt="Shivaraj, Owner of Home Studios India, in the full-scale 1:1 walkthrough studio" width={1200} height={720} loading="lazy" />
-        </div>
-        <figcaption className="wrap shivaraj-wrap">
-          <div className="shivaraj-mark-wrap">
-            <h3 className="shivaraj-mark wordmark-type" data-shivaraj-mark aria-label="Shivaraj">
-              <Letters text="SHIVARAJ" attr="data-shivaraj-ch" />
-            </h3>
-            <p className="shivaraj-sub" data-shivaraj-sub>Owner - Home Studios India</p>
-          </div>
-        </figcaption>
-      </figure>
     </section>
   );
 }

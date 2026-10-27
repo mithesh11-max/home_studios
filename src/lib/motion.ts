@@ -68,7 +68,7 @@ export function createMotion(): () => void {
   loading = true;
 
   // ── Wordmarks always span the full width ────────────────────────
-  const marks = qa("[data-hero-mark], [data-footer-mark], [data-shivaraj-mark]");
+  const marks = qa("[data-hero-mark], [data-footer-mark]");
   const fitAll = () => marks.forEach(fitWordmark);
   fitAll();
   ScrollTrigger.addEventListener("refreshInit", fitAll);
@@ -331,20 +331,6 @@ export function createMotion(): () => void {
         });
       }
 
-      // Studio band: opens from a framed card to full bleed.
-      const band = q("[data-band-inner]");
-      if (band) {
-        const phone = isPhone();
-        openFrame(band, {
-          insetX: phone ? 0.04 : 0.12,
-          insetY: phone ? 0.04 : 0.1,
-          r0: 10,
-          r1: 0,
-          start: 0.92,
-          end: 0.55,
-          imgFrom: phone ? 1.08 : 1.3,
-        });
-      }
 
       // Gallery: title rises letter by letter; photos unmask upward; columns drift at different speeds.
       gsap.fromTo("[data-gallery-ch]", { yPercent: 118, rotate: 7 }, {
@@ -374,23 +360,6 @@ export function createMotion(): () => void {
         },
       );
 
-      // Shivaraj title: rises letter by letter, and sinks again if you scroll back up (same as footer).
-      gsap.fromTo(
-        "[data-shivaraj-ch]",
-        { yPercent: 118, rotate: 7 },
-        {
-          yPercent: 0, rotate: 0, duration: 1.5, ease: "expo.out", stagger: 0.055,
-          scrollTrigger: { trigger: "[data-shivaraj-mark]", start: "top 95%", toggleActions: "play none none reverse" },
-        },
-      );
-      gsap.fromTo(
-        "[data-shivaraj-sub]",
-        { opacity: 0, y: 16 },
-        {
-          opacity: 1, y: 0, duration: 1.2, ease: "power2.out", delay: 0.3,
-          scrollTrigger: { trigger: "[data-shivaraj-mark]", start: "top 95%", toggleActions: "play none none reverse" },
-        },
-      );
 
       if (finePointer) pointerFx();
     });
