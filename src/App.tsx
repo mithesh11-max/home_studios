@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { createMotion, lockScroll, scrollToTarget } from "@/lib/motion";
+import { createMotion, lockScroll } from "@/lib/motion";
 import { SmokeCanvas } from "@/components/SmokeCanvas";
-import studioImg from "@/assets/studio.webp";
 import livingImg from "@/assets/project-living.webp";
 import kitchenImg from "@/assets/project-kitchen.webp";
 import exteriorImg from "@/assets/project-exterior.webp";
@@ -36,7 +35,6 @@ const BRAND = "HOME STUDIOS";
 
 const NAV: [string, string][] = [
   ["How it works", "#process"],
-  ["Services", "#services"],
   ["Gallery", "#gallery"],
   ["FAQ", "#faq"],
 ];
@@ -57,15 +55,6 @@ const STEPS = [
   { t: "We build what you walked", d: "Structure, approvals and construction follow the plan you approved on foot.", img: lanternImg, alt: "A lit wall lantern beside timber screens on a finished home" },
 ];
 
-const SERVICES = [
-  { t: "Real-size walkthroughs", d: "Your exact plan at 1:1, with 40+ movable full-height walls and furniture.", need: "Walkthrough only", img: studioImg },
-  { t: "Architecture", d: "Zoning, circulation and privacy, verified in the studio before sign-off.", need: "Architecture", img: livingImg },
-  { t: "Structural design", d: "Footing, column, plinth beam and reinforcement drawings for your site.", need: "Structural", img: exteriorImg },
-  { t: "Plan approvals", d: "BBMP and BDA sanctions, with BWSSB, BESCOM and fire NOCs.", need: "Approvals", img: studioImg },
-  { t: "Construction", d: "Foundation to RCC frame, with a named project manager on schedule.", need: "Construction", img: exteriorImg },
-  { t: "Interiors", d: "From a whole home to a single kitchen, tested at full size.", need: "Interiors", img: kitchenImg },
-  { t: "Turnkey", d: "One team from first sketch through to snag list and handover.", need: "New home end-to-end", img: livingImg },
-];
 
 type Photo = {
   img?: string;
@@ -126,7 +115,13 @@ const FAQS = [
   { q: "Is the studio comfortable for children?", a: "Yes. There's a waiting area for kids with streaming and free Wi-Fi." },
 ];
 
-const NEEDS = ["New home end-to-end", "Walkthrough only", "Architecture", "Structural", "Approvals", "Construction", "Interiors", "Commercial"];
+const PROJECT_TYPES = [
+  "Luxury Villa / Bungalow",
+  "Duplex / Penthouse",
+  "Apartment / Flat",
+  "Commercial / Retail Space",
+  "Architect / Interior Firm",
+];
 
 /** Wordmark split into masked letters, so each one can slide up on its own. */
 function Letters({ text, attr }: { text: string; attr: string }) {
@@ -142,13 +137,8 @@ function Letters({ text, attr }: { text: string; attr: string }) {
 }
 
 export default function App() {
-  const [need, setNeed] = useState("");
+  const [projectType, setProjectType] = useState("");
   useEffect(() => createMotion(), []);
-
-  const pickService = (n: string) => {
-    setNeed(n);
-    scrollToTarget("#contact");
-  };
 
   return (
     <>
@@ -163,10 +153,9 @@ export default function App() {
         <Statement />
         <Process />
         <Numbers />
-        <Services onPick={pickService} />
         <Gallery />
         <Faq />
-        <Contact need={need} setNeed={setNeed} />
+        <Contact projectType={projectType} setProjectType={setProjectType} />
       </main>
       <Footer />
       <MobileBar />
@@ -445,32 +434,6 @@ function Numbers() {
   );
 }
 
-function Services({ onPick }: { onPick: (need: string) => void }) {
-  return (
-    <section id="services" className="services" data-veil="0.72">
-      <div className="wrap">
-        <div className="section-head">
-          <h2 className="h2" data-split>One team, from first sketch to handover</h2>
-          <p className="lede" data-fade>Book just the walkthrough, or let the team that walked it with you design, approve and build it. Choose a service to start an enquiry.</p>
-        </div>
-        <ul className="svc-list">
-          {SERVICES.map((s) => (
-            <li key={s.t} data-row>
-              <button className="svc" onClick={() => onPick(s.need)}>
-                <span className="svc-t">{s.t}</span>
-                <span className="svc-d">{s.d}</span>
-                <span className="svc-thumb" aria-hidden="true" data-svc-thumb><img src={s.img} alt="" loading="lazy" /></span>
-                <span className="svc-arrow" aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 14L14 4M14 4H6M14 4v8" stroke="currentColor" strokeWidth="1.4" /></svg>
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
 
 function Gallery() {
   const [open, setOpen] = useState<number | null>(null);
@@ -667,7 +630,7 @@ function Faq() {
   );
 }
 
-function Contact({ need, setNeed }: { need: string; setNeed: (n: string) => void }) {
+function Contact({ projectType, setProjectType }: { projectType: string; setProjectType: (t: string) => void }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sent, setSent] = useState(false);
 
@@ -677,7 +640,7 @@ function Contact({ need, setNeed }: { need: string; setNeed: (n: string) => void
     const errs: Record<string, string> = {};
     if (!d["name"]?.trim()) errs["name"] = "Enter your name.";
     if (!/^[6-9]\d{9}$/.test((d["phone"] || "").replace(/\D/g, "").slice(-10))) errs["phone"] = "Enter a 10-digit mobile number.";
-    if (!d["need"]) errs["need"] = "Choose what you need.";
+    if (!d["projectType"]) errs["projectType"] = "Choose a project type.";
     setErrors(errs);
     const first = Object.keys(errs)[0];
     if (first) {
@@ -687,7 +650,7 @@ function Contact({ need, setNeed }: { need: string; setNeed: (n: string) => void
       el?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    const msg = `Hi Home Studios, I'm ${d["name"]} (${d["phone"]}). I need: ${d["need"]}. Plot: ${d["site"] || "not sure yet"}. ${d["message"] || ""}`.trim();
+    const msg = `Hi Home Studios, I'm ${d["name"]} (${d["phone"]}). Project Type: ${d["projectType"]}. Plot: ${d["site"] || "not sure yet"}. ${d["message"] || ""}`.trim();
     window.open(`${WA}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
     setSent(true);
   }
@@ -712,10 +675,10 @@ function Contact({ need, setNeed }: { need: string; setNeed: (n: string) => void
           <Field label="Mobile number" error={errors["phone"]} id="f-phone">
             <input id="f-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="98xxx xxxxx" />
           </Field>
-          <Field label="What do you need?" error={errors["need"]} id="f-need">
-            <select id="f-need" name="need" value={need} onChange={(e) => setNeed(e.target.value)}>
+          <Field label="Project Type" error={errors["projectType"]} id="f-projectType">
+            <select id="f-projectType" name="projectType" value={projectType} onChange={(e) => setProjectType(e.target.value)}>
               <option value="" disabled>Choose one</option>
-              {NEEDS.map((o) => <option key={o}>{o}</option>)}
+              {PROJECT_TYPES.map((o) => <option key={o}>{o}</option>)}
             </select>
           </Field>
           <Field label="Plot size" id="f-site">

@@ -274,7 +274,6 @@ export function createMotion(): () => void {
         const undoDock = heroDockPhone();
         const undoStatement = statementPhone();
         const undoProcess = processPhone();
-        servicesPhone();
         return () => {
           undoDock?.();
           undoStatement?.();
@@ -318,18 +317,6 @@ export function createMotion(): () => void {
         });
       });
 
-      // Services: rule draws, then names slide in.
-      const rows = qa("[data-row]");
-      if (rows.length) {
-        gsap.fromTo(rows, { "--draw": 0 }, {
-          "--draw": 1, duration: 1.4, ease: "expo.out", stagger: 0.07,
-          scrollTrigger: { trigger: rows[0]!, start: "top 85%", once: true },
-        });
-        gsap.from(rows.map((r) => r.querySelector(".svc")), {
-          opacity: 0, yPercent: 40, duration: 1.2, ease: "expo.out", stagger: 0.07,
-          scrollTrigger: { trigger: rows[0]!, start: "top 85%", once: true },
-        });
-      }
 
 
       // Gallery: title rises letter by letter; photos unmask upward; columns drift at different speeds.
@@ -920,12 +907,6 @@ export function createMotion(): () => void {
     };
   }
 
-  // Phones: each service photo opens upward a beat after its row slides in.
-  function servicesPhone() {
-    qa("[data-svc-thumb]").forEach((t) =>
-      wipeUp(t, t.parentElement ?? t, { duration: 1.2, imgFrom: 1.4, imgDuration: 1.6, delay: 0.15 }),
-    );
-  }
 
   // Reveals a photo with an upward wipe using transforms only: the frame slides up into
   // place while the photo inside slides down by the same amount, so the photo stays put
