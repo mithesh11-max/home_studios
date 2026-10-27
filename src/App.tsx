@@ -104,15 +104,66 @@ const MOBILE_LAYOUT: { i: number; wide?: boolean; ratio: string }[] = [
 const MOBILE_ORDER = MOBILE_LAYOUT.map((m) => m.i);
 
 const FAQS = [
-  { q: "What happens in a walkthrough session?", a: "Laser projectors cast your floor plan onto the studio floor at true 1:1 scale. You walk every room, check corridors and clearances, and our team moves full-height walls and furniture as you ask for changes." },
-  { q: "What should I send before my visit?", a: "Your floor plan as a PDF or CAD file. We set it out before you arrive, so the session is spent walking, not waiting." },
-  { q: "How long does a session take?", a: "Plan for two to three hours. Homes with more than one floor are walked one level at a time." },
-  { q: "Can I bring my family, architect or builder?", a: "Yes, please do. When everyone stands in the same room, everyone agrees on the same home." },
-  { q: "Can I compare more than one layout?", a: "Yes. Walls and furniture are moved live, so you can try options side by side in the same visit." },
-  { q: "Do I need a finished floor plan?", a: "No. If you're at an early stage, our architects can draft a first plan and then walk it with you." },
-  { q: "Construction has already started. Is it still useful?", a: "It's most useful before foundations are dug, but interiors, furniture fit and remaining floors can still be tested at full size." },
-  { q: "Can I book just one service?", a: "Yes. A walkthrough, architecture, structural design, approvals, construction or interiors can each be booked on their own." },
-  { q: "Is the studio comfortable for children?", a: "Yes. There's a waiting area for kids with streaming and free Wi-Fi." },
+  {
+    q: "How accurately can I experience my home before it is constructed?",
+    a: "Home Studios transforms architectural plans into immersive, life-scale experiences, helping you understand room proportions, spatial relationships, circulation, and interior layouts before construction begins.",
+  },
+  {
+    q: "Can I identify design flaws before they become expensive on-site changes?",
+    a: "Our immersive walkthroughs help you evaluate room dimensions, space utilisation, furniture placement, and layout decisions early, reducing the likelihood of costly revisions during construction.",
+  },
+  {
+    q: "What makes your walkthrough experience different from a conventional 3D render?",
+    a: "Unlike static images, our walkthrough experience allows you to explore your proposed home spatially, with immersive visualization, interactive exploration, and AR/VR capabilities where applicable.",
+  },
+  {
+    q: "Can I evaluate furniture layouts and interior functionality beforehand?",
+    a: "Yes. Explore how furniture, fixtures, clearances, and circulation paths work within your proposed spaces, allowing you to make better-informed interior decisions before execution.",
+  },
+  {
+    q: "Can the walkthrough help validate decisions made with my architect or interior designer?",
+    a: "The walkthrough provides a shared visual reference for reviewing layouts, discussing design alternatives, and identifying potential spatial conflicts with your project team before construction.",
+  },
+  {
+    q: "At what stage of my project should I experience a walkthrough?",
+    a: "The ideal time is during design development, when layouts, room dimensions, and major design decisions can still be refined before construction or interior execution begins.",
+  },
+  {
+    q: "How can a walkthrough help reduce unnecessary construction expenditure?",
+    a: "By revealing potential design issues and opportunities for improvement before implementation, a walkthrough can help minimise avoidable rework and support more informed spending decisions.",
+  },
+  {
+    q: "Can my existing architectural drawings be used to create the experience?",
+    a: "Yes. Existing floor plans, elevations, and 3D models can serve as the starting point. The final level of detail depends on the documentation available and the project's requirements.",
+  },
+  {
+    q: "Can I understand the actual scale and proportions of each room?",
+    a: "Our life-scale visualization experience helps you better perceive room dimensions, ceiling heights, spatial relationships, and the relative proportions of interior elements compared with viewing a design on a screen.",
+  },
+  {
+    q: "Can I assess natural lighting, window placement, and the overall spatial feel?",
+    a: "Visualization can help you review window positions, openings, sightlines, and lighting concepts. Actual daylight performance depends on orientation, weather, surrounding structures, and the accuracy of the underlying model.",
+  },
+  {
+    q: "Can I explore different design options before finalising my home?",
+    a: "Depending on the project scope and available models, alternative layouts and design options can be reviewed to help you compare spatial arrangements and make decisions with greater confidence.",
+  },
+  {
+    q: "Does the walkthrough help identify space-utilisation issues in compact homes?",
+    a: "Yes. Exploring the proposed layout can help you assess circulation, furniture clearances, storage placement, and underutilised areas, particularly in apartments and space-constrained homes.",
+  },
+  {
+    q: "Can multiple stakeholders use the walkthrough to align on the final design?",
+    a: "Yes. The experience can support more productive discussions between homeowners, architects, interior designers, and other project stakeholders by providing a common visual reference for design decisions.",
+  },
+  {
+    q: "What do I need to bring to make my visit productive?",
+    a: "Bring your latest floor plan, architectural drawings, available 3D models, and any preliminary interior layouts or reference images. These help our team understand your project and assess the most suitable visualization approach.",
+  },
+  {
+    q: "What should I expect to achieve from my Home Studios visit?",
+    a: "You can expect a more tangible understanding of your proposed spaces, greater clarity around design decisions, and a better-informed basis for discussing refinements with your project team before construction progresses.",
+  },
 ];
 
 const PROJECT_TYPES = [
@@ -596,24 +647,41 @@ function Gallery() {
 }
 
 function Faq() {
-  const [open, setOpen] = useState<number | null>(0);
+  const [openSet, setOpenSet] = useState<Set<number>>(() => new Set([0]));
+  const toggle = (i: number) => {
+    setOpenSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) {
+        next.delete(i);
+      } else {
+        next.add(i);
+      }
+      return next;
+    });
+  };
+
   return (
     <section id="faq" className="faq" data-veil="0.85">
       <div className="wrap faq-grid">
         <div className="faq-side">
           <h2 className="h2" data-split>Questions before your visit</h2>
           <figure className="faq-pic" data-fade>
-            <img src={familyImg} alt="A family walking through their floor plan, projected at full size in the studio" width={900} height={900} loading="lazy" />
-            <figcaption>Bring your plan, your family and your questions.</figcaption>
+            <img src={familyImg} alt="Architectural plan review in the studio" width={900} height={900} loading="lazy" />
+            <figcaption>Bring your plans, models and architectural questions.</figcaption>
           </figure>
         </div>
         <div className="faq-list">
           {FAQS.map((f, i) => {
-            const isOpen = open === i;
+            const isOpen = openSet.has(i);
             return (
               <div key={f.q} className={`faq-item ${isOpen ? "is-open" : ""}`}>
                 <h3>
-                  <button id={`faq-q-${i}`} aria-controls={`faq-a-${i}`} aria-expanded={isOpen} onClick={() => setOpen(isOpen ? null : i)}>
+                  <button
+                    id={`faq-q-${i}`}
+                    aria-controls={`faq-a-${i}`}
+                    aria-expanded={isOpen}
+                    onClick={() => toggle(i)}
+                  >
                     <span>{f.q}</span>
                     <span className="faq-icon" aria-hidden="true" />
                   </button>
