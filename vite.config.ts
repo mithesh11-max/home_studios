@@ -7,5 +7,11 @@ export default defineConfig({
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
-  server: { port: 5173 },
+  server: {
+    port: 5173,
+    watch: {
+      // Ignore zip/archive files and any file that might be held open by the OS or IDE
+      ignored: ["**/*.zip", "**/*.rar", "**/*.7z", "**/*.tar", "**/*.gz"],
+    },
+  },
 });

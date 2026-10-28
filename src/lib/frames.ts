@@ -15,7 +15,7 @@
 export const PORTRAIT_SET =
   typeof window !== "undefined" &&
   window.matchMedia("(max-width: 760px) and (orientation: portrait)").matches;
-export const FRAME_COUNT = PORTRAIT_SET ? 250 : 500;
+export const FRAME_COUNT = PORTRAIT_SET ? 250 : 300;
 /** Pixel size of the source frames. */
 export const FRAME_W = PORTRAIT_SET ? 720 : 1280;
 export const FRAME_H = PORTRAIT_SET ? 1280 : 720;
@@ -24,7 +24,9 @@ const CONCURRENCY = 6;
 export const FOCUS_X = PORTRAIT_SET ? 0.5 : 0.6;
 
 const frameUrl = (i: number) =>
-  `${import.meta.env.BASE_URL}${PORTRAIT_SET ? "frames-m" : "frames"}/${String(i + 1).padStart(4, "0")}.webp`;
+  PORTRAIT_SET
+    ? `${import.meta.env.BASE_URL}frames-m/${String(i + 1).padStart(4, "0")}.webp`
+    : `${import.meta.env.BASE_URL}frames/ezgif-frame-${String(i + 1).padStart(3, "0")}.jpg`;
 
 export type Drawable = HTMLImageElement | ImageBitmap;
 type ProgressFn = (critical: number, all: number) => void;
