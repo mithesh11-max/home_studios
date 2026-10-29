@@ -9,7 +9,7 @@
   --bone-dim: rgba(238, 236, 231, 0.7);
   --stone: #8b8a84;         /* secondary text */
   --rule: rgba(238, 236, 231, 0.14);
-  --ember: #f2662b;         /* the sun in the logo; used once, as the active marker */
+  --ember: #00a0f1;         /* the blue in the logo; used once, as the active marker */
   --error: #ff9b7a;
 
   --font: "Archivo Variable", "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
